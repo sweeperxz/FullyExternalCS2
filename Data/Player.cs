@@ -2,6 +2,8 @@
 using CS2Cheat.System;
 using CS2Cheat.Utils;
 using SharpDX;
+using WindowsInput;
+using WindowsInput.Native;
 
 namespace CS2Cheat.Data;
 
@@ -27,6 +29,10 @@ public class Player
 
     private int IdentityCrosshairIndex { get; set; }
 
+    private InputSimulator InputSimulator { get; set; } = new();
+
+    private int fFlags { get; set; }
+
     #endregion
 
     #region methods
@@ -50,13 +56,34 @@ public class Player
                                             Offsets.m_iFOVStart);
 
         IdentityCrosshairIndex = gameProcess.Process.Read<int>(addressBase + Offsets.m_iIDEntIndex);
+        fFlags = gameProcess.Process.Read<int>(addressBase + Offsets.m_fFlags);
 
         if (User32.GetAsyncKeyState((int)Keys.LMenu) < 0)
             if (IdentityCrosshairIndex > 0)
             {
-                User32.mouse_event(0x0002, 0, 0, 0, UIntPtr.Zero);
-                User32.mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
+                // User32.mouse_event(0x0002, 0, 0, 0, UIntPtr.Zero);
+                // User32.mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
+                InputSimulator.Mouse.LeftButtonClick();
             }
+
+
+        /*alias _checkjump "-jump; alias checkjump";
+        alias +j "+jump; alias checkjump _checkjump";
+        alias -j "checkjump";
+        bind "space" +j;*/
+
+
+        if (User32.GetAsyncKeyState(0x20) < 0)
+        {
+            if (fFlags is PlayerState.Standing or PlayerState.Crouching)
+            {
+                InputSimulator.Mouse.VerticalScroll(10); // memor.WriteUInt(forceJump, PlayerState.PlusJump);
+            }
+            else
+            {
+                InputSimulator.Mouse.VerticalScroll(-10); // memor.WriteUInt(forceJump, KeyEvent.MinusJump);
+            }
+        }
 
 
         if (Fov == 0)
@@ -81,4 +108,11 @@ public class Player
     }
 
     #endregion
+}
+
+public static class PlayerState
+{
+    public const int Standing = 65665;
+
+    public const int Crouching = 65667;
 }
