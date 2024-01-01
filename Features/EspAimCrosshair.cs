@@ -29,17 +29,13 @@ public static class EspAimCrosshair
         return player.MatrixViewport.Transform(pointClip);
     }
 
-    /// <summary>
-    /// Draw aim crosshair.
-    /// </summary>
+
     public static void Draw(Graphics graphics)
     {
         Draw(graphics, GetPositionScreen(graphics));
     }
 
-    /// <summary>
-    /// Draw aim crosshair in screen space.
-    /// </summary>
+
     private static void Draw(Graphics graphics, Vector3 pointScreen)
     {
         const int radius = 3;

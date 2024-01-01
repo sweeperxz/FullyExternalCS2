@@ -26,11 +26,6 @@ public static class Utility
         return (float)(degree * _PI_Over_180);
     }
 
-    public static float RadianToDegree(this float radian)
-    {
-        return (float)(radian * _180_Over_PI);
-    }
-
 
     public static Rectangle GetClientRectangle(IntPtr handle)
     {
