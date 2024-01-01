@@ -43,3 +43,4 @@ If you have issues or have questions, check out the Issues section of the GitHub
 - Inspired by [Martynas Apanavicius](https://www.linkedin.com/in/martynas-apanavicius/).
 - [unknowncheats.me](https://www.unknowncheats.me/)
 - [yougame.biz](https://yougame.biz/threads/191134/)
+- [cs-dumper](https://github.com/a2x/cs2-dumper)
