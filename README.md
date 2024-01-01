@@ -4,3 +4,4 @@ Features
 
 - Aim Crosshair
 - Trigger Bot on key
+- BunnyHop (Beta)
