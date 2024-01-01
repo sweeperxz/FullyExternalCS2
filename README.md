@@ -1,4 +1,4 @@
-Counter-Strike 2 External Cheat \
+Counter-Strike 2 External Cheat
 
 Features
 
