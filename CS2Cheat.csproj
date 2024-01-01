@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <UseWpf>true</UseWpf>
+        <LangVersion>12</LangVersion>
+        <Platforms>AnyCPU;x64;x86</Platforms>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <PlatformTarget>x64</PlatformTarget>
+        <Prefer32bit>false</Prefer32bit>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Overlay.NET" Version="1.0.2"/>
+        <PackageReference Include="PresentationFramework" Version="4.6.0"/>
+        <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0"/>
+        <PackageReference Include="SharpDX.DXGI" Version="4.2.0"/>
+        <PackageReference Include="Yato.DirectXOverlay" Version="1.27.17.6743"/>
+    </ItemGroup>
+
+</Project>
