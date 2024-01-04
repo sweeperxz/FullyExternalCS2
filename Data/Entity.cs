@@ -14,7 +14,7 @@ public class Entity(int index) : EntityBase
 
     protected override IntPtr ReadAddressBase(GameProcess gameProcess)
     {
-        var currentpawn = new List<IntPtr>();
+        var currentpawn = new List<IntPtr>(64);
         var entityList = gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList);
         var listEntryFirst = gameProcess.Process.Read<IntPtr>(entityList + 0x10);
         for (var i = 0; i < 64; i++)
@@ -32,7 +32,11 @@ public class Entity(int index) : EntityBase
             currentpawn.Add(gameProcess.Process.Read<IntPtr>(listEntrySecond + 0x78 * (pawnHandle & 0x1FF)));
         }
 
-        return currentpawn[Index];
+        if (index >= 0 && index < currentpawn.Count)
+        {
+            return currentpawn[index];
+        }
+        return IntPtr.Zero;
     }
 
 
