@@ -1,7 +1,9 @@
+using System.Windows;
 using CS2Cheat.Data;
+using CS2Cheat.Features;
 using CS2Cheat.Gfx;
 using Application = System.Windows.Application;
-using Graphics = CS2Cheat.Gfx.Graphics;
+using Graphics = CS2Cheat.Graphics.Graphics;
 
 namespace CS2Cheat;
 
@@ -29,19 +31,21 @@ public class Program :
 
     /// <inheritdoc cref="Graphics"/>
 
-    private Graphics Graphics { get; set; }
+    private Graphics.Graphics Graphics { get; set; }
+
+    private TriggerBot Trigger { get; set; }
 
 
     /// <summary />
     private Program()
     {
-        Startup += (_, _) => StartUp();
+        Startup += (_, _) => InitializeComponent();
         Exit += (_, _) => Dispose();
     }
 
 
     /// <summary />
-    private void StartUp()
+    private void InitializeComponent()
     {
         GameProcess = new GameProcess();
         GameProcess.Start();
@@ -52,8 +56,11 @@ public class Program :
         WindowOverlay = new WindowOverlay(GameProcess);
         WindowOverlay.Start();
 
-        Graphics = new Graphics(WindowOverlay, GameProcess, GameData);
+        Graphics = new Graphics.Graphics(WindowOverlay, GameProcess, GameData);
         Graphics.Start();
+
+        Trigger = new TriggerBot(GameProcess, GameData);
+        Trigger.Start();
     }
 
     /// <inheritdoc />
@@ -70,5 +77,8 @@ public class Program :
 
         Graphics.Dispose();
         Graphics = default;
+        
+        Trigger.Dispose();
+        Trigger = default;
     }
 }

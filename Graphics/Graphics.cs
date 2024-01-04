@@ -1,12 +1,13 @@
 ﻿using System.Windows.Threading;
 using CS2Cheat.Data;
 using CS2Cheat.Features;
+using CS2Cheat.Gfx;
 using CS2Cheat.Utils;
 using Yato.DirectXOverlay;
 using static System.Windows.Application;
 using Direct2DBrush = Yato.DirectXOverlay.Direct2DBrush;
 
-namespace CS2Cheat.Gfx;
+namespace CS2Cheat.Graphics;
 
 public class Graphics :
     ThreadedServiceBase
@@ -38,10 +39,10 @@ public class Graphics :
         get =>
             new()
             {
-                AntiAliasing = false,
+                AntiAliasing = true,
                 Hwnd = IntPtr.Zero,
                 MeasureFps = true,
-                VSync = false
+                VSync = true
             };
         set => Direct2DRendererOptions = value;
     }
@@ -52,9 +53,7 @@ public class Graphics :
     public Graphics(WindowOverlay windowOverlay, GameProcess gameProcess, GameData gameData)
     {
         GameProcess = gameProcess;
-        D2d = GameProcess.IsValid
-            ? new Direct2DRenderer(GameProcess.Process.MainWindowHandle)
-            : throw new NullReferenceException("Game is not running");
+        D2d = new Direct2DRenderer(GameProcess.Process.MainWindowHandle);
 
         OverlayManager = new OverlayManager(GameProcess.Process.MainWindowHandle, Direct2DRendererOptions);
         OverlayWindow = OverlayManager.Window;
@@ -74,7 +73,9 @@ public class Graphics :
         GameData = default;
         GameProcess = default;
         WindowOverlay = default;
+        OverlayWindow = default;
 
+        OverlayWindow.Dispose();
         D2d.Dispose();
         ClearBrush.Brush.Dispose();
         Font.Font.Dispose();

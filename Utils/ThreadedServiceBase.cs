@@ -6,7 +6,7 @@ public abstract class ThreadedServiceBase : IDisposable
 
     protected virtual string ThreadName => nameof(ThreadedServiceBase);
 
-    protected virtual TimeSpan ThreadTimeOut { get; set; } = new(0, 0, 0, 3);
+    protected TimeSpan ThreadTimeOut { get; set; } = new(0, 0, 0, 3);
 
     protected virtual TimeSpan ThreadFrameSleep { get; set; } = new(0, 0, 0, 0, 1);
     private CancellationTokenSource CancellationTokenSource { get; set; }

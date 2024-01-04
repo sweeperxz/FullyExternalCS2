@@ -1,13 +1,13 @@
 ﻿using CS2Cheat.Gfx;
-using CS2Cheat.System;
 using CS2Cheat.Utils;
+using Process.NET.Extensions;
 using SharpDX;
 using WindowsInput;
 using WindowsInput.Native;
 
 namespace CS2Cheat.Data;
 
-public class Player
+public class Player : EntityBase
 {
     #region properties
 
@@ -29,7 +29,7 @@ public class Player
 
     private int IdentityCrosshairIndex { get; set; }
 
-    private InputSimulator InputSimulator { get; set; } = new();
+    private InputSimulator InputSimulator { get; } = new();
 
     private int FFlags { get; set; }
 
@@ -37,46 +37,80 @@ public class Player
 
     #region methods
 
-    public void Update(GameProcess gameProcess)
+    protected override IntPtr ReadAddressBase(GameProcess gameProcess)
     {
-        var addressBase = gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn);
-        if (addressBase == IntPtr.Zero) return;
+        return gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn);
+    }
+
+    public override bool Update(GameProcess gameProcess)
+    {
+        if (!base.Update(gameProcess))
+        {
+            return false;
+        }
 
         MatrixViewport = GraphicsMath.GetMatrixViewport(gameProcess.WindowRectangleClient.Size);
 
 
-        Origin = gameProcess.Process.Read<Vector3>(addressBase + Offsets.m_vOldOrigin);
-        ViewOffset = gameProcess.Process.Read<Vector3>(addressBase + Offsets.m_vecViewOffset);
+        Origin = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_vOldOrigin);
+        ViewOffset = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_vecViewOffset);
 
         PlayerPosition = Origin + ViewOffset;
 
-        ViewAngles = gameProcess.Process.Read<Vector3>(addressBase + Offsets.m_angEyeAngles);
-        AimPunchAngle = gameProcess.Process.Read<Vector3>(addressBase + Offsets.m_AimPunchAngle);
-        Fov = gameProcess.Process.Read<int>(gameProcess.Process.Read<IntPtr>(addressBase + Offsets.m_pCameraServices) +
+        ViewAngles = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_angEyeAngles);
+        AimPunchAngle = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_AimPunchAngle);
+        Fov = gameProcess.Process.Read<int>(gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pCameraServices) +
                                             Offsets.m_iFOVStart);
 
-        IdentityCrosshairIndex = gameProcess.Process.Read<int>(addressBase + Offsets.m_iIDEntIndex);
-        FFlags = gameProcess.Process.Read<int>(addressBase + Offsets.m_fFlags);
-
-        if (User32.GetAsyncKeyState((int)Keys.LMenu) < 0)
-            if (IdentityCrosshairIndex > 0)
-                // User32.mouse_event(0x0002, 0, 0, 0, UIntPtr.Zero);
-                // User32.mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
-                InputSimulator.Mouse.LeftButtonClick();
+        IdentityCrosshairIndex = gameProcess.Process.Read<int>(AddressBase + Offsets.m_iIDEntIndex);
+        FFlags = gameProcess.Process.Read<int>(AddressBase + Offsets.m_fFlags);
+        
 
 
-        /*alias _checkjump "-jump; alias checkjump";
-        alias +j "+jump; alias checkjump _checkjump";
-        alias -j "checkjump";
-        bind "space" +j;*/
+        /* bind mwheelup +jump
+         bind mwheeldown -jump
+         alias _checkjump "-jump; alias checkjump";
+         alias +j "+jump; alias checkjump _checkjump";
+         alias -j "checkjump";
+         bind "space" +j;
+         fps_max 32;
+         fps_max 0;
+         */
+        // var EntityList = gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList);
+        // var ListEntry = gameProcess.Process.Read<IntPtr>(EntityList + 0x10);
+        //
+        // for (int i = 0; i < 64; i++)
+        // {
+        //     if (ListEntry == IntPtr.Zero)
+        //     {
+        //         continue;
+        //     }
+        //
+        //     var CurrentController = gameProcess.Process.Read<IntPtr>(ListEntry + i * 0x78);
+        //     if (CurrentController == IntPtr.Zero)
+        //     {
+        //         continue;
+        //     }
+        //
+        //     int pawnHandle = gameProcess.Process.Read<int>(CurrentController + Offsets.m_hPlayerPawn);
+        //     if (pawnHandle is 0)
+        //     {
+        //         continue;
+        //     }
+        //
+        //     var ListEntry2 = gameProcess.Process.Read<IntPtr>(EntityList + 0x8 * ((pawnHandle & 0x7FFF) >> 9) + 0x10);
+        //     var CurrentPawn = gameProcess.Process.Read<IntPtr>(ListEntry2 + 0x78 * (pawnHandle & 0x1FF));
+        //
+        //     var team = gameProcess.Process.Read<int>(CurrentPawn + Offsets.m_iTeamNum);
+        //     Console.WriteLine(team);
+        // }
 
-
-        if (User32.GetAsyncKeyState(0x20) < 0)
+        if (InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE))
         {
             if (FFlags is PlayerState.Standing or PlayerState.Crouching)
-                InputSimulator.Mouse.VerticalScroll(10); // memor.WriteUInt(forceJump, PlayerState.PlusJump);
+                InputSimulator.Mouse.VerticalScroll(10);
             else
-                InputSimulator.Mouse.VerticalScroll(-10); // memor.WriteUInt(forceJump, KeyEvent.MinusJump);
+                InputSimulator.Mouse.VerticalScroll(-10);
         }
 
 
@@ -85,6 +119,7 @@ public class Player
 
         // calc data
         AimDirection = GetAimDirection(ViewAngles, AimPunchAngle);
+        return true;
     }
 
     private static Vector3 GetAimDirection(Vector3 viewAngles, Vector3 aimPunchAngle)

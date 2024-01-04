@@ -1,25 +1,37 @@
-﻿using CS2Cheat.Utils;
+﻿using System.Collections;
+using CS2Cheat.Utils;
 
 namespace CS2Cheat.Data;
 
-public class GameData(GameProcess gameProcess) : ThreadedServiceBase
+public class GameData : ThreadedServiceBase
 {
     #region properties
 
     protected override string ThreadName => nameof(GameData);
 
-    private GameProcess GameProcess { get; set; } = gameProcess;
+    private GameProcess GameProcess { get; set; }
 
-    public Player Player { get; set; } = new();
+    public Player Player { get; set; }
+
+    public Entity[] Entities { get; private set; }
 
     #endregion
 
     #region methods
 
+    /// <inheritdoc />
+    public GameData(GameProcess gameProcess)
+    {
+        GameProcess = gameProcess;
+        Player = new Player();
+        Entities = Enumerable.Range(0, 64).Select(index => new Entity(index)).ToArray();
+    }
+
     public override void Dispose()
     {
         base.Dispose();
 
+        Entities = default;
         Player = default;
         GameProcess = default;
     }
@@ -28,6 +40,11 @@ public class GameData(GameProcess gameProcess) : ThreadedServiceBase
     {
         if (!GameProcess.IsValid) return;
         Player.Update(GameProcess);
+
+        foreach (var entity in Entities)
+        {
+            entity.Update(GameProcess);
+        }
     }
 
     #endregion

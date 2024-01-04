@@ -3,14 +3,14 @@ using CS2Cheat.Utils;
 using SharpDX;
 using Yato.DirectXOverlay;
 using Color = SharpDX.Color;
-using Graphics = CS2Cheat.Gfx.Graphics;
+using Graphics = CS2Cheat.Graphics.Graphics;
 
 
 namespace CS2Cheat.Features;
 
 public static class EspAimCrosshair
 {
-    public static Vector3 GetPositionScreen(Graphics graphics)
+    public static Vector3 GetPositionScreen(Graphics.Graphics graphics)
     {
         var screenSize = graphics.WindowOverlay.Window.Size;
         var aspectRatio = (double)screenSize.Width / screenSize.Height;
@@ -30,13 +30,13 @@ public static class EspAimCrosshair
     }
 
 
-    public static void Draw(Graphics graphics)
+    public static void Draw(Graphics.Graphics graphics)
     {
         Draw(graphics, GetPositionScreen(graphics));
     }
 
 
-    private static void Draw(Graphics graphics, Vector3 pointScreen)
+    private static void Draw(Graphics.Graphics graphics, Vector3 pointScreen)
     {
         const int radius = 3;
         var color = graphics.RedBrush.Color; // Replace this with your actual brush instance

@@ -16,11 +16,6 @@ public static class Utility
         return degree * _PI_Over_180;
     }
 
-    public static double RadianToDegree(this double radian)
-    {
-        return radian * _180_Over_PI;
-    }
-
     public static float DegreeToRadian(this float degree)
     {
         return (float)(degree * _PI_Over_180);
@@ -97,10 +92,19 @@ public static class Utility
     }
 
     #endregion
-
-
-    private static bool IsInfinityOrNaN(this float value)
+    
+    public static Data.Team ToTeam(this int teamNum)
     {
-        return float.IsNaN(value) || float.IsInfinity(value);
+        switch (teamNum)
+        {
+            case 1:
+                return Data.Team.Spectator;
+            case 2:
+                return Data.Team.Terrorists;
+            case 3:
+                return Data.Team.CounterTerrorists;
+            default:
+                return Data.Team.Unknown;
+        }
     }
 }
