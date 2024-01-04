@@ -1,24 +1,26 @@
+using CS2Cheat.Data;
 using CS2Cheat.Gfx;
 using CS2Cheat.Utils;
 using SharpDX;
-using Yato.DirectXOverlay;
-using Color = SharpDX.Color;
-using Graphics = CS2Cheat.Graphics.Graphics;
+using Color = System.Drawing.Color;
 
 
 namespace CS2Cheat.Features;
 
 public static class EspAimCrosshair
 {
-    public static Vector3 GetPositionScreen(Graphics.Graphics graphics)
+    public static Vector3 GetPositionScreen(GameProcess gameProcess, GameData gameData)
     {
-        var screenSize = graphics.WindowOverlay.Window.Size;
+        var screenSize = gameProcess.WindowRectangleClient.Size;
         var aspectRatio = (double)screenSize.Width / screenSize.Height;
-        var player = graphics.GameData.Player;
-        var fovY = ((double)player.Fov).DegreeToRadian();
+        var player = gameData.Player;
+        var fovY = ((double)90).DegreeToRadian();
         var fovX = fovY * aspectRatio;
-        var punchX = ((double)player.AimPunchAngle.X * Offsets.weapon_recoil_scale).DegreeToRadian();
-        var punchY = ((double)player.AimPunchAngle.Y * Offsets.weapon_recoil_scale).DegreeToRadian();
+
+        var doPunch = player.ShotsFired > 0;
+
+        var punchX = doPunch ? ((double)player.AimPunchAngle.X * Offsets.weapon_recoil_scale).DegreeToRadian() : 0;
+        var punchY = doPunch ? ((double)player.AimPunchAngle.Y * Offsets.weapon_recoil_scale).DegreeToRadian() : 0;
 
         var pointClip = new Vector3
         (
@@ -32,32 +34,16 @@ public static class EspAimCrosshair
 
     public static void Draw(Graphics.Graphics graphics)
     {
-        Draw(graphics, GetPositionScreen(graphics));
+        var pointScreen = GetPositionScreen(graphics.GameProcess, graphics.GameData);
+        Draw(graphics, new Vector2(pointScreen.X, pointScreen.Y));
     }
 
-
-    private static void Draw(Graphics.Graphics graphics, Vector3 pointScreen)
+    private static void Draw(Graphics.Graphics graphics, Vector2 pointScreen)
     {
-        const int radius = 3;
-        var color = graphics.RedBrush.Color; // Replace this with your actual brush instance
-
-        // Assuming there is a method DrawLine in Yato.DirectXOverlay.Direct2DRenderer
-        graphics.D2d.DrawLine(
-            pointScreen.X - radius,
-            pointScreen.Y,
-            pointScreen.X + radius + 1,
-            pointScreen.Y,
-            1.0f, // Replace this with your desired stroke width
-            color
-        );
-
-        graphics.D2d.DrawLine(
-            pointScreen.X,
-            pointScreen.Y - radius,
-            pointScreen.X,
-            pointScreen.Y + radius + 1,
-            1.0f, // Replace this with your desired stroke width
-            color
-        );
+        const int radius = 12;
+        graphics.DrawLine(SharpDX.Color.Red, pointScreen - new Vector2(radius, 0),
+            pointScreen + new Vector2(radius, 0));
+        graphics.DrawLine(SharpDX.Color.Red, pointScreen - new Vector2(0, radius),
+            pointScreen + new Vector2(0, radius));
     }
 }

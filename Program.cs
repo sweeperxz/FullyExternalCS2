@@ -2,6 +2,7 @@ using System.Windows;
 using CS2Cheat.Data;
 using CS2Cheat.Features;
 using CS2Cheat.Gfx;
+using CS2Cheat.Graphics;
 using Application = System.Windows.Application;
 using Graphics = CS2Cheat.Graphics.Graphics;
 
@@ -56,7 +57,7 @@ public class Program :
         WindowOverlay = new WindowOverlay(GameProcess);
         WindowOverlay.Start();
 
-        Graphics = new Graphics.Graphics(WindowOverlay, GameProcess, GameData);
+        Graphics = new Graphics.Graphics(GameProcess, GameData, WindowOverlay);
         Graphics.Start();
 
         Trigger = new TriggerBot(GameProcess, GameData);
@@ -77,7 +78,7 @@ public class Program :
 
         Graphics.Dispose();
         Graphics = default;
-        
+
         Trigger.Dispose();
         Trigger = default;
     }

@@ -29,24 +29,15 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
     {
         var entityId = gameProcess.Process.Read<int>(gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn) +
                                                      Offsets.m_iIDEntIndex);
-        if (!GameProcess.IsValid || !InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.LMENU))
-        {
-            return;
-        }
+        if (!GameProcess.IsValid || !InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.LMENU)) return;
 
-        if (entityId < 0)
-        {
-            return;
-        }
+        if (entityId < 0) return;
 
         var entityEntry = gameProcess.Process.Read<IntPtr>(gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList) +
                                                            0x8 * (entityId >> 9) + 0x10);
         var entity = gameProcess.Process.Read<IntPtr>(entityEntry + 120 * (entityId & 0x1FF));
         var entityTeam = gameProcess.Process.Read<int>(entity + Offsets.m_iTeamNum);
 
-        if (gameData.Player.Team != entityTeam.ToTeam())
-        {
-            InputSimulator.Mouse.LeftButtonClick();
-        }
+        if (gameData.Player.Team != entityTeam.ToTeam()) InputSimulator.Mouse.LeftButtonClick();
     }
 }

@@ -1,50 +1,82 @@
 using CS2Cheat.Utils;
+using SharpDX;
 
 namespace CS2Cheat.Data;
 
-public class Entity(int index) : EntityBase
+public class Entity : EntityBase
 {
-    private int Index { get; } = index;
-    public bool Dormant { get; private set; }
+    public Entity(int index)
+    {
+        Index = index;
+    }
+
+    public int Index { get; }
+    public bool Dormant { get; private set; } = true;
+
+    public Dictionary<string, Vector3> BonePos { get; } = new()
+    {
+        { "head", Vector3.Zero },
+        { "neck_0", Vector3.Zero },
+        { "spine_1", Vector3.Zero },
+        { "spine_2", Vector3.Zero },
+        { "pelvis", Vector3.Zero },
+        { "arm_upper_L", Vector3.Zero },
+        { "arm_lower_L", Vector3.Zero },
+        { "hand_L", Vector3.Zero },
+        { "arm_upper_R", Vector3.Zero },
+        { "arm_lower_R", Vector3.Zero },
+        { "hand_R", Vector3.Zero },
+        { "leg_upper_L", Vector3.Zero },
+        { "leg_lower_L", Vector3.Zero },
+        { "ankle_L", Vector3.Zero },
+        { "leg_upper_R", Vector3.Zero },
+        { "leg_lower_R", Vector3.Zero },
+        { "ankle_R", Vector3.Zero }
+    };
 
     public override bool IsAlive()
     {
-        return base.IsAlive();
+        return base.IsAlive() && !Dormant;
+    }
+
+    protected override IntPtr ReadControllerBase(GameProcess gameProcess)
+    {
+        var listEntry = gameProcess.Process.Read<IntPtr>(EntityList + ((8 * (Index & 0x7FFF)) >> 9) + 16);
+        if (listEntry == IntPtr.Zero) return IntPtr.Zero;
+        return gameProcess.Process.Read<IntPtr>(listEntry + 120 * (Index & 0x1FF));
     }
 
     protected override IntPtr ReadAddressBase(GameProcess gameProcess)
     {
-        var currentpawn = new List<IntPtr>(64);
-        var entityList = gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList);
-        var listEntryFirst = gameProcess.Process.Read<IntPtr>(entityList + 0x10);
-        for (var i = 0; i < 64; i++)
-        {
-            if (listEntryFirst == IntPtr.Zero) continue;
-
-            var currentController = gameProcess.Process.Read<IntPtr>(listEntryFirst + i * 0x78);
-            if (currentController == IntPtr.Zero) continue;
-
-            var pawnHandle = gameProcess.Process.Read<int>(currentController + Offsets.m_hPlayerPawn);
-            if (pawnHandle is 0) continue;
-
-            var listEntrySecond =
-                gameProcess.Process.Read<IntPtr>(entityList + 0x8 * ((pawnHandle & 0x7FFF) >> 9) + 0x10);
-            currentpawn.Add(gameProcess.Process.Read<IntPtr>(listEntrySecond + 0x78 * (pawnHandle & 0x1FF)));
-        }
-
-        if (index >= 0 && index < currentpawn.Count)
-        {
-            return currentpawn[index];
-        }
-        return IntPtr.Zero;
+        var playerPawn = gameProcess.Process.Read<int>(ControllerBase + Offsets.m_hPawn);
+        var listEntry2 = gameProcess.Process.Read<IntPtr>(EntityList + 0x8 * ((playerPawn & 0x7FFF) >> 9) + 16);
+        return listEntry2 == IntPtr.Zero ? IntPtr.Zero : gameProcess.Process.Read<IntPtr>(listEntry2 + 120 * (playerPawn & 0x1FF));
     }
-
 
     public override bool Update(GameProcess gameProcess)
     {
         if (!base.Update(gameProcess)) return false;
 
         Dormant = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_bDormant);
-        return !IsAlive() || true;
+        if (!IsAlive()) return true;
+
+        UpdateBonePos(gameProcess);
+
+        return true;
+    }
+
+    private void UpdateBonePos(GameProcess gameProcess)
+    {
+        var gameSceneNode = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pGameSceneNode);
+        var boneArray = gameProcess.Process.Read<IntPtr>(gameSceneNode + Offsets.m_modelState + 128);
+        foreach (var data in Offsets.BONES)
+        {
+            var name = data.Key;
+            var index = data.Value;
+
+            var boneAddress = boneArray + index * 32;
+            var bonePos = gameProcess.Process.Read<Vector3>(boneAddress);
+            BonePos[name] = bonePos;
+        }
     }
 }

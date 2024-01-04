@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using CS2Cheat.System;
+using SharpDX;
 using static System.Diagnostics.Process;
+using Rectangle = System.Drawing.Rectangle;
 
 
 namespace CS2Cheat.Utils;
@@ -9,7 +11,6 @@ namespace CS2Cheat.Utils;
 public static class Utility
 {
     private const double _PI_Over_180 = Math.PI / 180.0;
-    private const double _180_Over_PI = 180.0 / Math.PI;
 
     public static double DegreeToRadian(this double degree)
     {
@@ -91,20 +92,56 @@ public static class Utility
         return lpNumberOfBytesRead == size ? (T)buffer : default;
     }
 
+
+    public static Matrix GetMatrixViewport(Size screenSize)
+    {
+        return GetMatrixViewport(new Viewport
+        {
+            X = 0,
+            Y = 0,
+            Width = screenSize.Width,
+            Height = screenSize.Height,
+            MinDepth = 0,
+            MaxDepth = 1
+        });
+    }
+
+    private static Matrix GetMatrixViewport(in Viewport viewport)
+    {
+        return new Matrix
+        {
+            M11 = viewport.Width * 0.5f,
+            M12 = 0,
+            M13 = 0,
+            M14 = 0,
+
+            M21 = 0,
+            M22 = -viewport.Height * 0.5f,
+            M23 = 0,
+            M24 = 0,
+
+            M31 = 0,
+            M32 = 0,
+            M33 = viewport.MaxDepth - viewport.MinDepth,
+            M34 = 0,
+
+            M41 = viewport.X + viewport.Width * 0.5f,
+            M42 = viewport.Y + viewport.Height * 0.5f,
+            M43 = viewport.MinDepth,
+            M44 = 1
+        };
+    }
+
     #endregion
-    
+
     public static Data.Team ToTeam(this int teamNum)
     {
-        switch (teamNum)
+        return teamNum switch
         {
-            case 1:
-                return Data.Team.Spectator;
-            case 2:
-                return Data.Team.Terrorists;
-            case 3:
-                return Data.Team.CounterTerrorists;
-            default:
-                return Data.Team.Unknown;
-        }
+            1 => Data.Team.Spectator,
+            2 => Data.Team.Terrorists,
+            3 => Data.Team.CounterTerrorists,
+            _ => Data.Team.Unknown
+        };
     }
 }

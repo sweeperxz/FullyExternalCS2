@@ -1,114 +1,95 @@
 ﻿using System.Windows.Threading;
 using CS2Cheat.Data;
-using CS2Cheat.System;
-using CS2Cheat.System.Data;
 using CS2Cheat.Utils;
+using GameOverlay.Windows;
+using SharpDX;
 using static System.Windows.Application;
-using Point = System.Drawing.Point;
+using Color = SharpDX.Color;
+using Rectangle = System.Drawing.Rectangle;
 
-namespace CS2Cheat.Gfx;
+namespace CS2Cheat.Graphics;
 
 public class WindowOverlay : ThreadedServiceBase
 {
-    protected override TimeSpan ThreadFrameSleep { get; set; } = new(0, 0, 0, 0, 500);
+    public WindowOverlay(GameProcess gameProcess)
 
-    protected override string ThreadName => nameof(WindowOverlay);
-    private GameProcess GameProcessManager { get; set; }
 
-    public Form Window { get; private set; }
-
-    public WindowOverlay(GameProcess gameProcessManager)
     {
-        GameProcessManager = gameProcessManager;
+        GameProcess = gameProcess;
 
-        Window = new Form()
+        Window = new OverlayWindow
         {
-            Name = "Overlay Window",
-            Text = "Overlay Window",
-            MinimizeBox = false,
-            MaximizeBox = false,
-            FormBorderStyle = FormBorderStyle.None,
-            TopMost = true,
+            Title = "Overaly",
+            IsTopmost = true,
+            IsVisible = true,
+            X = -32000,
+            Y = -32000,
             Width = 16,
-            Height = 16,
-            Left = -32000,
-            Top = -32000,
-            StartPosition = FormStartPosition.Manual
+            Height = 16
         };
 
-        Window.Load += (_, _) =>
-        {
-            var exStyle = User32.GetWindowLong(Window.Handle, User32.GWL_EXSTYLE);
-            exStyle |= User32.WS_EX_LAYERED;
-            exStyle |= User32.WS_EX_TRANSPARENT;
-
-            // make the window's border completely transparent
-            User32.SetWindowLong(Window.Handle, User32.GWL_EXSTYLE, (IntPtr)exStyle);
-
-            // set the alpha on the whole window to 255 (solid)
-            User32.SetLayeredWindowAttributes(Window.Handle, 0, 255, User32.LWA_ALPHA);
-        };
-        Window.SizeChanged += (_, _) => ExtendFrameIntoClientArea();
-        Window.LocationChanged += (_, _) => ExtendFrameIntoClientArea();
-        Window.Closed += (_, _) => Current.Shutdown();
-
-        // show window
-        Window.Show();
+        Window.Create();
     }
 
+    private GameProcess GameProcess { get; set; }
+
+    public OverlayWindow Window { get; private set; }
 
     public override void Dispose()
     {
         base.Dispose();
 
-        Window.Close();
         Window.Dispose();
         Window = default;
 
-        GameProcessManager = default;
-    }
-
-
-    private void ExtendFrameIntoClientArea()
-    {
-        var margins = new Margins
-        {
-            Left = -1,
-            Right = -1,
-            Top = -1,
-            Bottom = -1
-        };
-        Dwmapi.DwmExtendFrameIntoClientArea(Window.Handle, ref margins);
+        GameProcess = default;
     }
 
     protected override void FrameAction()
     {
-        Update(GameProcessManager.WindowRectangleClient);
+        Update(GameProcess.WindowRectangleClient);
     }
 
-    private void Update(Rectangle windowRectangleClient)
+    private void Update(Rectangle windowRectangle)
     {
         Current.Dispatcher.Invoke(() =>
         {
-            Window.TransparencyKey = Color.Magenta;
-            Window.BackColor = Color.Magenta;
-
-
-            if (Window.Location != windowRectangleClient.Location || Window.Size != windowRectangleClient.Size)
+            if (Window.X != windowRectangle.Location.X || Window.Y != windowRectangle.Location.Y ||
+                Window.Width != windowRectangle.Size.Width || Window.Height != windowRectangle.Size.Height)
             {
-                if (windowRectangleClient is { Width: > 0, Height: > 0 })
+                if (windowRectangle.Width > 0 && windowRectangle.Height > 0)
                 {
-                    // valid
-                    Window.Location = windowRectangleClient.Location;
-                    Window.Size = windowRectangleClient.Size;
+                    Window.X = windowRectangle.Location.X;
+                    Window.Y = windowRectangle.Location.Y;
+                    Window.Width = windowRectangle.Size.Width;
+                    Window.Height = windowRectangle.Size.Height;
                 }
                 else
                 {
-                    // invalid
-                    Window.Location = new Point(-32000, -32000);
-                    Window.Size = new Size(16, 16);
+                    Window.X = -32000;
+                    Window.Y = -32000;
+                    Window.Width = 16;
+                    Window.Height = 16;
                 }
             }
         }, DispatcherPriority.Normal);
+    }
+
+    public static void Draw(GameProcess gameProcess, Graphics graphics)
+    {
+        // window border
+        graphics.DrawLine(Color.Red,
+            new Vector2(0, 0),
+            new Vector2(gameProcess.WindowRectangleClient.Width - 1, 0),
+            new Vector2(gameProcess.WindowRectangleClient.Width - 1, 0),
+            new Vector2(gameProcess.WindowRectangleClient.Width - 1, gameProcess.WindowRectangleClient.Height - 1),
+            new Vector2(gameProcess.WindowRectangleClient.Width - 1, gameProcess.WindowRectangleClient.Height - 1),
+            new Vector2(0, gameProcess.WindowRectangleClient.Height - 1),
+            new Vector2(0, gameProcess.WindowRectangleClient.Height - 1),
+            new Vector2(0, 0)
+        );
+        // fps count
+        // graphics.FontConsolas32.DrawText(default, $"{(int)graphics.FpsCounter.Fps} FPS", XOffset, YOffset * 2 + 64,
+        //     HudColor);
     }
 }

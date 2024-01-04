@@ -1,115 +1,197 @@
 ﻿using System.Windows.Threading;
+using CS2Cheat.Core.Data;
 using CS2Cheat.Data;
 using CS2Cheat.Features;
 using CS2Cheat.Gfx;
 using CS2Cheat.Utils;
-using Yato.DirectXOverlay;
+using SharpDX;
+using SharpDX.Direct3D9;
 using static System.Windows.Application;
-using Direct2DBrush = Yato.DirectXOverlay.Direct2DBrush;
+using Color = SharpDX.Color;
+using Font = SharpDX.Direct3D9.Font;
+using FontWeight = SharpDX.Direct3D9.FontWeight;
 
 namespace CS2Cheat.Graphics;
 
-public class Graphics :
-    ThreadedServiceBase
+public class Graphics : ThreadedServiceBase
 {
     protected override string ThreadName => nameof(Graphics);
 
 
-    internal WindowOverlay WindowOverlay { get; set; }
-
-
-    private GameProcess GameProcess { get; set; }
-
-
-    internal GameData GameData { get; private set; }
-
-    private OverlayWindow OverlayWindow { get; set; }
-
-    internal Direct2DRenderer D2d { get; }
-
-    private Direct2DBrush ClearBrush { get; }
-    private Direct2DFont Font { get; }
-
-    private Direct2DBrush BlackBrush { get; }
-    private Direct2DBrush GreenBrush { get; }
-    public Direct2DBrush RedBrush { get; }
-
-    private Direct2DRendererOptions Direct2DRendererOptions
+    public Graphics(GameProcess gameProcess, GameData gameData, WindowOverlay windowOverlay)
     {
-        get =>
-            new()
-            {
-                AntiAliasing = true,
-                Hwnd = IntPtr.Zero,
-                MeasureFps = true,
-                VSync = true
-            };
-        set => Direct2DRendererOptions = value;
-    }
-
-    private OverlayManager OverlayManager { get; }
-
-
-    public Graphics(WindowOverlay windowOverlay, GameProcess gameProcess, GameData gameData)
-    {
-        GameProcess = gameProcess;
-        D2d = new Direct2DRenderer(GameProcess.Process.MainWindowHandle);
-
-        OverlayManager = new OverlayManager(GameProcess.Process.MainWindowHandle, Direct2DRendererOptions);
-        OverlayWindow = OverlayManager.Window;
-        D2d = OverlayManager.Graphics;
         WindowOverlay = windowOverlay;
+        OldRes = new Vector2(WindowOverlay.Window.Width, WindowOverlay.Window.Height);
+        GameProcess = gameProcess;
         GameData = gameData;
-        Font = D2d.CreateFont("Tahoma", 14);
-        BlackBrush = D2d.CreateBrush(0, 0, 0);
-        GreenBrush = D2d.CreateBrush(0, 255, 0);
-        ClearBrush = D2d.CreateBrush(0xF5, 0xF5, 0xF5, 0);
-        RedBrush = D2d.CreateBrush(255, 0, 0);
+
+        InitDevice();
     }
+
+    private WindowOverlay WindowOverlay { get; set; }
+    private Vector2 OldRes { get; set; }
+    public GameProcess GameProcess { get; private set; }
+    public GameData GameData { get; private set; }
+    private Device Device { get; set; }
+    private Font FontAzonix64 { get; set; }
+    private Font FontConsolas32 { get; set; }
+    private List<Vertex> Vertices { get; } = new();
+
+    private static readonly VertexElement[] VertexElements =
+    {
+        new(0, 0, DeclarationType.Float4, DeclarationMethod.Default, DeclarationUsage.PositionTransformed, 0),
+        new(0, 16, DeclarationType.Color, DeclarationMethod.Default, DeclarationUsage.Color, 0),
+        VertexElement.VertexDeclarationEnd
+    };
+
 
     public override void Dispose()
     {
         base.Dispose();
+
+        FontAzonix64.Dispose();
+        FontAzonix64 = default;
+        FontConsolas32.Dispose();
+        FontConsolas32 = default;
+        Device.Dispose();
+        Device = default;
+
         GameData = default;
         GameProcess = default;
         WindowOverlay = default;
-        OverlayWindow = default;
+    }
 
-        OverlayWindow.Dispose();
-        D2d.Dispose();
-        ClearBrush.Brush.Dispose();
-        Font.Font.Dispose();
-        BlackBrush.Brush.Dispose();
-        RedBrush.Brush.Dispose();
+    private void InitDevice()
+    {
+        var parameters = new PresentParameters
+        {
+            Windowed = true,
+            SwapEffect = SwapEffect.Discard,
+            DeviceWindowHandle = WindowOverlay.Window.Handle,
+            MultiSampleQuality = 0,
+            BackBufferFormat = Format.A8R8G8B8,
+            BackBufferWidth = WindowOverlay.Window.Width,
+            BackBufferHeight = WindowOverlay.Window.Height,
+            EnableAutoDepthStencil = true,
+            AutoDepthStencilFormat = Format.D16,
+            PresentationInterval = PresentInterval.Immediate,
+            MultiSampleType = MultisampleType.TwoSamples
+        };
+
+        Device = new Device(new Direct3D(), 0, DeviceType.Hardware, WindowOverlay.Window.Handle,
+            CreateFlags.HardwareVertexProcessing, parameters);
+
+        var azonix64 = new FontDescription
+        {
+            Height = 64,
+            Italic = false,
+            CharacterSet = FontCharacterSet.Ansi,
+            FaceName = "Tahoma",
+            MipLevels = 0,
+            OutputPrecision = FontPrecision.TrueType,
+            PitchAndFamily = FontPitchAndFamily.Default,
+            Quality = FontQuality.ClearType,
+            Weight = FontWeight.Regular
+        };
+        FontAzonix64 = new Font(Device, azonix64);
+
+        var consolas32 = new FontDescription
+        {
+            Height = 32,
+            Italic = false,
+            CharacterSet = FontCharacterSet.Ansi,
+            FaceName = "Tahoma",
+            MipLevels = 0,
+            OutputPrecision = FontPrecision.TrueType,
+            PitchAndFamily = FontPitchAndFamily.Default,
+            Quality = FontQuality.ClearType,
+            Weight = FontWeight.Regular
+        };
+        FontConsolas32 = new Font(Device, consolas32);
     }
 
     protected override void FrameAction()
     {
         if (!GameProcess.IsValid) return;
-        Current.Dispatcher.Invoke(Render, DispatcherPriority.Normal);
+
+        var newRes = new Vector2(WindowOverlay.Window.Width, WindowOverlay.Window.Height);
+        if (!Equals(OldRes, newRes))
+            Current.Dispatcher.Invoke(() =>
+            {
+                Device.Dispose();
+                FontAzonix64.Dispose();
+                FontConsolas32.Dispose();
+                InitDevice();
+            }, DispatcherPriority.Render);
+
+        OldRes = newRes;
+
+        Current.Dispatcher.Invoke(() =>
+        {
+            Device.SetRenderState(RenderState.AlphaBlendEnable, true);
+            Device.SetRenderState(RenderState.AlphaTestEnable, false);
+            Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
+            Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
+            Device.SetRenderState(RenderState.Lighting, false);
+            Device.SetRenderState(RenderState.CullMode, Cull.None);
+            Device.SetRenderState(RenderState.ZEnable, true);
+            Device.SetRenderState(RenderState.ZFunc, Compare.Always);
+
+            Device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.FromAbgr(0), 1, 0);
+
+            Device.BeginScene();
+            Render();
+            Device.EndScene();
+
+            Device.Present();
+        }, DispatcherPriority.Render);
     }
 
 
     private void Render()
     {
-        D2d.BeginScene();
-        D2d.ClearScene(ClearBrush);
-        DrawFps();
-        DrawWindowBorder();
+        Vertices.Clear();
+
+        Draw();
+
+        var count = Vertices.Count;
+        var vertices = new VertexBuffer(Device, count * 20, Usage.WriteOnly, VertexFormat.None, Pool.Managed);
+        vertices.Lock(0, 0, LockFlags.None)
+            .WriteRange(Vertices.ToArray());
+        vertices.Unlock();
+
+        Device.SetStreamSource(0, vertices, 0, 20);
+        var vertexDecl = new VertexDeclaration(Device, VertexElements);
+        Device.VertexDeclaration = vertexDecl;
+        Device.DrawPrimitives(PrimitiveType.LineList, 0, count / 2);
+
+        vertices.Dispose();
+        vertexDecl.Dispose();
+    }
+
+    private void Draw()
+    {
+        // draw here
         EspAimCrosshair.Draw(this);
-        D2d.EndScene();
+        WindowOverlay.Draw(GameProcess, this);
+        SkeletonEsp.Draw(this);
     }
 
 
-    private void DrawFps()
+    public void DrawLine(Color color, params Vector2[] verts)
     {
-        D2d.DrawTextWithBackground($"{D2d.FPS}", 15, 15, Font, BlackBrush, GreenBrush);
+        if (verts.Length < 2 || verts.Length % 2 != 0) return;
+
+        foreach (var vertex in verts)
+            Vertices.Add(new Vertex { Color = color, Position = new Vector4(vertex.X, vertex.Y, 0.5f, 1.0f) });
     }
 
-
-    private void DrawWindowBorder()
+    public void DrawLineWorld(Color color, params Vector3[] verticesWorld)
     {
-        D2d.DrawRectangle(0, 0, WindowOverlay.Window.Width, WindowOverlay.Window.Height, 2.0f,
-            new Direct2DColor(255, 0, 0));
+        var verticesScreen = verticesWorld
+            .Select(v => GameData.Player.MatrixViewProjectionViewport.Transform(v))
+            .Where(v => v.Z < 1)
+            .Select(v => new Vector2(v.X, v.Y)).ToArray();
+        DrawLine(color, verticesScreen);
     }
 }

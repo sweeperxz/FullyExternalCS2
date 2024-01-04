@@ -41,10 +41,7 @@ public class GameData : ThreadedServiceBase
         if (!GameProcess.IsValid) return;
         Player.Update(GameProcess);
 
-        foreach (var entity in Entities)
-        {
-            entity.Update(GameProcess);
-        }
+        foreach (var entity in Entities) entity.Update(GameProcess);
     }
 
     #endregion
