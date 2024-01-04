@@ -10,6 +10,7 @@ It was created for the _purpose_ of _improving_ Windows API skills.
 #### Features
 
 - Aim Crosshair
+- Esp Skeleton
 - Trigger Bot on key (default = LAlt)
 - BunnyHop (Beta)
 
