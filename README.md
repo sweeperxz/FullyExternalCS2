@@ -20,12 +20,12 @@ It was created for the _purpose_ of _improving_ Windows API skills.
 
 ```cs
     <ItemGroup>
+        <PackageReference Include="GameOverlay.Net" Version="4.3.1"/>
         <PackageReference Include="InputSimulator" Version="1.0.4"/>
         <PackageReference Include="Overlay.NET" Version="1.0.2"/>
         <PackageReference Include="PresentationFramework" Version="4.6.0"/>
-        <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0"/>
+        <PackageReference Include="SharpDX.Direct3D9" Version="4.2.0"/>
         <PackageReference Include="SharpDX.DXGI" Version="4.2.0"/>
-        <PackageReference Include="Yato.DirectXOverlay" Version="1.27.17.6743"/>
     </ItemGroup>
 ```
 
