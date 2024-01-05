@@ -5,7 +5,7 @@ public static class Offsets
     #region offsets
 
     public static float weapon_recoil_scale = 2.0f;
-    public static int dwLocalPlayerPawn = 0x16C8F38;
+    public static int dwLocalPlayerPawn = 0x16C8F58;
     public static int dwViewAngels = 0x1880DC0;
     public static int m_vOldOrigin = 0x1224;
     public static int m_vecViewOffset = 0xC48;

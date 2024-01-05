@@ -11,9 +11,13 @@ namespace CS2Cheat.Graphics;
 
 public class WindowOverlay : ThreadedServiceBase
 {
+    protected override string ThreadName => nameof(WindowOverlay);
+
+    private GameProcess GameProcess { get; set; }
+
+    public OverlayWindow Window { get; private set; }
+    
     public WindowOverlay(GameProcess gameProcess)
-
-
     {
         GameProcess = gameProcess;
 
@@ -31,9 +35,6 @@ public class WindowOverlay : ThreadedServiceBase
         Window.Create();
     }
 
-    private GameProcess GameProcess { get; set; }
-
-    public OverlayWindow Window { get; private set; }
 
     public override void Dispose()
     {
