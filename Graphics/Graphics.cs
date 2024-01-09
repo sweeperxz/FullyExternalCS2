@@ -2,7 +2,6 @@
 using CS2Cheat.Core.Data;
 using CS2Cheat.Data;
 using CS2Cheat.Features;
-using CS2Cheat.Gfx;
 using CS2Cheat.Utils;
 using SharpDX;
 using SharpDX.Direct3D9;

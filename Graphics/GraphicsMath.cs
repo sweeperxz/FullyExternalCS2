@@ -1,6 +1,6 @@
 using SharpDX;
 
-namespace CS2Cheat.Gfx;
+namespace CS2Cheat.Graphics;
 
 public static class GraphicsMath
 {
@@ -20,7 +20,7 @@ public static class GraphicsMath
     /// <summary>
     ///     Get viewport matrix.
     /// </summary>
-    public static Matrix GetMatrixViewport(in Viewport viewport)
+    private static Matrix GetMatrixViewport(in Viewport viewport)
     {
         return new Matrix
         {

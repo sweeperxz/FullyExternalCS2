@@ -27,7 +27,7 @@ public static class Offsets
     public static int m_iszPlayerName = 0x640;
     public static int m_iShotsFired = 0x1420;
 
-    public static readonly Dictionary<string, int> BONES = new()
+    public static readonly Dictionary<string, int> Bones = new()
     {
         { "head", 6 },
         { "neck_0", 5 },

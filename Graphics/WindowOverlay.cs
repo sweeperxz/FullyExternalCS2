@@ -16,7 +16,7 @@ public class WindowOverlay : ThreadedServiceBase
     private GameProcess GameProcess { get; set; }
 
     public OverlayWindow Window { get; private set; }
-    
+
     public WindowOverlay(GameProcess gameProcess)
     {
         GameProcess = gameProcess;

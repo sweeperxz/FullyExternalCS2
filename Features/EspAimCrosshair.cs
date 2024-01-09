@@ -1,15 +1,14 @@
 using CS2Cheat.Data;
-using CS2Cheat.Gfx;
+using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
 using SharpDX;
-using Color = System.Drawing.Color;
 
 
 namespace CS2Cheat.Features;
 
 public static class EspAimCrosshair
 {
-    public static Vector3 GetPositionScreen(GameProcess gameProcess, GameData gameData)
+    private static Vector3 GetPositionScreen(GameProcess gameProcess, GameData gameData)
     {
         var screenSize = gameProcess.WindowRectangleClient.Size;
         var aspectRatio = (double)screenSize.Width / screenSize.Height;

@@ -38,6 +38,8 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
         var entity = gameProcess.Process.Read<IntPtr>(entityEntry + 120 * (entityId & 0x1FF));
         var entityTeam = gameProcess.Process.Read<int>(entity + Offsets.m_iTeamNum);
 
-        if (gameData.Player.Team != entityTeam.ToTeam()) InputSimulator.Mouse.LeftButtonClick();
+        if (gameData.Player.Team == entityTeam.ToTeam()) return;
+        Thread.Sleep(5);
+        InputSimulator.Mouse.LeftButtonClick();
     }
 }

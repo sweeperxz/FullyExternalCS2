@@ -1,10 +1,7 @@
-using System.Windows;
 using CS2Cheat.Data;
 using CS2Cheat.Features;
-using CS2Cheat.Gfx;
 using CS2Cheat.Graphics;
 using Application = System.Windows.Application;
-using Graphics = CS2Cheat.Graphics.Graphics;
 
 namespace CS2Cheat;
 
