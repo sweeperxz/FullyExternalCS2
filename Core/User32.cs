@@ -2,7 +2,7 @@
 using CS2Cheat.System.Data;
 using Point = CS2Cheat.System.Data.Point;
 
-namespace CS2Cheat.System;
+namespace CS2Cheat.Core;
 
 public static class User32
 {
@@ -28,15 +28,6 @@ public static class User32
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern uint GetWindowLong(IntPtr hWnd, int nIndex);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
     #endregion
 }

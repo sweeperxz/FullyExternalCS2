@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using CS2Cheat.System;
+using CS2Cheat.Core;
 using SharpDX;
 using static System.Diagnostics.Process;
 using Rectangle = System.Drawing.Rectangle;
