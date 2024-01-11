@@ -1,4 +1,6 @@
-﻿using CS2Cheat.Utils;
+﻿using CS2Cheat.Data.Entity;
+using CS2Cheat.Data.Game;
+using CS2Cheat.Utils;
 using SharpDX;
 using WindowsInput;
 using WindowsInput.Native;
@@ -59,7 +61,7 @@ public class Player : EntityBase
 
         AimDirection = GetAimDirection(ViewAngles, AimPunchAngle);
 
-        if (new InputSimulator().InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE))
+        if (InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE))
         {
             if (FFlags is PlayerState.Standing or PlayerState.Crouching)
                 InputSimulator.Mouse.VerticalScroll(10);

@@ -1,4 +1,4 @@
-using CS2Cheat.Data;
+using CS2Cheat.Data.Game;
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
 using SharpDX;
@@ -8,28 +8,28 @@ namespace CS2Cheat.Features;
 
 public static class EspAimCrosshair
 {
-    private static Vector3 GetPositionScreen(GameProcess gameProcess, GameData gameData)
+    private static Vector3 _pointClip = Vector3.Zero;
+
+    public static Vector3 GetPositionScreen(GameProcess gameProcess, GameData gameData)
     {
         var screenSize = gameProcess.WindowRectangleClient.Size;
         var aspectRatio = (double)screenSize.Width / screenSize.Height;
         var player = gameData.Player;
-        var fovY = ((double)90).DegreeToRadian();
+        var fovY = 90.0.DegreeToRadian();
         var fovX = fovY * aspectRatio;
 
         var doPunch = player.ShotsFired > 0;
+        var recoilScale = Offsets.weapon_recoil_scale;
 
-        var punchX = doPunch ? ((double)player.AimPunchAngle.X * Offsets.weapon_recoil_scale).DegreeToRadian() : 0;
-        var punchY = doPunch ? ((double)player.AimPunchAngle.Y * Offsets.weapon_recoil_scale).DegreeToRadian() : 0;
+        var punchX = doPunch ? ((double)player.AimPunchAngle.X * recoilScale).DegreeToRadian() : 0;
+        var punchY = doPunch ? ((double)player.AimPunchAngle.Y * recoilScale).DegreeToRadian() : 0;
 
-        var pointClip = new Vector3
-        (
-            (float)(-punchY / fovX),
-            (float)(-punchX / fovY),
-            0
-        );
-        return player.MatrixViewport.Transform(pointClip);
+        _pointClip.X = (float)(-punchY / fovX);
+        _pointClip.Y = (float)(-punchX / fovY);
+        _pointClip.Z = 0;
+
+        return player.MatrixViewport.Transform(_pointClip);
     }
-
 
     public static void Draw(Graphics.Graphics graphics)
     {
@@ -39,7 +39,12 @@ public static class EspAimCrosshair
 
     private static void Draw(Graphics.Graphics graphics, Vector2 pointScreen)
     {
-        const int radius = 12;
+        const int crosshairRadius = 12;
+        DrawCrosshair(graphics, pointScreen, crosshairRadius);
+    }
+
+    private static void DrawCrosshair(Graphics.Graphics graphics, Vector2 pointScreen, int radius)
+    {
         graphics.DrawLine(SharpDX.Color.Red, pointScreen - new Vector2(radius, 0),
             pointScreen + new Vector2(radius, 0));
         graphics.DrawLine(SharpDX.Color.Red, pointScreen - new Vector2(0, radius),

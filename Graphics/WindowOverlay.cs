@@ -1,5 +1,6 @@
 ﻿using System.Windows.Threading;
 using CS2Cheat.Data;
+using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using GameOverlay.Windows;
 using SharpDX;

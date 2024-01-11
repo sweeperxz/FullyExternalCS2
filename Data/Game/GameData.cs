@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using CS2Cheat.Utils;
+﻿using CS2Cheat.Utils;
 
-namespace CS2Cheat.Data;
+namespace CS2Cheat.Data.Game;
 
 public class GameData : ThreadedServiceBase
 {
@@ -13,7 +12,7 @@ public class GameData : ThreadedServiceBase
 
     public Player Player { get; set; }
 
-    public Entity[] Entities { get; private set; }
+    public Entity.Entity[] Entities { get; private set; }
 
     #endregion
 
@@ -24,7 +23,7 @@ public class GameData : ThreadedServiceBase
     {
         GameProcess = gameProcess;
         Player = new Player();
-        Entities = Enumerable.Range(0, 64).Select(index => new Entity(index)).ToArray();
+        Entities = Enumerable.Range(0, 64).Select(index => new Entity.Entity(index)).ToArray();
     }
 
     public override void Dispose()

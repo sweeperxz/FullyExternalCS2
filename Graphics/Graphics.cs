@@ -1,6 +1,7 @@
 ﻿using System.Windows.Threading;
 using CS2Cheat.Core.Data;
 using CS2Cheat.Data;
+using CS2Cheat.Data.Game;
 using CS2Cheat.Features;
 using CS2Cheat.Utils;
 using SharpDX;
@@ -120,6 +121,7 @@ public class Graphics : ThreadedServiceBase
                 Device.Dispose();
                 FontAzonix64.Dispose();
                 FontConsolas32.Dispose();
+                Vertices.Clear();
                 InitDevice();
             }, DispatcherPriority.Render);
 
@@ -143,7 +145,7 @@ public class Graphics : ThreadedServiceBase
             Device.EndScene();
 
             Device.Present();
-        }, DispatcherPriority.Render);
+        }, DispatcherPriority.Normal);
     }
 
 

@@ -1,18 +1,19 @@
+using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using SharpDX;
 
-namespace CS2Cheat.Data;
+namespace CS2Cheat.Data.Entity;
 
 public abstract class EntityBase
 {
     protected IntPtr EntityList { get; set; }
     protected IntPtr ControllerBase { get; set; }
-    public IntPtr AddressBase { get; protected set; }
+    public IntPtr AddressBase { get; private set; }
 
     private bool LifeState { get; set; }
     private int Health { get; set; }
     public int Armor { get; protected set; }
-    public Team Team { get; protected set; }
+    public Team Team { get; private set; }
     protected Vector3 Origin { get; private set; }
     public int ShotsFired { get; private set; }
 

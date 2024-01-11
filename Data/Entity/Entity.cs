@@ -1,16 +1,12 @@
+using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using SharpDX;
 
-namespace CS2Cheat.Data;
+namespace CS2Cheat.Data.Entity;
 
-public class Entity : EntityBase
+public class Entity(int index) : EntityBase
 {
-    public Entity(int index)
-    {
-        Index = index;
-    }
-
-    private int Index { get; }
+    private int Index { get; } = index;
     private bool Dormant { get; set; } = true;
 
     public Dictionary<string, Vector3> BonePos { get; } = new()
@@ -42,7 +38,9 @@ public class Entity : EntityBase
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
     {
         var listEntry = gameProcess.Process.Read<IntPtr>(EntityList + ((8 * (Index & 0x7FFF)) >> 9) + 16);
-        return listEntry == IntPtr.Zero ? IntPtr.Zero : gameProcess.Process.Read<IntPtr>(listEntry + 120 * (Index & 0x1FF));
+        return listEntry == IntPtr.Zero
+            ? IntPtr.Zero
+            : gameProcess.Process.Read<IntPtr>(listEntry + 120 * (Index & 0x1FF));
     }
 
     protected override IntPtr ReadAddressBase(GameProcess gameProcess)

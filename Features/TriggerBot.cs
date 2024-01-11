@@ -1,4 +1,5 @@
 using CS2Cheat.Data;
+using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using WindowsInput;
 using WindowsInput.Native;

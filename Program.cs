@@ -1,4 +1,7 @@
+using System;
+using System.Runtime.InteropServices;
 using CS2Cheat.Data;
+using CS2Cheat.Data.Game;
 using CS2Cheat.Features;
 using CS2Cheat.Graphics;
 using Application = System.Windows.Application;
@@ -33,6 +36,8 @@ public class Program :
 
     private TriggerBot Trigger { get; set; }
 
+    private AimBot AimBot { get; set; }
+
 
     /// <summary />
     private Program()
@@ -59,6 +64,9 @@ public class Program :
 
         Trigger = new TriggerBot(GameProcess, GameData);
         Trigger.Start();
+
+        AimBot = new AimBot(GameProcess, GameData);
+        AimBot.Start();
     }
 
     /// <inheritdoc />
@@ -78,5 +86,8 @@ public class Program :
 
         Trigger.Dispose();
         Trigger = default;
+
+        AimBot.Dispose();
+        AimBot = default;
     }
 }

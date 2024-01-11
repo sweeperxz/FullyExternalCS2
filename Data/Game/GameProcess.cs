@@ -1,8 +1,7 @@
 ﻿using CS2Cheat.Core;
-using CS2Cheat.System;
 using CS2Cheat.Utils;
 
-namespace CS2Cheat.Data;
+namespace CS2Cheat.Data.Game;
 
 public class GameProcess : ThreadedServiceBase
 {

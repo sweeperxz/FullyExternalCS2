@@ -1,4 +1,4 @@
-using CS2Cheat.Data;
+using CS2Cheat.Data.Entity;
 using Color = SharpDX.Color;
 
 namespace CS2Cheat.Features;
