@@ -1,9 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Windows.Input;
 using CS2Cheat.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Features;
 using CS2Cheat.Graphics;
+using WindowsInput.Native;
 using Application = System.Windows.Application;
 
 namespace CS2Cheat;
@@ -44,6 +46,7 @@ public class Program :
     {
         Startup += (_, _) => InitializeComponent();
         Exit += (_, _) => Dispose();
+        
     }
 
 
@@ -67,6 +70,9 @@ public class Program :
 
         AimBot = new AimBot(GameProcess, GameData);
         AimBot.Start();
+        
+        
+        
     }
 
     /// <inheritdoc />

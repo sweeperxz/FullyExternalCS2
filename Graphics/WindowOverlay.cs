@@ -1,5 +1,4 @@
 ﻿using System.Windows.Threading;
-using CS2Cheat.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using GameOverlay.Windows;
@@ -18,13 +17,16 @@ public class WindowOverlay : ThreadedServiceBase
 
     public OverlayWindow Window { get; private set; }
 
+    private static FpsCounter? FpsCounter { get; set; }
+
     public WindowOverlay(GameProcess gameProcess)
     {
         GameProcess = gameProcess;
 
+        FpsCounter = new FpsCounter();
         Window = new OverlayWindow
         {
-            Title = "Overaly",
+            Title = "Overlay",
             IsTopmost = true,
             IsVisible = true,
             X = -32000,
@@ -44,11 +46,13 @@ public class WindowOverlay : ThreadedServiceBase
         Window.Dispose();
         Window = default;
 
+        FpsCounter = default;
         GameProcess = default;
     }
 
     protected override void FrameAction()
     {
+        FpsCounter.Update();
         Update(GameProcess.WindowRectangleClient);
     }
 
@@ -59,7 +63,7 @@ public class WindowOverlay : ThreadedServiceBase
             if (Window.X != windowRectangle.Location.X || Window.Y != windowRectangle.Location.Y ||
                 Window.Width != windowRectangle.Size.Width || Window.Height != windowRectangle.Size.Height)
             {
-                if (windowRectangle.Width > 0 && windowRectangle.Height > 0)
+                if (windowRectangle is { Width: > 0, Height: > 0 })
                 {
                     Window.X = windowRectangle.Location.X;
                     Window.Y = windowRectangle.Location.Y;
@@ -90,8 +94,7 @@ public class WindowOverlay : ThreadedServiceBase
             new Vector2(0, gameProcess.WindowRectangleClient.Height - 1),
             new Vector2(0, 0)
         );
-        // fps count
-        // graphics.FontConsolas32.DrawText(default, $"{(int)graphics.FpsCounter.Fps} FPS", XOffset, YOffset * 2 + 64,
-        //     HudColor);
+        //fps count
+        graphics.FontConsolas32.DrawText(default, $"{FpsCounter!.Fps} FPS", 5, 5, Color.Green);
     }
 }

@@ -41,6 +41,9 @@ public class GameData : ThreadedServiceBase
         Player.Update(GameProcess);
 
         foreach (var entity in Entities) entity.Update(GameProcess);
+        
+        
+        
     }
 
     #endregion

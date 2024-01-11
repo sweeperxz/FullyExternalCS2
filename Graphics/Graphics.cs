@@ -33,8 +33,8 @@ public class Graphics : ThreadedServiceBase
     public GameProcess GameProcess { get; private set; }
     public GameData GameData { get; private set; }
     private Device Device { get; set; }
-    private Font FontAzonix64 { get; set; }
-    private Font FontConsolas32 { get; set; }
+    public Font FontAzonix64 { get; set; }
+    public Font FontConsolas32 { get; set; }
     private List<Vertex> Vertices { get; } = new();
 
     private static readonly VertexElement[] VertexElements =
@@ -97,10 +97,10 @@ public class Graphics : ThreadedServiceBase
 
         var consolas32 = new FontDescription
         {
-            Height = 32,
+            Height = 14,
             Italic = false,
             CharacterSet = FontCharacterSet.Ansi,
-            FaceName = "Tahoma",
+            FaceName = "Verdana",
             MipLevels = 0,
             OutputPrecision = FontPrecision.TrueType,
             PitchAndFamily = FontPitchAndFamily.Default,
