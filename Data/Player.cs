@@ -1,4 +1,5 @@
-﻿using CS2Cheat.Data.Entity;
+﻿using System.Runtime.InteropServices;
+using CS2Cheat.Data.Entity;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using SharpDX;
@@ -39,15 +40,6 @@ public class Player : EntityBase
         if (!base.Update(gameProcess)) return false;
 
 
-        /* bind mwheelup +jump
-     bind mwheeldown -jump
-     alias _checkjump "-jump; alias checkjump";
-     alias +j "+jump; alias checkjump _checkjump";
-     alias -j "checkjump";
-     bind "space" +j;
-     fps_max 32;
-     fps_max 0;*/
-
         MatrixViewProjection = Matrix.Transpose(gameProcess.ModuleClient.Read<Matrix>(Offsets.dwViewMatrix));
         MatrixViewport = Utility.GetMatrixViewport(gameProcess.WindowRectangleClient.Size);
         MatrixViewProjectionViewport = MatrixViewProjection * MatrixViewport;
@@ -61,12 +53,23 @@ public class Player : EntityBase
 
         AimDirection = GetAimDirection(ViewAngles, AimPunchAngle);
 
-        if (InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE))
+
+       
+
+        /*
+        for bunnyhop to work correctly you need to write this
+        alias j "+jump;-jump";
+        bind space j;
+        bind rightarrow j;
+        fps_max 32;
+        fps_max 0;
+        */
+
+
+        if (InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE) is not false && (FFlags & (1 << 0)) != 0)
         {
-            if (FFlags is PlayerState.Standing or PlayerState.Crouching)
-                InputSimulator.Mouse.VerticalScroll(10);
-            else
-                InputSimulator.Mouse.VerticalScroll(-10);
+            Thread.Sleep(15);
+            InputSimulator.Keyboard.KeyPress(VirtualKeyCode.RIGHT);
         }
 
 
@@ -85,11 +88,4 @@ public class Player : EntityBase
             (float)-Math.Sin(phi)
         ));
     }
-}
-
-public static class PlayerState
-{
-    public const int Standing = 65665;
-
-    public const int Crouching = 65667;
 }
