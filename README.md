@@ -10,7 +10,7 @@ It was created for the _purpose_ of _improving_ Windows API skills.
 #### Features
 
 - Aim Crosshair
-- AimBot on key (default = LBUTTON)
+- AimBot on key with RCS (default = LBUTTON)
 - Esp Skeleton
 - Trigger Bot on key (default = LAlt)
 - BunnyHop (Read [this](https://github.com/sweeperxz/FullyExternalCS2/blob/31f90c2fe4825ac86ba6862531dc633ab6d3aef0/Data/Player.cs#L60))
