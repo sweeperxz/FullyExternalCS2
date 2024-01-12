@@ -4,7 +4,7 @@ namespace CS2Cheat.Utils;
 
 public class FpsCounter
 {
-    #region 
+    #region
 
     private static readonly TimeSpan TimeSpanFpsUpdate = new(0, 0, 0, 1);
 

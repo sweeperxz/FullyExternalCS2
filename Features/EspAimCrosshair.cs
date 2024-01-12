@@ -45,9 +45,9 @@ public static class EspAimCrosshair
 
     private static void DrawCrosshair(Graphics.Graphics graphics, Vector2 pointScreen, int radius)
     {
-        graphics.DrawLine(SharpDX.Color.Red, pointScreen - new Vector2(radius, 0),
+        graphics.DrawLine(SharpDX.Color.Green, pointScreen - new Vector2(radius, 0),
             pointScreen + new Vector2(radius, 0));
-        graphics.DrawLine(SharpDX.Color.Red, pointScreen - new Vector2(0, radius),
+        graphics.DrawLine(SharpDX.Color.Green, pointScreen - new Vector2(0, radius),
             pointScreen + new Vector2(0, radius));
     }
 }

@@ -54,8 +54,6 @@ public class Player : EntityBase
         AimDirection = GetAimDirection(ViewAngles, AimPunchAngle);
 
 
-       
-
         /*
         for bunnyhop to work correctly you need to write this
         alias j "+jump;-jump";

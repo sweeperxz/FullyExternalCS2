@@ -1,11 +1,7 @@
-using System;
-using System.Runtime.InteropServices;
-using System.Windows.Input;
-using CS2Cheat.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Features;
 using CS2Cheat.Graphics;
-using WindowsInput.Native;
+using static CS2Cheat.Core.User32;
 using Application = System.Windows.Application;
 
 namespace CS2Cheat;
@@ -46,7 +42,6 @@ public class Program :
     {
         Startup += (_, _) => InitializeComponent();
         Exit += (_, _) => Dispose();
-        
     }
 
 
@@ -70,9 +65,8 @@ public class Program :
 
         AimBot = new AimBot(GameProcess, GameData);
         AimBot.Start();
-        
-        
-        
+
+        SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
     }
 
     /// <inheritdoc />
