@@ -1,3 +1,4 @@
+using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using SharpDX;

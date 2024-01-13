@@ -1,4 +1,4 @@
-namespace CS2Cheat.Data;
+namespace CS2Cheat.Core.Data;
 
 public enum Team
 {

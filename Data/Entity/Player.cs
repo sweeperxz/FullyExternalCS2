@@ -1,12 +1,10 @@
-﻿using System.Runtime.InteropServices;
-using CS2Cheat.Data.Entity;
-using CS2Cheat.Data.Game;
+﻿using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using SharpDX;
 using WindowsInput;
 using WindowsInput.Native;
 
-namespace CS2Cheat.Data;
+namespace CS2Cheat.Data.Entity;
 
 public class Player : EntityBase
 {
@@ -64,7 +62,7 @@ public class Player : EntityBase
         */
 
 
-        if (InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE) is not false && (FFlags & (1 << 0)) != 0)
+        if (InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE) && (FFlags & 1) > 0)
         {
             Thread.Sleep(15);
             InputSimulator.Keyboard.KeyPress(VirtualKeyCode.RIGHT);

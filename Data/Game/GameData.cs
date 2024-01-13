@@ -1,4 +1,5 @@
-﻿using CS2Cheat.Utils;
+﻿using CS2Cheat.Data.Entity;
+using CS2Cheat.Utils;
 
 namespace CS2Cheat.Data.Game;
 

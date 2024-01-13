@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using CS2Cheat.Core;
+using CS2Cheat.Core.Data;
 using SharpDX;
 using static System.Diagnostics.Process;
 using Rectangle = System.Drawing.Rectangle;
@@ -134,14 +135,14 @@ public static class Utility
 
     #endregion
 
-    public static Data.Team ToTeam(this int teamNum)
+    public static Team ToTeam(this int teamNum)
     {
         return teamNum switch
         {
-            1 => Data.Team.Spectator,
-            2 => Data.Team.Terrorists,
-            3 => Data.Team.CounterTerrorists,
-            _ => Data.Team.Unknown
+            1 => Team.Spectator,
+            2 => Team.Terrorists,
+            3 => Team.CounterTerrorists,
+            _ => Team.Unknown
         };
     }
 }
