@@ -64,7 +64,7 @@ public class Player : EntityBase
 
         if (InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE) && (FFlags & 1) > 0)
         {
-            Thread.Sleep(15);
+            Thread.Sleep(7);
             InputSimulator.Keyboard.KeyPress(VirtualKeyCode.RIGHT);
         }
 

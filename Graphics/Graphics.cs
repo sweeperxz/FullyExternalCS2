@@ -1,6 +1,5 @@
 ﻿using System.Windows.Threading;
 using CS2Cheat.Core.Data;
-using CS2Cheat.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Features;
 using CS2Cheat.Utils;
