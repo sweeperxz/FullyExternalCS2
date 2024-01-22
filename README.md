@@ -53,9 +53,7 @@ If you have issues or have questions, check out the Issues section of the GitHub
 
 - sweeperxz - Developer/Engineer
 
-### Acknowledgements
+## Star History
 
-- Inspired by [Martynas Apanavicius](https://www.linkedin.com/in/martynas-apanavicius/).
-- [unknowncheats.me](https://www.unknowncheats.me/)
-- [yougame.biz](https://yougame.biz/threads/191134/)
-- [cs-dumper](https://github.com/a2x/cs2-dumper)
+[![Star History Chart](https://api.star-history.com/svg?repos=sweeperxz/FullyExternalCS2&type=Date)](https://star-history.com/#sweeperxz/FullyExternalCS2&Date)
+
