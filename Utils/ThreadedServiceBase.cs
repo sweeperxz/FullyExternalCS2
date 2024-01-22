@@ -39,9 +39,7 @@ public abstract class ThreadedServiceBase : IDisposable
                 Thread.Sleep(ThreadFrameSleep);
             }
         }
-        catch (ThreadInterruptedException)
-        {
-        }
+        catch (ThreadInterruptedException){}
     }
 
     public virtual void Dispose()
