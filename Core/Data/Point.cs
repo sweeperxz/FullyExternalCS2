@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace CS2Cheat.System.Data;
+namespace CS2Cheat.Core.Data;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct Point

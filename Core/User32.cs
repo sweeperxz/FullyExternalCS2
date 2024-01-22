@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using CS2Cheat.System.Data;
-using Point = CS2Cheat.System.Data.Point;
+using CS2Cheat.Core.Data;
+using Point = CS2Cheat.Core.Data.Point;
 
 namespace CS2Cheat.Core;
 

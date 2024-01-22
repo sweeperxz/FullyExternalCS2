@@ -78,7 +78,7 @@ public class GameProcess : ThreadedServiceBase
     private bool EnsureProcessAndModules()
     {
         if (Process is null)
-            Process = global::System.Diagnostics.Process.GetProcessesByName(NAME_PROCESS).FirstOrDefault();
+            Process = System.Diagnostics.Process.GetProcessesByName(NAME_PROCESS).FirstOrDefault();
         if (Process is null || !Process.IsRunning()) return false;
 
         if (ModuleClient is null) ModuleClient = Process.GetModule(NAME_MODULE);
