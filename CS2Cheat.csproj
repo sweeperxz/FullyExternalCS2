@@ -9,6 +9,7 @@
         <UseWpf>true</UseWpf>
         <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86</Platforms>
+        <ApplicationIcon>assets\logo.ico</ApplicationIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
