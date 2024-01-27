@@ -4,32 +4,30 @@ public static class Offsets
 {
     #region offsets
 
-    public static readonly float weapon_recoil_scale = 2.0f;
-    public static readonly int dwLocalPlayerPawn = 0x16C8F48;
-    public static readonly int dwViewAngels = 0x1880DC0;
+    public const float WeaponRecoilScale = 2.0f;
+    public static readonly int dwLocalPlayerPawn = 0x16D4F48;
     public static readonly int m_vOldOrigin = 0x1224;
     public static readonly int m_vecViewOffset = 0xC48;
     public static readonly int m_AimPunchAngle = 0x171C;
-    public static readonly int m_iFOV = 0x210;
     public static readonly int m_modelState = 0x160;
-    public static readonly int m_angEyeAngles = 0x1518;
     public static readonly int m_pGameSceneNode = 0x310;
     public static readonly int m_fFlags = 0x3C8;
-    public static readonly int m_pCameraServices = 0x10E0;
-    public static readonly int m_iFOVStart = 0x214;
     public static readonly int m_iIDEntIndex = 0x1544;
     public static readonly int m_lifeState = 0x330;
     public static readonly int m_iHealth = 0x32C;
     public static readonly int m_iTeamNum = 0x3BF;
-    public static readonly int dwEntityList = 0x17C26A0;
+    public static readonly int dwEntityList = 0x17CE6A0;
     public static readonly int m_bDormant = 0xE7;
-    public static readonly int m_hPlayerPawn = 0x7EC;
-    public static readonly int m_iszPlayerName = 0x640;
     public static readonly int m_iShotsFired = 0x1420;
     public static readonly int m_hPawn = 0x60C;
-    public static readonly int dwLocalPlayerController = 0x1811C98;
-    public static readonly int dwViewMatrix = 0x1820EA0;
-    public static readonly int dwViewAngles = 0x1884F30;
+    public static readonly int dwLocalPlayerController = 0x181DC98;
+    public static readonly int dwViewMatrix = 0x182CEA0;
+    public static readonly int dwViewAngles = 0x1890F30;
+    public static readonly int m_nBombSite = 0xE84;
+    public static readonly int m_bBeingDefused = 0xEBC;
+    public static readonly int m_bBombDefused = 0xED4;
+    public static readonly int dwPlantedC4 = 0x18257D8;
+
 
     public static readonly Dictionary<string, int> Bones = new()
     {

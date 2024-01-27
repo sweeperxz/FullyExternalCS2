@@ -37,19 +37,19 @@ public class Entity(int index) : EntityBase
 
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
     {
-        var listEntry = gameProcess.Process.Read<IntPtr>(EntityList + ((8 * (Index & 0x7FFF)) >> 9) + 16);
-        return listEntry == IntPtr.Zero
+        var listEntryFirst = gameProcess.Process.Read<IntPtr>(EntityList + ((8 * (Index & 0x7FFF)) >> 9) + 16);
+        return listEntryFirst == IntPtr.Zero
             ? IntPtr.Zero
-            : gameProcess.Process.Read<IntPtr>(listEntry + 120 * (Index & 0x1FF));
+            : gameProcess.Process.Read<IntPtr>(listEntryFirst + 120 * (Index & 0x1FF));
     }
 
     protected override IntPtr ReadAddressBase(GameProcess gameProcess)
     {
         var playerPawn = gameProcess.Process.Read<int>(ControllerBase + Offsets.m_hPawn);
-        var listEntry2 = gameProcess.Process.Read<IntPtr>(EntityList + 0x8 * ((playerPawn & 0x7FFF) >> 9) + 16);
-        return listEntry2 == IntPtr.Zero
+        var listEntrySecond = gameProcess.Process.Read<IntPtr>(EntityList + 0x8 * ((playerPawn & 0x7FFF) >> 9) + 16);
+        return listEntrySecond == IntPtr.Zero
             ? IntPtr.Zero
-            : gameProcess.Process.Read<IntPtr>(listEntry2 + 120 * (playerPawn & 0x1FF));
+            : gameProcess.Process.Read<IntPtr>(listEntrySecond + 120 * (playerPawn & 0x1FF));
     }
 
     public override bool Update(GameProcess gameProcess)
@@ -68,11 +68,8 @@ public class Entity(int index) : EntityBase
     {
         var gameSceneNode = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pGameSceneNode);
         var boneArray = gameProcess.Process.Read<IntPtr>(gameSceneNode + Offsets.m_modelState + 128);
-        foreach (var data in Offsets.Bones)
+        foreach (var (name, index) in Offsets.Bones)
         {
-            var name = data.Key;
-            var index = data.Value;
-
             var boneAddress = boneArray + index * 32;
             var bonePos = gameProcess.Process.Read<Vector3>(boneAddress);
             BonePos[name] = bonePos;
