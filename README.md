@@ -17,6 +17,7 @@ It was created for the _purpose_ of _improving_ Windows API skills.
 - Trigger Bot on key (default = LAlt)
 - BunnyHop (Read [this](https://github.com/sweeperxz/FullyExternalCS2/blob/31f90c2fe4825ac86ba6862531dc633ab6d3aef0/Data/Player.cs#L60))
 - OBS bypass
+- Auto update offsets
 
 ### Getting started
 
