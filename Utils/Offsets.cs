@@ -73,7 +73,7 @@ public class Offsets
         dynamic destData = JsonConvert.DeserializeObject(destJson)!;
 
         if (destData != null && destData?.dwBuildNumber != 0 && destData?.dwBuildNumber != null &&
-            destData?.dwBuildNumber == sourceDataDw.dwBuildNumber)
+            sourceDataDw.engine2_dll?.data?.dwBuildNumber?.value! == destData?.dwBuildNumber)
         {
             dwLocalPlayerPawn = destData?.dwLocalPlayerPawn;
             m_vOldOrigin = destData?.m_vOldOrigin;
