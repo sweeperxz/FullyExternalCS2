@@ -74,8 +74,8 @@ public class Player : EntityBase
 
     private static Vector3 GetAimDirection(Vector3 viewAngles, Vector3 aimPunchAngle)
     {
-        var phi = (viewAngles.X + aimPunchAngle.X * Offsets.weapon_recoil_scale).DegreeToRadian();
-        var theta = (viewAngles.Y + aimPunchAngle.Y * Offsets.weapon_recoil_scale).DegreeToRadian();
+        var phi = (viewAngles.X + aimPunchAngle.X * Offsets.WeaponRecoilScale).DegreeToRadian();
+        var theta = (viewAngles.Y + aimPunchAngle.Y * Offsets.WeaponRecoilScale).DegreeToRadian();
 
         return Vector3.Normalize(new Vector3
         (
