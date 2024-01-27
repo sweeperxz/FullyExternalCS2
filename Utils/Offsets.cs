@@ -1,28 +1,34 @@
-﻿namespace CS2Cheat.Utils;
+﻿using System.Dynamic;
+using System.IO;
+using System.Net.Http;
+using Newtonsoft.Json;
 
-public static class Offsets
+namespace CS2Cheat.Utils;
+
+public class Offsets
 {
     #region offsets
 
+    private static readonly HttpClient HttpClient = new();
     public const float WeaponRecoilScale = 2.0f;
-    public static readonly int dwLocalPlayerPawn = 0x16D4F48;
-    public static readonly int m_vOldOrigin = 0x1224;
-    public static readonly int m_vecViewOffset = 0xC48;
-    public static readonly int m_AimPunchAngle = 0x171C;
-    public static readonly int m_modelState = 0x160;
-    public static readonly int m_pGameSceneNode = 0x310;
-    public static readonly int m_fFlags = 0x3C8;
-    public static readonly int m_iIDEntIndex = 0x1544;
-    public static readonly int m_lifeState = 0x330;
-    public static readonly int m_iHealth = 0x32C;
-    public static readonly int m_iTeamNum = 0x3BF;
-    public static readonly int dwEntityList = 0x17CE6A0;
-    public static readonly int m_bDormant = 0xE7;
-    public static readonly int m_iShotsFired = 0x1420;
-    public static readonly int m_hPawn = 0x60C;
-    public static readonly int dwLocalPlayerController = 0x181DC98;
-    public static readonly int dwViewMatrix = 0x182CEA0;
-    public static readonly int dwViewAngles = 0x1890F30;
+    public static int dwLocalPlayerPawn;
+    public static int m_vOldOrigin;
+    public static int m_vecViewOffset;
+    public static int m_AimPunchAngle;
+    public static int m_modelState;
+    public static int m_pGameSceneNode;
+    public static int m_fFlags;
+    public static int m_iIDEntIndex;
+    public static int m_lifeState;
+    public static int m_iHealth;
+    public static int m_iTeamNum;
+    public static int dwEntityList;
+    public static int m_bDormant;
+    public static int m_iShotsFired;
+    public static int m_hPawn;
+    public static int dwLocalPlayerController;
+    public static int dwViewMatrix;
+    public static int dwViewAngles;
     public static readonly int m_nBombSite = 0xE84;
     public static readonly int m_bBeingDefused = 0xEBC;
     public static readonly int m_bBombDefused = 0xED4;
@@ -49,6 +55,112 @@ public static class Offsets
         { "leg_lower_R", 26 },
         { "ankle_R", 27 }
     };
+
+
+    public void UpdateOffsets()
+    {
+        const string offsetsDw = "https://github.com/a2x/cs2-dumper/raw/main/generated/offsets.json";
+        const string offsetsClient = "https://github.com/a2x/cs2-dumper/raw/main/generated/client.dll.json";
+        const string destPath = "offsets.json";
+
+        if (!File.Exists(destPath)) File.Create(destPath).Dispose();
+
+        var sourceDataDw = FetchJsonAndDeserialize(offsetsDw);
+        var sourceDataClient = FetchJsonAndDeserialize(offsetsClient);
+
+
+        var destJson = File.ReadAllText(destPath);
+        dynamic destData = JsonConvert.DeserializeObject(destJson)!;
+
+        if (destData != null && destData?.dwBuildNumber != 0 && destData?.dwBuildNumber != null &&
+            destData?.dwBuildNumber == sourceDataDw.dwBuildNumber)
+        {
+            dwLocalPlayerPawn = destData?.dwLocalPlayerPawn;
+            m_vOldOrigin = destData?.m_vOldOrigin;
+            m_vecViewOffset = destData?.m_vecViewOffset;
+            m_AimPunchAngle = destData?.m_aimPunchAngle;
+            m_modelState = destData?.m_modelState;
+            m_pGameSceneNode = destData?.m_pGameSceneNode;
+            m_iIDEntIndex = destData?.m_iIDEntIndex;
+            m_lifeState = destData?.m_lifeState;
+            m_iHealth = destData?.m_iHealth;
+            m_iTeamNum = destData?.m_iTeamNum;
+            m_bDormant = destData?.m_bDormant;
+            m_iShotsFired = destData?.m_iShotsFired;
+            m_hPawn = destData?.m_hPawn;
+            m_fFlags = destData?.m_fFlags;
+            dwLocalPlayerController = destData?.dwLocalPlayerController;
+            dwViewMatrix = destData?.dwViewMatrix;
+            dwViewAngles = destData?.dwViewAngles;
+            dwEntityList = destData?.dwEntityList;
+            return;
+        }
+
+        if (destData == null) destData = new ExpandoObject();
+
+
+        // offsets
+        destData.dwBuildNumber = sourceDataDw.engine2_dll?.data?.dwBuildNumber?.value!;
+        destData.dwLocalPlayerController = sourceDataDw.client_dll?.data?.dwLocalPlayerController?.value!;
+        destData.dwEntityList = sourceDataDw.client_dll?.data?.dwEntityList?.value!;
+        destData.dwViewMatrix = sourceDataDw.client_dll?.data?.dwViewMatrix?.value!;
+        destData.dwPlantedC4 = sourceDataDw.client_dll?.data?.dwPlantedC4?.value!;
+        destData.dwLocalPlayerPawn = sourceDataDw.client_dll?.data?.dwLocalPlayerPawn?.value!;
+        destData.dwViewAngles = sourceDataDw.client_dll?.data?.dwViewAngles?.value!;
+
+        // client.dll
+        destData.m_fFlags = sourceDataClient.C_BaseEntity?.data?.m_fFlags?.value!;
+        destData.m_vOldOrigin = sourceDataClient.C_BasePlayerPawn?.data?.m_vOldOrigin?.value!;
+        destData.m_vecViewOffset = sourceDataClient.C_BaseModelEntity?.data?.m_vecViewOffset?.value!;
+        destData.m_aimPunchAngle = sourceDataClient.C_CSPlayerPawn?.data?.m_aimPunchAngle?.value!;
+        destData.m_modelState = sourceDataClient.CSkeletonInstance?.data?.m_modelState?.value!;
+        destData.m_pGameSceneNode = sourceDataClient.C_BaseEntity?.data?.m_pGameSceneNode?.value!;
+        destData.m_iIDEntIndex = sourceDataClient.C_CSPlayerPawnBase?.data?.m_iIDEntIndex?.value!;
+        destData.m_lifeState = sourceDataClient.C_BaseEntity?.data?.m_lifeState?.value!;
+        destData.m_iHealth = sourceDataClient.C_BaseEntity?.data?.m_iHealth?.value!;
+        destData.m_iTeamNum = sourceDataClient.C_BaseEntity?.data?.m_iTeamNum?.value!;
+        destData.m_bDormant = sourceDataClient.CGameSceneNode?.data?.m_bDormant?.value!;
+        destData.m_iShotsFired = sourceDataClient.C_CSPlayerPawnBase?.data?.m_iShotsFired?.value!;
+        destData.m_hPawn = sourceDataClient.CBasePlayerController?.data?.m_hPawn?.value!;
+
+
+        // Write updated destination JSON
+        string updatedDestJson = JsonConvert.SerializeObject(destData, Formatting.Indented);
+        File.WriteAllText(destPath, updatedDestJson);
+
+        Console.WriteLine("Offsets updated in the local file.");
+
+
+        var jsonContent = File.ReadAllText(destPath);
+
+        dynamic updatedDestData = JsonConvert.DeserializeObject(jsonContent)!;
+
+
+        dwLocalPlayerPawn = updatedDestData?.dwLocalPlayerPawn;
+        m_vOldOrigin = updatedDestData?.m_vOldOrigin;
+        m_vecViewOffset = updatedDestData?.m_vecViewOffset;
+        m_AimPunchAngle = updatedDestData?.m_aimPunchAngle;
+        m_modelState = updatedDestData?.m_modelState;
+        m_pGameSceneNode = updatedDestData?.m_pGameSceneNode;
+        m_iIDEntIndex = updatedDestData?.m_iIDEntIndex;
+        m_lifeState = updatedDestData?.m_lifeState;
+        m_iHealth = updatedDestData?.m_iHealth;
+        m_iTeamNum = updatedDestData?.m_iTeamNum;
+        m_bDormant = updatedDestData?.m_bDormant;
+        m_iShotsFired = updatedDestData?.m_iShotsFired;
+        m_hPawn = updatedDestData?.m_hPawn;
+        m_fFlags = updatedDestData?.m_fFlags;
+        dwLocalPlayerController = updatedDestData?.dwLocalPlayerController;
+        dwViewMatrix = updatedDestData?.dwViewMatrix;
+        dwViewAngles = updatedDestData?.dwViewAngles;
+        dwEntityList = updatedDestData?.dwEntityList;
+    }
+
+    private static dynamic FetchJsonAndDeserialize(string url)
+    {
+        var sourceJson = HttpClient.GetStringAsync(url).Result;
+        return JsonConvert.DeserializeObject(sourceJson)!;
+    }
 
     #endregion
 }

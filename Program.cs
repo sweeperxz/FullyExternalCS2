@@ -1,6 +1,7 @@
 using CS2Cheat.Data.Game;
 using CS2Cheat.Features;
 using CS2Cheat.Graphics;
+using CS2Cheat.Utils;
 using static CS2Cheat.Core.User32;
 using Application = System.Windows.Application;
 
@@ -36,10 +37,13 @@ public class Program :
 
     private AimBot AimBot { get; set; }
 
+    private Offsets Offsets => new();
 
     /// <summary />
     private Program()
     {
+        
+        Offsets.UpdateOffsets();
         Startup += (_, _) => InitializeComponent();
         Exit += (_, _) => Dispose();
     }
@@ -65,7 +69,7 @@ public class Program :
 
         AimBot = new AimBot(GameProcess, GameData);
         AimBot.Start();
-
+        
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
     }
 
