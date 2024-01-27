@@ -42,7 +42,6 @@ public class Program :
     /// <summary />
     private Program()
     {
-        
         Offsets.UpdateOffsets();
         Startup += (_, _) => InitializeComponent();
         Exit += (_, _) => Dispose();
@@ -69,7 +68,7 @@ public class Program :
 
         AimBot = new AimBot(GameProcess, GameData);
         AimBot.Start();
-        
+
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
     }
 

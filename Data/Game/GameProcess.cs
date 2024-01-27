@@ -82,9 +82,7 @@ public class GameProcess : ThreadedServiceBase
         if (Process is null || !Process.IsRunning()) return false;
 
         if (ModuleClient is null) ModuleClient = Process.GetModule(NAME_MODULE);
-        if (ModuleClient is null) return false;
-
-        return true;
+        return ModuleClient is not null;
     }
 
     private bool EnsureWindow()

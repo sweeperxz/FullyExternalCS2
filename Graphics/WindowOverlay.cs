@@ -52,7 +52,7 @@ public class WindowOverlay : ThreadedServiceBase
 
     protected override void FrameAction()
     {
-        FpsCounter.Update();
+        FpsCounter?.Update();
         Update(GameProcess.WindowRectangleClient);
     }
 

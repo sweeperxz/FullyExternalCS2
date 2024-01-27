@@ -14,7 +14,7 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
 
     private GameData GameData { get; set; } = gameData;
 
-    private InputSimulator InputSimulator { get; set; } = new();
+    private InputSimulator InputSimulator { get; } = new();
 
 
     public override void Dispose()
@@ -28,18 +28,18 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
 
     protected override void FrameAction()
     {
-        var entityId = gameProcess.Process.Read<int>(gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn) +
+        var entityId = GameProcess.Process.Read<int>(GameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn) +
                                                      Offsets.m_iIDEntIndex);
         if (!GameProcess.IsValid || !InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.LMENU)) return;
 
         if (entityId < 0) return;
 
-        var entityEntry = gameProcess.Process.Read<IntPtr>(gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList) +
+        var entityEntry = GameProcess.Process.Read<IntPtr>(GameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList) +
                                                            0x8 * (entityId >> 9) + 0x10);
-        var entity = gameProcess.Process.Read<IntPtr>(entityEntry + 120 * (entityId & 0x1FF));
-        var entityTeam = gameProcess.Process.Read<int>(entity + Offsets.m_iTeamNum);
+        var entity = GameProcess.Process.Read<IntPtr>(entityEntry + 120 * (entityId & 0x1FF));
+        var entityTeam = GameProcess.Process.Read<int>(entity + Offsets.m_iTeamNum);
 
-        if (gameData.Player.Team == entityTeam.ToTeam()) return;
+        if (GameData.Player.Team == entityTeam.ToTeam()) return;
         Thread.Sleep(5);
         InputSimulator.Mouse.LeftButtonClick();
     }

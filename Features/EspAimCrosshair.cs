@@ -19,7 +19,7 @@ public static class EspAimCrosshair
         var fovX = fovY * aspectRatio;
 
         var doPunch = player.ShotsFired > 0;
-        var recoilScale = Offsets.WeaponRecoilScale;
+        const float recoilScale = Offsets.WeaponRecoilScale;
 
         var punchX = doPunch ? ((double)player.AimPunchAngle.X * recoilScale).DegreeToRadian() : 0;
         var punchY = doPunch ? ((double)player.AimPunchAngle.Y * recoilScale).DegreeToRadian() : 0;

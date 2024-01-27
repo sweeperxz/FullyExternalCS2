@@ -11,7 +11,7 @@ public class GameData : ThreadedServiceBase
 
     private GameProcess GameProcess { get; set; }
 
-    public Player Player { get; set; }
+    public Player Player { get; private set; }
 
     public Entity.Entity[] Entities { get; private set; }
 

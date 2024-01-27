@@ -11,16 +11,16 @@ namespace CS2Cheat.Utils;
 
 public static class Utility
 {
-    private const double _PI_Over_180 = Math.PI / 180.0;
+    private const double PiOver180 = Math.PI / 180.0;
 
     public static double DegreeToRadian(this double degree)
     {
-        return degree * _PI_Over_180;
+        return degree * PiOver180;
     }
 
     public static float DegreeToRadian(this float degree)
     {
-        return (float)(degree * _PI_Over_180);
+        return (float)(degree * PiOver180);
     }
 
 
@@ -41,7 +41,7 @@ public static class Utility
     }
 
 
-    public static ProcessModule GetProcessModule(this global::System.Diagnostics.Process process,
+    private static ProcessModule GetProcessModule(this global::System.Diagnostics.Process process,
         string moduleName)
     {
         return process?.Modules.OfType<ProcessModule>()
@@ -70,6 +70,7 @@ public static class Utility
 
     #region memory
 
+    [Obsolete("Obsolete")]
     public static T Read<T>(this global::System.Diagnostics.Process process, IntPtr lpBaseAddress)
         where T : unmanaged
     {
@@ -77,6 +78,7 @@ public static class Utility
     }
 
 
+    [Obsolete("Obsolete")]
     public static T Read<T>(this Module module, int offset)
         where T : unmanaged
     {
@@ -84,7 +86,8 @@ public static class Utility
     }
 
 
-    public static T Read<T>(IntPtr hProcess, IntPtr lpBaseAddress)
+    [Obsolete("Obsolete")]
+    private static T Read<T>(IntPtr hProcess, IntPtr lpBaseAddress)
         where T : unmanaged
     {
         var size = Marshal.SizeOf<T>();

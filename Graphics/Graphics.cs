@@ -32,9 +32,9 @@ public class Graphics : ThreadedServiceBase
     public GameProcess GameProcess { get; private set; }
     public GameData GameData { get; private set; }
     private Device Device { get; set; }
-    public Font FontAzonix64 { get; set; }
+    private Font FontAzonix64 { get; set; }
     public Font FontConsolas32 { get; set; }
-    private List<Vertex> Vertices { get; } = new();
+    private List<Vertex> Vertices { get; } = [];
 
     private static readonly VertexElement[] VertexElements =
     {
