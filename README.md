@@ -26,6 +26,7 @@ It was created for the _purpose_ of _improving_ Windows API skills.
     <ItemGroup>
         <PackageReference Include="GameOverlay.Net" Version="4.3.1"/>
         <PackageReference Include="InputSimulator" Version="1.0.4"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
         <PackageReference Include="Overlay.NET" Version="1.0.2"/>
         <PackageReference Include="PresentationFramework" Version="4.6.0"/>
         <PackageReference Include="SharpDX.Direct3D9" Version="4.2.0"/>
