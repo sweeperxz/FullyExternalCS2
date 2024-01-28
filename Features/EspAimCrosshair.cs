@@ -10,24 +10,22 @@ public static class EspAimCrosshair
 {
     private static Vector3 _pointClip = Vector3.Zero;
 
-    public static Vector3 GetPositionScreen(GameProcess gameProcess, GameData gameData)
+    private static Vector3 GetPositionScreen(GameProcess gameProcess, GameData gameData)
     {
         var screenSize = gameProcess.WindowRectangleClient.Size;
         var aspectRatio = (double)screenSize.Width / screenSize.Height;
         var player = gameData.Player;
-        var fovY = 90.0.DegreeToRadian();
+        var fovY = ((double)Data.Entity.Player.Fov).DegreeToRadian();
         var fovX = fovY * aspectRatio;
-
         var doPunch = player.ShotsFired > 0;
-        const float recoilScale = Offsets.WeaponRecoilScale;
-
-        var punchX = doPunch ? ((double)player.AimPunchAngle.X * recoilScale).DegreeToRadian() : 0;
-        var punchY = doPunch ? ((double)player.AimPunchAngle.Y * recoilScale).DegreeToRadian() : 0;
-
-        _pointClip.X = (float)(-punchY / fovX);
-        _pointClip.Y = (float)(-punchX / fovY);
-        _pointClip.Z = 0;
-
+        var punchX = doPunch ? ((double)player.AimPunchAngle.X * Offsets.WeaponRecoilScale).DegreeToRadian() : 0;
+        var punchY = doPunch ? ((double)player.AimPunchAngle.Y * Offsets.WeaponRecoilScale).DegreeToRadian() : 0;
+        _pointClip = new Vector3
+        (
+            (float)(-punchY / fovX),
+            (float)(-punchX / fovY),
+            0
+        );
         return player.MatrixViewport.Transform(_pointClip);
     }
 

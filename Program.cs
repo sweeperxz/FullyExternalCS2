@@ -37,7 +37,7 @@ public class Program :
 
     private AimBot AimBot { get; set; }
 
-    private Offsets Offsets => new();
+    private static Offsets Offsets => new();
 
     /// <summary />
     private Program()

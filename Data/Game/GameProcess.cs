@@ -31,7 +31,7 @@ public class GameProcess : ThreadedServiceBase
 
     private bool WindowActive { get; set; }
 
-    public bool IsValid => WindowActive && !(Process is null) && !(ModuleClient is null);
+    public bool IsValid => WindowActive;
 
     #endregion
 
@@ -47,13 +47,17 @@ public class GameProcess : ThreadedServiceBase
 
     protected override async void FrameAction()
     {
-        if (!EnsureProcessAndModules()) InvalidateModules();
+        if (!EnsureProcessAndModules())
+        {
+            Console.WriteLine("[+] Process or Module is not detected");
+            InvalidateModules();
+        }
 
-        if (!EnsureWindow()) InvalidateWindow();
-
-        Console.WriteLine(IsValid
-            ? $"0x{(int)Process.Handle:X8} {WindowRectangleClient.X} {WindowRectangleClient.Y} {WindowRectangleClient.Width} {WindowRectangleClient.Height}"
-            : "Game process invalid");
+        if (!EnsureWindow())
+        {
+            Console.WriteLine("[+] The game is not Foreground");
+            InvalidateWindow();
+        }
 
         await Task.Delay(ThreadFrameSleep);
     }
@@ -77,17 +81,15 @@ public class GameProcess : ThreadedServiceBase
 
     private bool EnsureProcessAndModules()
     {
-        if (Process is null)
-            Process = System.Diagnostics.Process.GetProcessesByName(NAME_PROCESS).FirstOrDefault();
+        Process ??= System.Diagnostics.Process.GetProcessesByName(NAME_PROCESS).FirstOrDefault();
         if (Process is null || !Process.IsRunning()) return false;
-
-        if (ModuleClient is null) ModuleClient = Process.GetModule(NAME_MODULE);
-        return ModuleClient is not null;
+        ModuleClient ??= Process.GetModule(NAME_MODULE);
+        return true;
     }
 
     private bool EnsureWindow()
     {
-        WindowHwnd = User32.FindWindow(null, NAME_WINDOW);
+        WindowHwnd = User32.FindWindow(null!, NAME_WINDOW);
         if (WindowHwnd == IntPtr.Zero) return false;
 
         WindowRectangleClient = Utility.GetClientRectangle(WindowHwnd);

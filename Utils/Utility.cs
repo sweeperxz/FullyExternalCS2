@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using CS2Cheat.Core;
 using CS2Cheat.Core.Data;
+using Process.NET.Native.Types;
 using SharpDX;
 using static System.Diagnostics.Process;
 using Rectangle = System.Drawing.Rectangle;
@@ -32,7 +33,7 @@ public static class Utility
     }
 
 
-    public static Module GetModule(this global::System.Diagnostics.Process process, string moduleName)
+    public static Module GetModule(this System.Diagnostics.Process process, string moduleName)
     {
         var processModule = process.GetProcessModule(moduleName);
         return processModule is null || processModule.BaseAddress == IntPtr.Zero
@@ -41,7 +42,7 @@ public static class Utility
     }
 
 
-    private static ProcessModule GetProcessModule(this global::System.Diagnostics.Process process,
+    private static ProcessModule GetProcessModule(this System.Diagnostics.Process process,
         string moduleName)
     {
         return process?.Modules.OfType<ProcessModule>()
@@ -49,7 +50,7 @@ public static class Utility
     }
 
 
-    public static bool IsRunning(this global::System.Diagnostics.Process process)
+    public static bool IsRunning(this System.Diagnostics.Process process)
     {
         try
         {
@@ -70,15 +71,13 @@ public static class Utility
 
     #region memory
 
-    [Obsolete("Obsolete")]
-    public static T Read<T>(this global::System.Diagnostics.Process process, IntPtr lpBaseAddress)
+    public static T Read<T>(this System.Diagnostics.Process process, IntPtr lpBaseAddress)
         where T : unmanaged
     {
         return Read<T>(process.Handle, lpBaseAddress);
     }
 
 
-    [Obsolete("Obsolete")]
     public static T Read<T>(this Module module, int offset)
         where T : unmanaged
     {
@@ -86,12 +85,11 @@ public static class Utility
     }
 
 
-    [Obsolete("Obsolete")]
     private static T Read<T>(IntPtr hProcess, IntPtr lpBaseAddress)
         where T : unmanaged
     {
         var size = Marshal.SizeOf<T>();
-        var buffer = (object)default(T);
+        var buffer = default(T) as object;
         Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, buffer, size, out var lpNumberOfBytesRead);
         return lpNumberOfBytesRead == size ? (T)buffer : default;
     }
@@ -147,5 +145,143 @@ public static class Utility
             3 => Team.CounterTerrorists,
             _ => Team.Unknown
         };
+    }
+
+    public static bool IsKeyDown(this WindowsVirtualKey key)
+    {
+        return (User32.GetAsyncKeyState((int)key) & 0x8000) != 0;
+    }
+
+    [Flags]
+    public enum MouseFlags : uint
+    {
+        Move = 0x0001,
+
+
+        LeftDown = 0x0002,
+
+
+        LeftUp = 0x0004,
+
+
+        RightDown = 0x0008,
+
+
+        RightUp = 0x0010,
+
+        MiddleDown = 0x0020,
+
+
+        MiddleUp = 0x0040,
+
+
+        XDown = 0x0080,
+
+
+        XUp = 0x0100,
+
+
+        VerticalWheel = 0x0800,
+
+
+        HorizontalWheel = 0x1000,
+
+
+        VirtualDesk = 0x4000,
+
+
+        Absolute = 0x8000
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KEYBDINPUT
+    {
+        public ushort virtualKey;
+        public ushort scanCode;
+        public KeyboardFlags flags;
+        public uint timeStamp;
+        public IntPtr extraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MOUSEINPUT
+    {
+        public int deltaX;
+        public int deltaY;
+        public int mouseData;
+        public MouseFlags flags;
+        public uint time;
+        public IntPtr extraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct HARDWAREINPUT
+    {
+        public uint message;
+        public ushort wParamL;
+        public ushort wParamH;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct InputUnion
+    {
+        [FieldOffset(0)] public MOUSEINPUT mouse;
+        [FieldOffset(0)] public KEYBDINPUT keyboard;
+        [FieldOffset(0)] public HARDWAREINPUT hardware;
+    }
+
+    public enum InputType
+    {
+        Mouse = 0,
+        Keyboard = 1,
+        Hardware = 2
+    }
+
+    public struct INPUT
+    {
+        public InputType type;
+        public InputUnion union;
+    }
+
+
+    public static void MouseMove(int x, int y)
+    {
+        var inputs = new INPUT[1];
+
+        inputs[0] = new INPUT
+        {
+            type = InputType.Mouse,
+            union = new InputUnion
+            {
+                mouse = new MOUSEINPUT
+                {
+                    deltaX = x,
+                    deltaY = y,
+                    flags = MouseFlags.Move
+                }
+            }
+        };
+
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+    }
+
+
+    public static void MouseLeftDown()
+    {
+        var inputs = new INPUT[1];
+
+        inputs[0] = new INPUT
+        {
+            type = InputType.Mouse,
+            union = new InputUnion
+            {
+                mouse = new MOUSEINPUT
+                {
+                    flags = MouseFlags.LeftDown
+                }
+            }
+        };
+
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
     }
 }

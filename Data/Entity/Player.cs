@@ -1,4 +1,5 @@
 ﻿using CS2Cheat.Data.Game;
+using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
 using SharpDX;
 using WindowsInput;
@@ -17,6 +18,10 @@ public class Player : EntityBase
     public Vector3 AimPunchAngle { get; private set; }
     public Vector3 AimDirection { get; private set; }
     public int TargetedEntityIndex { get; private set; }
+
+    public Vector3 EyeDirection { get; private set; }
+
+    public static int Fov => 90;
 
     private int FFlags { get; set; }
 
@@ -49,9 +54,14 @@ public class Player : EntityBase
         TargetedEntityIndex = gameProcess.Process.Read<int>(AddressBase + Offsets.m_iIDEntIndex);
         FFlags = gameProcess.Process.Read<int>(AddressBase + Offsets.m_fFlags);
 
-        AimDirection = GetAimDirection(ViewAngles, AimPunchAngle);
 
-
+        EyeDirection =
+            GraphicsMath.GetVectorFromEulerAngles(ViewAngles.X.DegreeToRadian(), ViewAngles.Y.DegreeToRadian());
+        AimDirection = AimDirection = GraphicsMath.GetVectorFromEulerAngles
+        (
+            (ViewAngles.X + AimPunchAngle.X * Offsets.WeaponRecoilScale).DegreeToRadian(),
+            (ViewAngles.Y + AimPunchAngle.Y * Offsets.WeaponRecoilScale).DegreeToRadian()
+        );
         /*
         for bunnyhop to work correctly you need to write this
         alias j "+jump;-jump";
@@ -70,18 +80,5 @@ public class Player : EntityBase
 
 
         return true;
-    }
-
-    private static Vector3 GetAimDirection(Vector3 viewAngles, Vector3 aimPunchAngle)
-    {
-        var phi = (viewAngles.X + aimPunchAngle.X * Offsets.WeaponRecoilScale).DegreeToRadian();
-        var theta = (viewAngles.Y + aimPunchAngle.Y * Offsets.WeaponRecoilScale).DegreeToRadian();
-
-        return Vector3.Normalize(new Vector3
-        (
-            (float)(Math.Cos(phi) * Math.Cos(theta)),
-            (float)(Math.Cos(phi) * Math.Sin(theta)),
-            (float)-Math.Sin(phi)
-        ));
     }
 }

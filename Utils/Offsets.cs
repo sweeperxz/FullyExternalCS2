@@ -10,7 +10,7 @@ public class Offsets
     #region offsets
 
     private static readonly HttpClient HttpClient = new();
-    public const float WeaponRecoilScale = 2.0f;
+    public const float WeaponRecoilScale = 2f;
     public static int dwLocalPlayerPawn;
     public static int m_vOldOrigin;
     public static int m_vecViewOffset;

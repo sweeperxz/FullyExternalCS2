@@ -1,5 +1,5 @@
+using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Entity;
-using CS2Cheat.Graphics;
 using Color = SharpDX.Color;
 
 namespace CS2Cheat.Features;
@@ -11,7 +11,8 @@ public static class SkeletonEsp
         foreach (var entity in graphics.GameData.Entities)
         {
             if (!entity.IsAlive() || entity.AddressBase == graphics.GameData.Player.AddressBase) continue;
-            DrawBones(graphics, entity, Color.Red);
+            var color = entity.Team == Team.Terrorists ? Color.Yellow : Color.Blue;
+            DrawBones(graphics, entity, color);
         }
     }
 
