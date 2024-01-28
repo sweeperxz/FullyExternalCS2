@@ -3,7 +3,7 @@ using System.ComponentModel;
 namespace CS2Cheat.Utils;
 
 /// <summary>
-/// https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+///     https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 /// </summary>
 public enum WindowsVirtualKey
 {

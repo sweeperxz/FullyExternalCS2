@@ -8,28 +8,30 @@ using Application = System.Windows.Application;
 namespace CS2Cheat;
 
 /// <summary>
-/// Main program class for the CS2Cheat application.
+///     Main program class for the CS2Cheat application.
 /// </summary>
 public class Program :
     Application,
     IDisposable
 {
     /// <summary />
-    public static void Main()
+    private Program()
     {
-        new Program().Run();
+        Offsets.UpdateOffsets();
+        Startup += (_, _) => InitializeComponent();
+        Exit += (_, _) => Dispose();
     }
 
-    /// <inheritdoc cref="GameProcess"/>
+    /// <inheritdoc cref="GameProcess" />
     private GameProcess GameProcess { get; set; }
 
-    /// <inheritdoc cref="GameData"/>
+    /// <inheritdoc cref="GameData" />
     private GameData GameData { get; set; }
 
-    /// <inheritdoc cref="WindowOverlay"/>
+    /// <inheritdoc cref="WindowOverlay" />
     private WindowOverlay WindowOverlay { get; set; }
 
-    /// <inheritdoc cref="Graphics"/>
+    /// <inheritdoc cref="Graphics" />
 
     private Graphics.Graphics Graphics { get; set; }
 
@@ -39,12 +41,32 @@ public class Program :
 
     private static Offsets Offsets => new();
 
-    /// <summary />
-    private Program()
+    /// <inheritdoc />
+    public void Dispose()
     {
-        Offsets.UpdateOffsets();
-        Startup += (_, _) => InitializeComponent();
-        Exit += (_, _) => Dispose();
+        GameProcess.Dispose();
+        GameProcess = default;
+
+        GameData.Dispose();
+        GameData = default;
+
+        WindowOverlay.Dispose();
+        WindowOverlay = default;
+
+        Graphics.Dispose();
+        Graphics = default;
+
+        Trigger.Dispose();
+        Trigger = default;
+
+        AimBot.Dispose();
+        AimBot = default;
+    }
+
+    /// <summary />
+    public static void Main()
+    {
+        new Program().Run();
     }
 
 
@@ -70,27 +92,5 @@ public class Program :
         AimBot.Start();
 
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        GameProcess.Dispose();
-        GameProcess = default;
-
-        GameData.Dispose();
-        GameData = default;
-
-        WindowOverlay.Dispose();
-        WindowOverlay = default;
-
-        Graphics.Dispose();
-        Graphics = default;
-
-        Trigger.Dispose();
-        Trigger = default;
-
-        AimBot.Dispose();
-        AimBot = default;
     }
 }

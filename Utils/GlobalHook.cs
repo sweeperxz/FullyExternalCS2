@@ -7,19 +7,18 @@ namespace CS2Cheat.Utils;
 public class GlobalHook :
     IDisposable
 {
-    private HookType HookType { get; }
-
-    private HookProc HookProc { get; set; }
-
-    public IntPtr HookHandle { get; private set; }
-
-
     public GlobalHook(HookType hookType, HookProc hookProc)
     {
         HookType = hookType;
         HookProc = hookProc;
         HookHandle = Hook(HookType, HookProc);
     }
+
+    private HookType HookType { get; }
+
+    private HookProc HookProc { get; set; }
+
+    public IntPtr HookHandle { get; private set; }
 
     public void Dispose()
     {

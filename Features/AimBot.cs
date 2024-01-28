@@ -1,5 +1,6 @@
 using CS2Cheat.Core;
 using CS2Cheat.Core.Data;
+using CS2Cheat.Data.Entity;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
@@ -12,21 +13,30 @@ namespace CS2Cheat.Features;
 
 public class AimBot : ThreadedServiceBase
 {
-    private double AnglePerPixel { get; set; } = 0.00069;
-    private bool IsCalibrated { get; set; }
-
     /// <summary>
-    ///  FOV aimbot, the higher the value, the higher the radius of enemy detection.
-    /// </summary>
-    private static readonly float AimBotFov = 30f.DegreeToRadian();
-
-    /// <summary>
-    /// Smooth for aimbot, the higher the value the smoother it is
+    ///     Smooth for aimbot, the higher the value the smoother it is
     /// </summary>
     private const float AimBotSmoothing = 1f;
 
     /// <summary>
-    ///  A bone to aim for
+    ///     FOV aimbot, the higher the value, the higher the radius of enemy detection.
+    /// </summary>
+    private static readonly float AimBotFov = 30f.DegreeToRadian();
+
+    private readonly object _stateLock = new();
+
+    public AimBot(GameProcess gameProcess, GameData gameData)
+    {
+        GameProcess = gameProcess;
+        GameData = gameData;
+        MouseHook = new GlobalHook(HookType.WH_MOUSE_LL, MouseHookCallback);
+    }
+
+    private double AnglePerPixel { get; set; } = 0.00069;
+    private bool IsCalibrated { get; set; }
+
+    /// <summary>
+    ///     A bone to aim for
     /// </summary>
     private static string AimBonePos => "head";
 
@@ -35,16 +45,7 @@ public class AimBot : ThreadedServiceBase
     private GameProcess GameProcess { get; set; }
     private GameData GameData { get; set; }
     private GlobalHook MouseHook { get; set; }
-
-    private readonly object _stateLock = new();
     private AimBotState State { get; set; }
-
-    public AimBot(GameProcess gameProcess, GameData gameData)
-    {
-        GameProcess = gameProcess;
-        GameData = gameData;
-        MouseHook = new GlobalHook(HookType.WH_MOUSE_LL, MouseHookCallback);
-    }
 
     public override void Dispose()
     {
@@ -165,7 +166,7 @@ public class AimBot : ThreadedServiceBase
 
     private void GetAimPixels(Vector2 aimAngles, out Point aimPixels)
     {
-        var fovRatio = 90.0 / Data.Entity.Player.Fov;
+        var fovRatio = 90.0 / Player.Fov;
         aimPixels = new Point(
             (int)Math.Round(aimAngles.X / AnglePerPixel * fovRatio),
             (int)Math.Round(aimAngles.Y / AnglePerPixel * fovRatio)
@@ -209,7 +210,7 @@ public class AimBot : ThreadedServiceBase
             CalibrationMeasureAnglePerPixel(-400),
             CalibrationMeasureAnglePerPixel(200)
         }.Average();
-        Console.WriteLine($"[+] Mouse calibrate successful!");
+        Console.WriteLine("[+] Mouse calibrate successful!");
     }
 
     private double CalibrationMeasureAnglePerPixel(int deltaPixels)

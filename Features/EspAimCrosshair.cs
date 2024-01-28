@@ -1,8 +1,9 @@
+using CS2Cheat.Data.Entity;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
 using SharpDX;
-
+using Color = SharpDX.Color;
 
 namespace CS2Cheat.Features;
 
@@ -15,7 +16,7 @@ public static class EspAimCrosshair
         var screenSize = gameProcess.WindowRectangleClient.Size;
         var aspectRatio = (double)screenSize.Width / screenSize.Height;
         var player = gameData.Player;
-        var fovY = ((double)Data.Entity.Player.Fov).DegreeToRadian();
+        var fovY = ((double)Player.Fov).DegreeToRadian();
         var fovX = fovY * aspectRatio;
         var doPunch = player.ShotsFired > 0;
         var punchX = doPunch ? ((double)player.AimPunchAngle.X * Offsets.WeaponRecoilScale).DegreeToRadian() : 0;
@@ -43,9 +44,9 @@ public static class EspAimCrosshair
 
     private static void DrawCrosshair(Graphics.Graphics graphics, Vector2 pointScreen, int radius)
     {
-        graphics.DrawLine(SharpDX.Color.Green, pointScreen - new Vector2(radius, 0),
+        graphics.DrawLine(Color.Green, pointScreen - new Vector2(radius, 0),
             pointScreen + new Vector2(radius, 0));
-        graphics.DrawLine(SharpDX.Color.Green, pointScreen - new Vector2(0, radius),
+        graphics.DrawLine(Color.Green, pointScreen - new Vector2(0, radius),
             pointScreen + new Vector2(0, radius));
     }
 }

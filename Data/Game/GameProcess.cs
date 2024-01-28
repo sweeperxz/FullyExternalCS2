@@ -21,7 +21,7 @@ public class GameProcess : ThreadedServiceBase
 
     protected override TimeSpan ThreadFrameSleep { get; set; } = new(0, 0, 0, 0, 500);
 
-    public global::System.Diagnostics.Process Process { get; private set; }
+    public System.Diagnostics.Process Process { get; private set; }
 
     public Module ModuleClient { get; private set; }
 

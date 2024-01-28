@@ -12,6 +12,54 @@ namespace CS2Cheat.Utils;
 
 public static class Utility
 {
+    public enum InputType
+    {
+        Mouse = 0,
+        Keyboard = 1,
+        Hardware = 2
+    }
+
+    [Flags]
+    public enum MouseFlags : uint
+    {
+        Move = 0x0001,
+
+
+        LeftDown = 0x0002,
+
+
+        LeftUp = 0x0004,
+
+
+        RightDown = 0x0008,
+
+
+        RightUp = 0x0010,
+
+        MiddleDown = 0x0020,
+
+
+        MiddleUp = 0x0040,
+
+
+        XDown = 0x0080,
+
+
+        XUp = 0x0100,
+
+
+        VerticalWheel = 0x0800,
+
+
+        HorizontalWheel = 0x1000,
+
+
+        VirtualDesk = 0x4000,
+
+
+        Absolute = 0x8000
+    }
+
     private const double PiOver180 = Math.PI / 180.0;
 
     public static double DegreeToRadian(this double degree)
@@ -66,6 +114,107 @@ public static class Utility
         }
 
         return true;
+    }
+
+    public static Team ToTeam(this int teamNum)
+    {
+        return teamNum switch
+        {
+            1 => Team.Spectator,
+            2 => Team.Terrorists,
+            3 => Team.CounterTerrorists,
+            _ => Team.Unknown
+        };
+    }
+
+    public static bool IsKeyDown(this WindowsVirtualKey key)
+    {
+        return (User32.GetAsyncKeyState((int)key) & 0x8000) != 0;
+    }
+
+
+    public static void MouseMove(int x, int y)
+    {
+        var inputs = new INPUT[1];
+
+        inputs[0] = new INPUT
+        {
+            type = InputType.Mouse,
+            union = new InputUnion
+            {
+                mouse = new MOUSEINPUT
+                {
+                    deltaX = x,
+                    deltaY = y,
+                    flags = MouseFlags.Move
+                }
+            }
+        };
+
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+    }
+
+
+    public static void MouseLeftDown()
+    {
+        var inputs = new INPUT[1];
+
+        inputs[0] = new INPUT
+        {
+            type = InputType.Mouse,
+            union = new InputUnion
+            {
+                mouse = new MOUSEINPUT
+                {
+                    flags = MouseFlags.LeftDown
+                }
+            }
+        };
+
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KEYBDINPUT
+    {
+        public ushort virtualKey;
+        public ushort scanCode;
+        public KeyboardFlags flags;
+        public uint timeStamp;
+        public IntPtr extraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MOUSEINPUT
+    {
+        public int deltaX;
+        public int deltaY;
+        public int mouseData;
+        public MouseFlags flags;
+        public uint time;
+        public IntPtr extraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct HARDWAREINPUT
+    {
+        public uint message;
+        public ushort wParamL;
+        public ushort wParamH;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct InputUnion
+    {
+        [FieldOffset(0)] public MOUSEINPUT mouse;
+        [FieldOffset(0)] public KEYBDINPUT keyboard;
+        [FieldOffset(0)] public HARDWAREINPUT hardware;
+    }
+
+    public struct INPUT
+    {
+        public InputType type;
+        public InputUnion union;
     }
 
 
@@ -135,153 +284,4 @@ public static class Utility
     }
 
     #endregion
-
-    public static Team ToTeam(this int teamNum)
-    {
-        return teamNum switch
-        {
-            1 => Team.Spectator,
-            2 => Team.Terrorists,
-            3 => Team.CounterTerrorists,
-            _ => Team.Unknown
-        };
-    }
-
-    public static bool IsKeyDown(this WindowsVirtualKey key)
-    {
-        return (User32.GetAsyncKeyState((int)key) & 0x8000) != 0;
-    }
-
-    [Flags]
-    public enum MouseFlags : uint
-    {
-        Move = 0x0001,
-
-
-        LeftDown = 0x0002,
-
-
-        LeftUp = 0x0004,
-
-
-        RightDown = 0x0008,
-
-
-        RightUp = 0x0010,
-
-        MiddleDown = 0x0020,
-
-
-        MiddleUp = 0x0040,
-
-
-        XDown = 0x0080,
-
-
-        XUp = 0x0100,
-
-
-        VerticalWheel = 0x0800,
-
-
-        HorizontalWheel = 0x1000,
-
-
-        VirtualDesk = 0x4000,
-
-
-        Absolute = 0x8000
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct KEYBDINPUT
-    {
-        public ushort virtualKey;
-        public ushort scanCode;
-        public KeyboardFlags flags;
-        public uint timeStamp;
-        public IntPtr extraInfo;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MOUSEINPUT
-    {
-        public int deltaX;
-        public int deltaY;
-        public int mouseData;
-        public MouseFlags flags;
-        public uint time;
-        public IntPtr extraInfo;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct HARDWAREINPUT
-    {
-        public uint message;
-        public ushort wParamL;
-        public ushort wParamH;
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    public struct InputUnion
-    {
-        [FieldOffset(0)] public MOUSEINPUT mouse;
-        [FieldOffset(0)] public KEYBDINPUT keyboard;
-        [FieldOffset(0)] public HARDWAREINPUT hardware;
-    }
-
-    public enum InputType
-    {
-        Mouse = 0,
-        Keyboard = 1,
-        Hardware = 2
-    }
-
-    public struct INPUT
-    {
-        public InputType type;
-        public InputUnion union;
-    }
-
-
-    public static void MouseMove(int x, int y)
-    {
-        var inputs = new INPUT[1];
-
-        inputs[0] = new INPUT
-        {
-            type = InputType.Mouse,
-            union = new InputUnion
-            {
-                mouse = new MOUSEINPUT
-                {
-                    deltaX = x,
-                    deltaY = y,
-                    flags = MouseFlags.Move
-                }
-            }
-        };
-
-        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
-    }
-
-
-    public static void MouseLeftDown()
-    {
-        var inputs = new INPUT[1];
-
-        inputs[0] = new INPUT
-        {
-            type = InputType.Mouse,
-            union = new InputUnion
-            {
-                mouse = new MOUSEINPUT
-                {
-                    flags = MouseFlags.LeftDown
-                }
-            }
-        };
-
-        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
-    }
 }

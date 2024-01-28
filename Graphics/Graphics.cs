@@ -14,7 +14,12 @@ namespace CS2Cheat.Graphics;
 
 public class Graphics : ThreadedServiceBase
 {
-    protected override string ThreadName => nameof(Graphics);
+    private static readonly VertexElement[] VertexElements =
+    {
+        new(0, 0, DeclarationType.Float4, DeclarationMethod.Default, DeclarationUsage.PositionTransformed, 0),
+        new(0, 16, DeclarationType.Color, DeclarationMethod.Default, DeclarationUsage.Color, 0),
+        VertexElement.VertexDeclarationEnd
+    };
 
 
     public Graphics(GameProcess gameProcess, GameData gameData, WindowOverlay windowOverlay)
@@ -27,6 +32,8 @@ public class Graphics : ThreadedServiceBase
         InitDevice();
     }
 
+    protected override string ThreadName => nameof(Graphics);
+
     private WindowOverlay WindowOverlay { get; set; }
     private Vector2 OldRes { get; set; }
     public GameProcess GameProcess { get; private set; }
@@ -35,13 +42,6 @@ public class Graphics : ThreadedServiceBase
     private Font FontAzonix64 { get; set; }
     public Font FontConsolas32 { get; set; }
     private List<Vertex> Vertices { get; } = [];
-
-    private static readonly VertexElement[] VertexElements =
-    {
-        new(0, 0, DeclarationType.Float4, DeclarationMethod.Default, DeclarationUsage.PositionTransformed, 0),
-        new(0, 16, DeclarationType.Color, DeclarationMethod.Default, DeclarationUsage.Color, 0),
-        VertexElement.VertexDeclarationEnd
-    };
 
 
     public override void Dispose()

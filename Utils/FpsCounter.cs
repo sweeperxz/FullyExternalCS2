@@ -6,21 +6,6 @@ public class FpsCounter
 {
     #region
 
-    private static readonly TimeSpan TimeSpanFpsUpdate = new(0, 0, 0, 1);
-
-
-    private Stopwatch FpsTimer { get; } = Stopwatch.StartNew();
-
-
-    private int FpsFrameCount { get; set; }
-
-
-    public int Fps { get; private set; }
-
-    #endregion
-
-    #region
-
     public void Update()
     {
         var fpsTimerElapsed = FpsTimer.Elapsed;
@@ -33,6 +18,21 @@ public class FpsCounter
 
         FpsFrameCount++;
     }
+
+    #endregion
+
+    #region
+
+    private static readonly TimeSpan TimeSpanFpsUpdate = new(0, 0, 0, 1);
+
+
+    private Stopwatch FpsTimer { get; } = Stopwatch.StartNew();
+
+
+    private int FpsFrameCount { get; set; }
+
+
+    public int Fps { get; private set; }
 
     #endregion
 }
