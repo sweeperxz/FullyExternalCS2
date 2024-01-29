@@ -38,7 +38,7 @@ public class Entity(int index) : EntityBase
 
     public bool IsVisible()
     {
-        return IsSpotted is not false;
+        return IsSpotted;
     }
 
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
