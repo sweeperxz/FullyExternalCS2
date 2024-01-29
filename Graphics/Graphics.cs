@@ -174,7 +174,7 @@ public class Graphics : ThreadedServiceBase
         // draw here
         EspAimCrosshair.Draw(this);
         WindowOverlay.Draw(GameProcess, this);
-        SkeletonEsp.Draw(this);
+        EspVisuals.Draw(this);
     }
 
 
@@ -193,5 +193,19 @@ public class Graphics : ThreadedServiceBase
             .Where(v => v.Z < 1)
             .Select(v => new Vector2(v.X, v.Y)).ToArray();
         DrawLine(color, verticesScreen);
+    }
+
+    public void DrawRectangle(Color color, Vector2 topLeft, Vector2 bottomRight)
+    {
+        var verts = new Vector2[]
+        {
+            new(topLeft.X, topLeft.Y),
+            new(bottomRight.X, topLeft.Y),
+            new(bottomRight.X, bottomRight.Y),
+            new(topLeft.X, bottomRight.Y),
+            new(topLeft.X, topLeft.Y)
+        };
+
+        for (var i = 0; i < verts.Length - 1; i++) DrawLine(color, verts[i], verts[i + 1]);
     }
 }

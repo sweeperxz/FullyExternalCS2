@@ -12,7 +12,7 @@ public abstract class EntityBase
     public IntPtr AddressBase { get; private set; }
 
     private bool LifeState { get; set; }
-    private int Health { get; set; }
+    public int Health { get; set; }
     public Team Team { get; private set; }
     protected Vector3 Origin { get; private set; }
     public int ShotsFired { get; private set; }
