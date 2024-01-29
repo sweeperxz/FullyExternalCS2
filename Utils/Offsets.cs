@@ -29,6 +29,7 @@ public class Offsets
     public static int dwLocalPlayerController;
     public static int dwViewMatrix;
     public static int dwViewAngles;
+    public static int m_entitySpottedState;
     public static readonly int m_nBombSite = 0xE84;
     public static readonly int m_bBeingDefused = 0xEBC;
     public static readonly int m_bBombDefused = 0xED4;
@@ -93,6 +94,7 @@ public class Offsets
             dwViewMatrix = destData?.dwViewMatrix;
             dwViewAngles = destData?.dwViewAngles;
             dwEntityList = destData?.dwEntityList;
+            m_entitySpottedState = destData?.m_entitySpottedState;
             return;
         }
 
@@ -122,6 +124,7 @@ public class Offsets
         destData.m_bDormant = sourceDataClient.CGameSceneNode?.data?.m_bDormant?.value!;
         destData.m_iShotsFired = sourceDataClient.C_CSPlayerPawnBase?.data?.m_iShotsFired?.value!;
         destData.m_hPawn = sourceDataClient.CBasePlayerController?.data?.m_hPawn?.value!;
+        destData.m_entitySpottedState = sourceDataClient.C_CSPlayerPawnBase?.data?.m_entitySpottedState?.value!;
 
 
         // Write updated destination JSON
@@ -154,6 +157,7 @@ public class Offsets
         dwViewMatrix = updatedDestData?.dwViewMatrix;
         dwViewAngles = updatedDestData?.dwViewAngles;
         dwEntityList = updatedDestData?.dwEntityList;
+        m_entitySpottedState = updatedDestData?.m_entitySpottedState;
     }
 
     private static dynamic FetchJsonAndDeserialize(string url)

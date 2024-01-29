@@ -8,6 +8,7 @@ public class Entity(int index) : EntityBase
 {
     private int Index { get; } = index;
     private bool Dormant { get; set; } = true;
+    private bool IsSpotted { get; set; }
 
     public Dictionary<string, Vector3> BonePos { get; } = new()
     {
@@ -35,6 +36,11 @@ public class Entity(int index) : EntityBase
         return base.IsAlive() && !Dormant;
     }
 
+    public bool IsVisible()
+    {
+        return IsSpotted is not false;
+    }
+
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
     {
         var listEntryFirst = gameProcess.Process.Read<IntPtr>(EntityList + ((8 * (Index & 0x7FFF)) >> 9) + 16);
@@ -57,6 +63,7 @@ public class Entity(int index) : EntityBase
         if (!base.Update(gameProcess)) return false;
 
         Dormant = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_bDormant);
+        IsSpotted = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_entitySpottedState + 0x8);
         if (!IsAlive()) return true;
 
         UpdateBonePos(gameProcess);

@@ -131,7 +131,7 @@ public class AimBot : ThreadedServiceBase
 
         foreach (var entity in GameData.Entities.Where(entity =>
                      entity.IsAlive() && entity.AddressBase != GameData.Player.AddressBase &&
-                     entity.Team != GameData.Player.Team))
+                     entity.Team != GameData.Player.Team && entity.IsVisible()))
         {
             GetAimAngles(entity.BonePos[AimBonePos], out var angleToBoneSize, out var anglesToBone);
 
