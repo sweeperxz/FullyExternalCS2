@@ -1,57 +1,63 @@
-﻿namespace CS2Cheat.Utils;
+﻿using System.Diagnostics;
 
-public abstract class ThreadedServiceBase : IDisposable
+namespace CS2Cheat.Utils;
+
+public abstract class ThreadedServiceBase :
+    IDisposable
 {
-    #region properties
+    #region
 
     protected virtual string ThreadName => nameof(ThreadedServiceBase);
 
-    protected TimeSpan ThreadTimeOut { get; set; } = new(0, 0, 0, 3);
+    protected virtual TimeSpan ThreadTimeout { get; set; } = new(0, 0, 0, 3);
 
     protected virtual TimeSpan ThreadFrameSleep { get; set; } = new(0, 0, 0, 0, 1);
-    private CancellationTokenSource CancellationTokenSource { get; set; }
 
-    private Task Task { get; set; }
+    private Thread Thread { get; set; }
 
     #endregion
 
-    #region routines
+    #region
 
     protected ThreadedServiceBase()
     {
-        CancellationTokenSource = new CancellationTokenSource();
-        Task = new Task(ThreadStart, CancellationTokenSource.Token, TaskCreationOptions.LongRunning);
+        Thread = new Thread(ThreadStart)
+        {
+            Name = ThreadName
+        };
     }
+
+    public virtual void Dispose()
+    {
+        Thread.Interrupt();
+        if (!Thread.Join(ThreadTimeout)) Thread.Abort();
+
+        Thread = default;
+    }
+
+    #endregion
+
+    #region
 
     public void Start()
     {
-        Task.Start();
+        Thread.Start();
     }
-
 
     private void ThreadStart()
     {
         try
         {
-            while (!CancellationTokenSource.IsCancellationRequested)
+            while (true)
             {
                 FrameAction();
                 Thread.Sleep(ThreadFrameSleep);
             }
         }
-        catch (ThreadInterruptedException)
+        catch (NullReferenceException)
         {
+            System.Diagnostics.Process.Start(new ProcessStartInfo{FileName = "steam://rungameid/730", UseShellExecute = true});
         }
-    }
-
-    public virtual void Dispose()
-    {
-        CancellationTokenSource.Cancel();
-        Task.Wait();
-        CancellationTokenSource.Dispose();
-
-        Task = null;
-        CancellationTokenSource = null;
     }
 
     protected abstract void FrameAction();

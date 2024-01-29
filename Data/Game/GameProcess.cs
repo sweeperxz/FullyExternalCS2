@@ -47,17 +47,9 @@ public class GameProcess : ThreadedServiceBase
 
     protected override async void FrameAction()
     {
-        if (!EnsureProcessAndModules())
-        {
-            Console.WriteLine("[+] Process or Module is not detected");
-            InvalidateModules();
-        }
+        if (!EnsureProcessAndModules()) InvalidateModules();
 
-        if (!EnsureWindow())
-        {
-            Console.WriteLine("[+] The game is not Foreground");
-            InvalidateWindow();
-        }
+        if (!EnsureWindow()) InvalidateWindow();
 
         await Task.Delay(ThreadFrameSleep);
     }
