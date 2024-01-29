@@ -4,6 +4,7 @@ using CS2Cheat.Core;
 using CS2Cheat.Core.Data;
 using Process.NET.Native.Types;
 using SharpDX;
+using WindowsInput.Native;
 using static System.Diagnostics.Process;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -127,7 +128,7 @@ public static class Utility
         };
     }
 
-    public static bool IsKeyDown(this WindowsVirtualKey key)
+    public static bool IsKeyDown(this VirtualKeyCode key)
     {
         return (User32.GetAsyncKeyState((int)key) & 0x8000) != 0;
     }
@@ -167,6 +168,26 @@ public static class Utility
                 mouse = new MOUSEINPUT
                 {
                     flags = MouseFlags.LeftDown
+                }
+            }
+        };
+
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+    }
+    
+    
+    public static void MouseLeftUp()
+    {
+        var inputs = new INPUT[1];
+
+        inputs[0] = new INPUT
+        {
+            type = InputType.Mouse,
+            union = new InputUnion
+            {
+                mouse = new MOUSEINPUT
+                {
+                    flags = MouseFlags.LeftUp
                 }
             }
         };

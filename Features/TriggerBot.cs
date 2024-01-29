@@ -1,6 +1,5 @@
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
-using WindowsInput;
 using WindowsInput.Native;
 
 namespace CS2Cheat.Features;
@@ -13,8 +12,7 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
 
     private GameData GameData { get; set; } = gameData;
 
-    private InputSimulator InputSimulator { get; } = new();
-
+    private static VirtualKeyCode TriggerBotHotKey => VirtualKeyCode.LMENU;
 
     public override void Dispose()
     {
@@ -26,14 +24,14 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
 
     public static bool IsHotKeyDown()
     {
-        return WindowsVirtualKey.VK_MBUTTON.IsKeyDown();
+        return TriggerBotHotKey.IsKeyDown();
     }
 
     protected override void FrameAction()
     {
         var entityId = GameProcess.Process.Read<int>(GameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn) +
                                                      Offsets.m_iIDEntIndex);
-        if (!GameProcess.IsValid || !InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.LMENU)) return;
+        if (!GameProcess.IsValid || !IsHotKeyDown()) return;
 
         if (entityId < 0) return;
 
@@ -45,7 +43,8 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
         if (GameData.Player.Team != entityTeam.ToTeam())
         {
             Task.Delay(5);
-            InputSimulator.Mouse.LeftButtonClick();
+            Utility.MouseLeftDown();
+            Utility.MouseLeftUp();
         }
     }
 }
