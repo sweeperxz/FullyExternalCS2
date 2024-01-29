@@ -56,7 +56,8 @@ public abstract class ThreadedServiceBase :
         }
         catch (NullReferenceException)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo{FileName = "steam://rungameid/730", UseShellExecute = true});
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+                { FileName = "steam://rungameid/730", UseShellExecute = true });
         }
     }
 

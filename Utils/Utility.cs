@@ -4,8 +4,8 @@ using CS2Cheat.Core;
 using CS2Cheat.Core.Data;
 using Process.NET.Native.Types;
 using SharpDX;
-using WindowsInput.Native;
 using static System.Diagnostics.Process;
+using Keys = Process.NET.Native.Types.Keys;
 using Rectangle = System.Drawing.Rectangle;
 
 
@@ -128,7 +128,11 @@ public static class Utility
         };
     }
 
-    public static bool IsKeyDown(this VirtualKeyCode key)
+
+    /// <summary>
+    ///     https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+    /// </summary>
+    public static bool IsKeyDown(this Keys key)
     {
         return (User32.GetAsyncKeyState((int)key) & 0x8000) != 0;
     }
@@ -174,8 +178,8 @@ public static class Utility
 
         User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
     }
-    
-    
+
+
     public static void MouseLeftUp()
     {
         var inputs = new INPUT[1];
@@ -194,6 +198,46 @@ public static class Utility
 
         User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
     }
+
+    public static void PressSpace()
+    {
+        var inputs = new INPUT[2];
+
+        inputs[0] = new INPUT
+        {
+            type = InputType.Keyboard,
+            union = new InputUnion
+            {
+                keyboard = new KEYBDINPUT
+                {
+                    virtualKey = (ushort)Keys.Right,
+                    scanCode = 0,
+                    flags = 0,
+                    timeStamp = 0,
+                    extraInfo = IntPtr.Zero
+                }
+            }
+        };
+
+        inputs[1] = new INPUT
+        {
+            type = InputType.Keyboard,
+            union = new InputUnion
+            {
+                keyboard = new KEYBDINPUT
+                {
+                    virtualKey = (ushort)Keys.Right,
+                    scanCode = 0,
+                    flags = KeyboardFlags.KeyUp,
+                    timeStamp = 0,
+                    extraInfo = IntPtr.Zero
+                }
+            }
+        };
+
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+    }
+
 
     [StructLayout(LayoutKind.Sequential)]
     public struct KEYBDINPUT

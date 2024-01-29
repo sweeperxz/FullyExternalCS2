@@ -2,8 +2,7 @@
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
 using SharpDX;
-using WindowsInput;
-using WindowsInput.Native;
+using Keys = Process.NET.Native.Types.Keys;
 
 namespace CS2Cheat.Data.Entity;
 
@@ -24,8 +23,6 @@ public class Player : EntityBase
     public static int Fov => 90;
 
     private int FFlags { get; set; }
-
-    private InputSimulator InputSimulator { get; } = new();
 
 
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
@@ -72,10 +69,10 @@ public class Player : EntityBase
         */
 
 
-        if (InputSimulator.InputDeviceState.IsKeyDown(VirtualKeyCode.SPACE) && (FFlags & 1) > 0)
+        if (Keys.Space.IsKeyDown() && (FFlags & 1) > 0)
         {
             Thread.Sleep(7);
-            InputSimulator.Keyboard.KeyPress(VirtualKeyCode.RIGHT);
+            Utility.PressSpace();
         }
 
 

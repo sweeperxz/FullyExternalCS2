@@ -1,6 +1,6 @@
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
-using WindowsInput.Native;
+using Keys = Process.NET.Native.Types.Keys;
 
 namespace CS2Cheat.Features;
 
@@ -12,7 +12,7 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
 
     private GameData GameData { get; set; } = gameData;
 
-    private static VirtualKeyCode TriggerBotHotKey => VirtualKeyCode.LMENU;
+    private static Keys TriggerBotHotKey => Keys.LMenu;
 
     public override void Dispose()
     {
