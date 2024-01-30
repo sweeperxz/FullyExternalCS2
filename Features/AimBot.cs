@@ -89,7 +89,7 @@ public class AimBot : ThreadedServiceBase
             Monitor.Exit(_stateLock);
         }
 
-        return false;
+        return true;
     }
 
     protected override void FrameAction()
@@ -131,7 +131,7 @@ public class AimBot : ThreadedServiceBase
 
         foreach (var entity in GameData.Entities.Where(entity =>
                      entity.IsAlive() && entity.AddressBase != GameData.Player.AddressBase &&
-                     entity.Team != GameData.Player.Team && entity.IsVisible()))
+                     entity.Team != GameData.Player.Team && entity.IsSpotted))
         {
             GetAimAngles(entity.BonePos[AimBonePos], out var angleToBoneSize, out var anglesToBone);
 

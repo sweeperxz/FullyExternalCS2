@@ -8,7 +8,7 @@ public class Entity(int index) : EntityBase
 {
     private int Index { get; } = index;
     private bool Dormant { get; set; } = true;
-    private bool IsSpotted { get; set; }
+    public bool IsSpotted { get; private set; }
 
     public Dictionary<string, Vector3> BonePos { get; } = new()
     {
@@ -35,12 +35,7 @@ public class Entity(int index) : EntityBase
     {
         return base.IsAlive() && !Dormant;
     }
-
-    public bool IsVisible()
-    {
-        return IsSpotted;
-    }
-
+    
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
     {
         var listEntryFirst = gameProcess.Process.Read<IntPtr>(EntityList + ((8 * (Index & 0x7FFF)) >> 9) + 16);
