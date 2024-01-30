@@ -1,4 +1,4 @@
-using CS2Cheat.Core.Data;
+﻿using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Entity;
 using CS2Cheat.Graphics;
 using SharpDX;
@@ -6,7 +6,7 @@ using Color = SharpDX.Color;
 
 namespace CS2Cheat.Features;
 
-public static class EspVisuals
+public static class EspBox
 {
     public static void Draw(Graphics.Graphics graphics)
     {
@@ -14,33 +14,12 @@ public static class EspVisuals
         {
             if (!entity.IsAlive() || entity.AddressBase == graphics.GameData.Player.AddressBase) continue;
 
-            var colorBones = entity.Team == Team.Terrorists ? Color.Yellow : Color.Blue;
             var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
 
-            DrawBones(graphics, entity, colorBones);
-            DrawEntityRectangle(graphics, entity, colorBox, 2f);
+            DrawEntityRectangle(graphics, entity, colorBox, 3f);
         }
     }
 
-    private static void DrawBones(Graphics.Graphics graphics, Entity entity, Color color)
-    {
-        graphics.DrawLineWorld(color, entity.BonePos["head"], entity.BonePos["neck_0"]);
-        graphics.DrawLineWorld(color, entity.BonePos["neck_0"], entity.BonePos["spine_1"]);
-        graphics.DrawLineWorld(color, entity.BonePos["spine_1"], entity.BonePos["spine_2"]);
-        graphics.DrawLineWorld(color, entity.BonePos["spine_2"], entity.BonePos["pelvis"]);
-        graphics.DrawLineWorld(color, entity.BonePos["spine_1"], entity.BonePos["arm_upper_L"]);
-        graphics.DrawLineWorld(color, entity.BonePos["arm_upper_L"], entity.BonePos["arm_lower_L"]);
-        graphics.DrawLineWorld(color, entity.BonePos["arm_lower_L"], entity.BonePos["hand_L"]);
-        graphics.DrawLineWorld(color, entity.BonePos["spine_1"], entity.BonePos["arm_upper_R"]);
-        graphics.DrawLineWorld(color, entity.BonePos["arm_upper_R"], entity.BonePos["arm_lower_R"]);
-        graphics.DrawLineWorld(color, entity.BonePos["arm_lower_R"], entity.BonePos["hand_R"]);
-        graphics.DrawLineWorld(color, entity.BonePos["pelvis"], entity.BonePos["leg_upper_L"]);
-        graphics.DrawLineWorld(color, entity.BonePos["leg_upper_L"], entity.BonePos["leg_lower_L"]);
-        graphics.DrawLineWorld(color, entity.BonePos["leg_lower_L"], entity.BonePos["ankle_L"]);
-        graphics.DrawLineWorld(color, entity.BonePos["pelvis"], entity.BonePos["leg_upper_R"]);
-        graphics.DrawLineWorld(color, entity.BonePos["leg_upper_R"], entity.BonePos["leg_lower_R"]);
-        graphics.DrawLineWorld(color, entity.BonePos["leg_lower_R"], entity.BonePos["ankle_R"]);
-    }
 
     private static void DrawEntityRectangle(Graphics.Graphics graphics, Entity entity, Color color, float thickness)
     {

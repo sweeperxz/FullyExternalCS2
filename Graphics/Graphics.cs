@@ -174,7 +174,8 @@ public class Graphics : ThreadedServiceBase
         // draw here
         EspAimCrosshair.Draw(this);
         WindowOverlay.Draw(GameProcess, this);
-        EspVisuals.Draw(this);
+        SkeletonEsp.Draw(this);
+        EspBox.Draw(this);
     }
 
 
