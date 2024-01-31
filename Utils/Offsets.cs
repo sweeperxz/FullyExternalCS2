@@ -34,6 +34,8 @@ public class Offsets
     public static int m_pClippingWeapon;
     public static int m_AttributeManager;
     public static int m_iItemDefinitionIndex;
+    public static int m_bIsScoped;
+    public static int m_flFlashDuration;
     public static readonly int m_nBombSite = 0xE84;
     public static readonly int m_bBeingDefused = 0xEBC;
     public static readonly int m_bBombDefused = 0xED4;
@@ -103,6 +105,8 @@ public class Offsets
             m_pClippingWeapon = destData?.m_pClippingWeapon;
             m_AttributeManager = destData?.m_AttributeManager;
             m_iItemDefinitionIndex = destData?.m_iItemDefinitionIndex;
+            m_bIsScoped = destData?.m_bIsScoped;
+            m_flFlashDuration = destData?.m_flFlashDuration;
             return;
         }
 
@@ -137,6 +141,8 @@ public class Offsets
         destData.m_pClippingWeapon = sourceDataClient.C_CSPlayerPawnBase.data?.m_pClippingWeapon.value!;
         destData.m_AttributeManager = sourceDataClient.C_EconEntity.data?.m_AttributeManager.value!;
         destData.m_iItemDefinitionIndex = sourceDataClient.C_EconItemView.data?.m_iItemDefinitionIndex.value!;
+        destData.m_bIsScoped = sourceDataClient.C_CSPlayerPawnBase.data?.m_bIsScoped.value!;
+        destData.m_flFlashDuration = sourceDataClient.C_CSPlayerPawnBase.data?.m_flFlashDuration.value!;
 
 
         // Write updated destination JSON
@@ -174,6 +180,8 @@ public class Offsets
         m_pClippingWeapon = updatedDestData?.m_pClippingWeapon;
         m_AttributeManager = updatedDestData?.m_AttributeManager;
         m_iItemDefinitionIndex = updatedDestData?.m_iItemDefinitionIndex;
+        m_bIsScoped = updatedDestData?.m_bIsScoped;
+        m_flFlashDuration = updatedDestData?.m_flFlashDuration;
     }
 
     private static dynamic FetchJsonAndDeserialize(string url)

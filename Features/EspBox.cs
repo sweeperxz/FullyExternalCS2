@@ -42,17 +42,33 @@ public static class EspBox
             new Vector2(boundingBox.Item1.X - healthBarWidth - healthBarPadding, boundingBox.Item1.Y);
         var healthBarBottomRight = new Vector2(healthBarTopLeft.X + healthBarWidth, boundingBox.Item2.Y);
 
+        DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
+
         //weapon name
         var playerName = entity.CurrentWeaponName ?? "NONE";
         var textWidth = graphics.FontConsolas32.MeasureText(null, playerName, FontDrawFlags.Center).Right + 20;
 
-        var namePosition = new Vector2(
+        var weaponNamePosition = new Vector2(
             (boundingBox.Item1.X + boundingBox.Item2.X - textWidth) / 2,
             boundingBox.Item2.Y + 5f
         );
-        graphics.FontConsolas32.DrawText(default, $"{playerName}", (int)namePosition.X, (int)namePosition.Y,
+
+
+        graphics.FontConsolas32.DrawText(default, $"{playerName}", (int)weaponNamePosition.X, (int)weaponNamePosition.Y,
             Color.White);
-        DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
+
+        //flags 
+        var flagsPosition = new Vector2(boundingBox.Item2.X + 5f, boundingBox.Item1.Y);
+        
+        var scoped = entity.IsinScope == 1
+            ? graphics.FontConsolas32.DrawText(default, "Scoped", (int)flagsPosition.X, (int)flagsPosition.Y,
+                Color.White)
+            : default;
+
+        var flashed = entity.FlashAlpha > 7
+            ? graphics.FontConsolas32.DrawText(default, "Flashed", (int)flagsPosition.X, (int)flagsPosition.Y + 15,
+                Color.White)
+            : default;
     }
 
 

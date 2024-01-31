@@ -15,6 +15,10 @@ public class Entity(int index) : EntityBase
 
     private short WeaponIndex { get; set; }
 
+    protected internal int IsinScope { get; private set; }
+
+    protected internal int FlashAlpha { get; private set; }
+
     protected internal string CurrentWeaponName { get; private set; } = null!;
 
     public Dictionary<string, Vector3> BonePos { get; } = new()
@@ -70,6 +74,8 @@ public class Entity(int index) : EntityBase
         WeaponIndex = gameProcess.Process.Read<short>(CurrentWeapon + Offsets.m_AttributeManager + Offsets.m_Item +
                                                       Offsets.m_iItemDefinitionIndex);
         CurrentWeaponName = Enum.GetName(typeof(WeaponIndexes), WeaponIndex)!;
+        IsinScope = gameProcess.Process.Read<int>(AddressBase + Offsets.m_bIsScoped);
+        FlashAlpha = gameProcess.Process.Read<int>(AddressBase + Offsets.m_flFlashDuration);
         if (!IsAlive()) return true;
 
         UpdateBonePos(gameProcess);
