@@ -5,7 +5,6 @@
 FullyExternalCS2 is an external cheat for Counter-Strike 2 **that does not write to the game memory**. \
 It was created for the _purpose_ of _improving_ Windows API skills.
 
-[![Watch the video](https://i.imgur.com/UJK7dnU.png)](https://youtu.be/izwhojhj3ms)
 ![SS](assets/photo.png)
 
 #### Features
