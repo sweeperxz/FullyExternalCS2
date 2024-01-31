@@ -36,6 +36,7 @@ public class Offsets
     public static int m_iItemDefinitionIndex;
     public static int m_bIsScoped;
     public static int m_flFlashDuration;
+    public static int m_iszPlayerName;
     public static readonly int m_nBombSite = 0xE84;
     public static readonly int m_bBeingDefused = 0xEBC;
     public static readonly int m_bBombDefused = 0xED4;
@@ -64,7 +65,7 @@ public class Offsets
     };
 
 
-    public void UpdateOffsets()
+    public static void UpdateOffsets()
     {
         const string offsetsDw = "https://github.com/a2x/cs2-dumper/raw/main/generated/offsets.json";
         const string offsetsClient = "https://github.com/a2x/cs2-dumper/raw/main/generated/client.dll.json";
@@ -107,6 +108,7 @@ public class Offsets
             m_iItemDefinitionIndex = destData?.m_iItemDefinitionIndex;
             m_bIsScoped = destData?.m_bIsScoped;
             m_flFlashDuration = destData?.m_flFlashDuration;
+            m_iszPlayerName = destData?.m_iszPlayerName;
             return;
         }
 
@@ -143,6 +145,7 @@ public class Offsets
         destData.m_iItemDefinitionIndex = sourceDataClient.C_EconItemView.data?.m_iItemDefinitionIndex.value!;
         destData.m_bIsScoped = sourceDataClient.C_CSPlayerPawnBase.data?.m_bIsScoped.value!;
         destData.m_flFlashDuration = sourceDataClient.C_CSPlayerPawnBase.data?.m_flFlashDuration.value!;
+        destData.m_iszPlayerName = sourceDataClient.CBasePlayerController.data?.m_iszPlayerName.value!;
 
 
         // Write updated destination JSON
@@ -182,6 +185,7 @@ public class Offsets
         m_iItemDefinitionIndex = updatedDestData?.m_iItemDefinitionIndex;
         m_bIsScoped = updatedDestData?.m_bIsScoped;
         m_flFlashDuration = updatedDestData?.m_flFlashDuration;
+        m_iszPlayerName = updatedDestData?.m_iszPlayerName;
     }
 
     private static dynamic FetchJsonAndDeserialize(string url)

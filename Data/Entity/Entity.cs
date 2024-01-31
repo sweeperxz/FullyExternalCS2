@@ -8,9 +8,13 @@ namespace CS2Cheat.Data.Entity;
 public class Entity(int index) : EntityBase
 {
     private int Index { get; } = index;
+
     private bool Dormant { get; set; } = true;
+
     protected internal bool IsSpotted { get; private set; }
 
+    protected internal string Name { get; private set; } = null!;
+    
     private IntPtr CurrentWeapon { get; set; }
 
     private short WeaponIndex { get; set; }
@@ -76,6 +80,7 @@ public class Entity(int index) : EntityBase
         CurrentWeaponName = Enum.GetName(typeof(WeaponIndexes), WeaponIndex)!;
         IsinScope = gameProcess.Process.Read<int>(AddressBase + Offsets.m_bIsScoped);
         FlashAlpha = gameProcess.Process.Read<int>(AddressBase + Offsets.m_flFlashDuration);
+        Name = gameProcess.Process.ReadString(ControllerBase + Offsets.m_iszPlayerName);
         if (!IsAlive()) return true;
 
         UpdateBonePos(gameProcess);

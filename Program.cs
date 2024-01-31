@@ -39,8 +39,6 @@ public class Program :
 
     private AimBot AimBot { get; set; }
 
-    private static Offsets Offsets => new();
-
     /// <inheritdoc />
     public void Dispose()
     {

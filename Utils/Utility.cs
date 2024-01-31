@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using CS2Cheat.Core;
 using CS2Cheat.Core.Data;
 using Process.NET.Native.Types;
@@ -306,6 +307,22 @@ public static class Utility
         var buffer = default(T) as object;
         Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, buffer, size, out var lpNumberOfBytesRead);
         return lpNumberOfBytesRead == size ? (T)buffer : default;
+    }
+
+    public static string ReadString(this System.Diagnostics.Process process, IntPtr lpBaseAddress, int maxLength = 256)
+    {
+        var buffer = ReadBytes(process.Handle, lpBaseAddress, maxLength);
+        var nullCharIndex = Array.IndexOf(buffer, (byte)'\0');
+        return nullCharIndex >= 0
+            ? Encoding.UTF8.GetString(buffer, 0, nullCharIndex).Trim()
+            : Encoding.UTF8.GetString(buffer).Trim();
+    }
+
+    private static byte[] ReadBytes(IntPtr hProcess, IntPtr lpBaseAddress, int maxLength)
+    {
+        var buffer = new byte[maxLength];
+        Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, buffer, maxLength, out _);
+        return buffer;
     }
 
 

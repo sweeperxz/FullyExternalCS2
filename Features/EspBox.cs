@@ -45,21 +45,41 @@ public static class EspBox
         DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
 
         //weapon name
-        var playerName = entity.CurrentWeaponName ?? "NONE";
-        var textWidth = graphics.FontConsolas32.MeasureText(null, playerName, FontDrawFlags.Center).Right + 20;
+        var currentWeaponName = entity.CurrentWeaponName ?? "NONE";
+        var textWidth = graphics.FontConsolas32.MeasureText(null, currentWeaponName, FontDrawFlags.Center).Right + 30;
 
         var weaponNamePosition = new Vector2(
             (boundingBox.Item1.X + boundingBox.Item2.X - textWidth) / 2,
             boundingBox.Item2.Y + 5f
         );
-
-
-        graphics.FontConsolas32.DrawText(default, $"{playerName}", (int)weaponNamePosition.X, (int)weaponNamePosition.Y,
+        graphics.FontConsolas32.DrawText(default, $"{currentWeaponName}", (int)weaponNamePosition.X,
+            (int)weaponNamePosition.Y,
             Color.White);
+
+
+        // enemy name
+        var enemyNamePosition = new Vector2(
+            (boundingBox.Item1.X + boundingBox.Item2.X) / 2,
+            boundingBox.Item1.Y - 15f
+        );
+
+        if (graphics.GameData.Player.Team != entity.Team)
+        {
+            var entityName = entity.Name ?? "UNKNOWN";
+            var textWidth2 = graphics.FontConsolas32.MeasureText(null, entityName, FontDrawFlags.Center).Right + 10f;
+
+            // Adjust the position to center the text at the top
+            enemyNamePosition.X -= textWidth2 / 2;
+
+            graphics.FontConsolas32.DrawText(default, entityName, (int)enemyNamePosition.X,
+                (int)enemyNamePosition.Y,
+                Color.White);
+        }
+
 
         //flags 
         var flagsPosition = new Vector2(boundingBox.Item2.X + 5f, boundingBox.Item1.Y);
-        
+
         var scoped = entity.IsinScope == 1
             ? graphics.FontConsolas32.DrawText(default, "Scoped", (int)flagsPosition.X, (int)flagsPosition.Y,
                 Color.White)
