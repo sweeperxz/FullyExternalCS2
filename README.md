@@ -13,6 +13,7 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 - AimBot on key with RCS (default = LBUTTON) (Visibility check)
 - Esp Skeleton (Color team)
 - Esp Box with health bar
+- Esp name
 - Esp weapon name
 - Esp enemy flags (Scoped, Flashed)
 - Aim Crosshair
