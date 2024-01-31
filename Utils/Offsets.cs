@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace CS2Cheat.Utils;
 
-public class Offsets
+public abstract class Offsets
 {
     #region offsets
 
@@ -37,10 +37,6 @@ public class Offsets
     public static int m_bIsScoped;
     public static int m_flFlashDuration;
     public static int m_iszPlayerName;
-    public static readonly int m_nBombSite = 0xE84;
-    public static readonly int m_bBeingDefused = 0xEBC;
-    public static readonly int m_bBombDefused = 0xED4;
-    public static readonly int dwPlantedC4 = 0x18257D8;
 
 
     public static readonly Dictionary<string, int> Bones = new()

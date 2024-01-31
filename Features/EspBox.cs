@@ -42,6 +42,11 @@ public static class EspBox
             new Vector2(boundingBox.Item1.X - healthBarWidth - healthBarPadding, boundingBox.Item1.Y);
         var healthBarBottomRight = new Vector2(healthBarTopLeft.X + healthBarWidth, boundingBox.Item2.Y);
 
+        // heath bar num
+        graphics.FontConsolas32.DrawText(default, $"{entity.Health}", (int)healthBarTopLeft.X - 20,
+            (int)healthBarBottomRight.Y,
+            Color.LightGreen);
+
         DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
 
         //weapon name
@@ -67,10 +72,7 @@ public static class EspBox
         {
             var entityName = entity.Name ?? "UNKNOWN";
             var textWidth2 = graphics.FontConsolas32.MeasureText(null, entityName, FontDrawFlags.Center).Right + 10f;
-
-            // Adjust the position to center the text at the top
             enemyNamePosition.X -= textWidth2 / 2;
-
             graphics.FontConsolas32.DrawText(default, entityName, (int)enemyNamePosition.X,
                 (int)enemyNamePosition.Y,
                 Color.White);
