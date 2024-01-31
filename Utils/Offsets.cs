@@ -30,6 +30,10 @@ public class Offsets
     public static int dwViewMatrix;
     public static int dwViewAngles;
     public static int m_entitySpottedState;
+    public static int m_Item;
+    public static int m_pClippingWeapon;
+    public static int m_AttributeManager;
+    public static int m_iItemDefinitionIndex;
     public static readonly int m_nBombSite = 0xE84;
     public static readonly int m_bBeingDefused = 0xEBC;
     public static readonly int m_bBombDefused = 0xED4;
@@ -95,6 +99,10 @@ public class Offsets
             dwViewAngles = destData?.dwViewAngles;
             dwEntityList = destData?.dwEntityList;
             m_entitySpottedState = destData?.m_entitySpottedState;
+            m_Item = destData?.m_Item;
+            m_pClippingWeapon = destData?.m_pClippingWeapon;
+            m_AttributeManager = destData?.m_AttributeManager;
+            m_iItemDefinitionIndex = destData?.m_iItemDefinitionIndex;
             return;
         }
 
@@ -125,6 +133,10 @@ public class Offsets
         destData.m_iShotsFired = sourceDataClient.C_CSPlayerPawnBase?.data?.m_iShotsFired?.value!;
         destData.m_hPawn = sourceDataClient.CBasePlayerController?.data?.m_hPawn?.value!;
         destData.m_entitySpottedState = sourceDataClient.C_CSPlayerPawnBase?.data?.m_entitySpottedState?.value!;
+        destData.m_Item = sourceDataClient.C_AttributeContainer?.data?.m_Item?.value!;
+        destData.m_pClippingWeapon = sourceDataClient.C_CSPlayerPawnBase.data?.m_pClippingWeapon.value!;
+        destData.m_AttributeManager = sourceDataClient.C_EconEntity.data?.m_AttributeManager.value!;
+        destData.m_iItemDefinitionIndex = sourceDataClient.C_EconItemView.data?.m_iItemDefinitionIndex.value!;
 
 
         // Write updated destination JSON
@@ -158,6 +170,10 @@ public class Offsets
         dwViewAngles = updatedDestData?.dwViewAngles;
         dwEntityList = updatedDestData?.dwEntityList;
         m_entitySpottedState = updatedDestData?.m_entitySpottedState;
+        m_Item = updatedDestData?.m_Item;
+        m_pClippingWeapon = updatedDestData?.m_pClippingWeapon;
+        m_AttributeManager = updatedDestData?.m_AttributeManager;
+        m_iItemDefinitionIndex = updatedDestData?.m_iItemDefinitionIndex;
     }
 
     private static dynamic FetchJsonAndDeserialize(string url)

@@ -2,6 +2,7 @@
 using CS2Cheat.Data.Entity;
 using CS2Cheat.Graphics;
 using SharpDX;
+using SharpDX.Direct3D9;
 using Color = SharpDX.Color;
 
 namespace CS2Cheat.Features;
@@ -19,7 +20,6 @@ public static class EspBox
             DrawEntityRectangle(graphics, entity, colorBox, 3f);
         }
     }
-
 
     private static void DrawEntityRectangle(Graphics.Graphics graphics, Entity entity, Color color, float thickness)
     {
@@ -42,8 +42,19 @@ public static class EspBox
             new Vector2(boundingBox.Item1.X - healthBarWidth - healthBarPadding, boundingBox.Item1.Y);
         var healthBarBottomRight = new Vector2(healthBarTopLeft.X + healthBarWidth, boundingBox.Item2.Y);
 
+        //weapon name
+        var playerName = entity.CurrentWeaponName ?? "NONE";
+        var textWidth = graphics.FontConsolas32.MeasureText(null, playerName, FontDrawFlags.Center).Right + 20;
+
+        var namePosition = new Vector2(
+            (boundingBox.Item1.X + boundingBox.Item2.X - textWidth) / 2,
+            boundingBox.Item2.Y + 5f
+        );
+        graphics.FontConsolas32.DrawText(default, $"{playerName}", (int)namePosition.X, (int)namePosition.Y,
+            Color.White);
         DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
     }
+
 
     private static void DrawHealthBar(Graphics.Graphics graphics, Vector2 topLeft, Vector2 bottomRight,
         float healthPercentage)

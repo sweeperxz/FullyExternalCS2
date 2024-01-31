@@ -96,7 +96,7 @@ public class Graphics : ThreadedServiceBase
 
         var consolas32 = new FontDescription
         {
-            Height = 14,
+            Height = 12,
             Italic = false,
             CharacterSet = FontCharacterSet.Ansi,
             FaceName = "Verdana",

@@ -1,3 +1,4 @@
+using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using SharpDX;
@@ -8,7 +9,13 @@ public class Entity(int index) : EntityBase
 {
     private int Index { get; } = index;
     private bool Dormant { get; set; } = true;
-    public bool IsSpotted { get; private set; }
+    protected internal bool IsSpotted { get; private set; }
+
+    private IntPtr CurrentWeapon { get; set; }
+
+    private short WeaponIndex { get; set; }
+
+    protected internal string CurrentWeaponName { get; private set; } = null!;
 
     public Dictionary<string, Vector3> BonePos { get; } = new()
     {
@@ -35,7 +42,7 @@ public class Entity(int index) : EntityBase
     {
         return base.IsAlive() && !Dormant;
     }
-    
+
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
     {
         var listEntryFirst = gameProcess.Process.Read<IntPtr>(EntityList + ((8 * (Index & 0x7FFF)) >> 9) + 16);
@@ -59,6 +66,10 @@ public class Entity(int index) : EntityBase
 
         Dormant = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_bDormant);
         IsSpotted = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_entitySpottedState + 0x8);
+        CurrentWeapon = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pClippingWeapon);
+        WeaponIndex = gameProcess.Process.Read<short>(CurrentWeapon + Offsets.m_AttributeManager + Offsets.m_Item +
+                                                      Offsets.m_iItemDefinitionIndex);
+        CurrentWeaponName = Enum.GetName(typeof(WeaponIndexes), WeaponIndex)!;
         if (!IsAlive()) return true;
 
         UpdateBonePos(gameProcess);
