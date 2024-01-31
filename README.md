@@ -13,6 +13,7 @@ It was created for the _purpose_ of _improving_ Windows API skills.
 - Esp Skeleton (Color team)
 - Esp Box with health bar
 - Esp weapon name
+- Esp enemy flags (Scoped, Flashed)
 - Aim Crosshair
 - Trigger Bot on key (default = LAlt)
 - BunnyHop (
