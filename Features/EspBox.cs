@@ -86,9 +86,19 @@ public static class EspBox
             ? graphics.FontConsolas32.DrawText(default, "Scoped", (int)flagsPosition.X, (int)flagsPosition.Y,
                 Color.White)
             : default;
-
+        
         var flashed = entity.FlashAlpha > 7
             ? graphics.FontConsolas32.DrawText(default, "Flashed", (int)flagsPosition.X, (int)flagsPosition.Y + 15,
+                Color.White)
+            : default;
+        
+        var shifting = entity.IsinScope == 256
+            ? graphics.FontConsolas32.DrawText(default, $"Shifting", (int)flagsPosition.X, (int)flagsPosition.Y + 30,
+                Color.White)
+            : default;
+        
+        var shiftingInScope = entity.IsinScope == 257
+            ? graphics.FontConsolas32.DrawText(default, $"Shifting in scope", (int)flagsPosition.X, (int)flagsPosition.Y + 45,
                 Color.White)
             : default;
     }
