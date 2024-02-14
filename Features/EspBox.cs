@@ -114,7 +114,7 @@ public static class EspBox
         graphics.DrawRectangle(Color.Green, new Vector2(topLeft.X, bottomRight.Y - filledHeight), bottomRight);
     }
 
-    private static Tuple<Vector2, Vector2> GetEntityBoundingBox(Graphics.Graphics graphics, Entity entity)
+    private static (Vector2, Vector2) GetEntityBoundingBox(Graphics.Graphics graphics, Entity entity)
     {
         const float padding = 5.0f;
         var minScreenPos = new Vector2(float.MaxValue, float.MaxValue);
@@ -135,6 +135,6 @@ public static class EspBox
         minScreenPos -= new Vector2(padding * sizeMultiplier, padding * sizeMultiplier);
         maxScreenPos += new Vector2(padding * sizeMultiplier, padding * sizeMultiplier);
 
-        return new Tuple<Vector2, Vector2>(minScreenPos, maxScreenPos);
+        return (minScreenPos, maxScreenPos);
     }
 }
