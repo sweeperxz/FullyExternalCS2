@@ -38,7 +38,7 @@ public static class User32
     public static extern IntPtr CallNextHookEx(IntPtr idHook, int nCode, IntPtr wParam, IntPtr lParam);
 
     [DllImport("user32.dll")]
-    public static extern uint SendInput(uint nInputs, Utility.INPUT[] pInputs, int cbSize);
+    public static extern uint SendInput(uint nInputs, Utility.Input[] pInputs, int cbSize);
 
     #endregion
 }

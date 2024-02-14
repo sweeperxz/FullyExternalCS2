@@ -1,4 +1,5 @@
-﻿using CS2Cheat.Data.Game;
+﻿using CS2Cheat.Core.Data;
+using CS2Cheat.Data.Game;
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
 using SharpDX;
@@ -77,5 +78,17 @@ public class Player : EntityBase
 
 
         return true;
+    }
+
+    public bool IsGrenade()
+    {
+        var grenades = new HashSet<string>
+        {
+            WeaponIndexes.Smokegrenade.ToString(),
+            WeaponIndexes.Flashbang.ToString(),
+            WeaponIndexes.Hegrenade.ToString()
+        };
+
+        return grenades.Contains(CurrentWeaponName);
     }
 }

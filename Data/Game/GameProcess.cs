@@ -7,11 +7,11 @@ public class GameProcess : ThreadedServiceBase
 {
     #region constants
 
-    private const string NAME_PROCESS = "cs2";
+    private const string NameProcess = "cs2";
 
-    private const string NAME_MODULE = "client.dll";
+    private const string NameModule = "client.dll";
 
-    private const string NAME_WINDOW = "Counter-Strike 2";
+    private const string NameWindow = "Counter-Strike 2";
 
     #endregion
 
@@ -73,15 +73,15 @@ public class GameProcess : ThreadedServiceBase
 
     private bool EnsureProcessAndModules()
     {
-        Process ??= System.Diagnostics.Process.GetProcessesByName(NAME_PROCESS).FirstOrDefault();
+        Process ??= System.Diagnostics.Process.GetProcessesByName(NameProcess).FirstOrDefault();
         if (Process is null || !Process.IsRunning()) return false;
-        ModuleClient ??= Process.GetModule(NAME_MODULE);
+        ModuleClient ??= Process.GetModule(NameModule);
         return true;
     }
 
     private bool EnsureWindow()
     {
-        WindowHwnd = User32.FindWindow(null!, NAME_WINDOW);
+        WindowHwnd = User32.FindWindow(null!, NameWindow);
         if (WindowHwnd == IntPtr.Zero) return false;
 
         WindowRectangleClient = Utility.GetClientRectangle(WindowHwnd);

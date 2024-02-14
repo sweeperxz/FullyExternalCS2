@@ -84,7 +84,7 @@ public class WindowOverlay : ThreadedServiceBase
     public static void Draw(GameProcess gameProcess, Graphics graphics)
     {
         // window border
-        graphics.DrawLine(Color.Red,
+        graphics.DrawLine(Color.DarkGray,
             new Vector2(0, 0),
             new Vector2(gameProcess.WindowRectangleClient.Width - 1, 0),
             new Vector2(gameProcess.WindowRectangleClient.Width - 1, 0),

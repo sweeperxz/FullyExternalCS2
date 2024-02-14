@@ -1,22 +1,13 @@
 namespace CS2Cheat.Core.Data;
 
-/// <summary>
-///     Aim bot state.
-/// </summary>
 public enum AimBotState
 {
-    /// <summary>
-    ///     Hot key is up, waiting for it to be pressed.
-    /// </summary>
+    // the hotkey is awaiting a press.
     Up,
 
-    /// <summary>
-    ///     Hot key was pressed and suppressed.
-    /// </summary>
+    // hotkey pressed and suppressed.
     DownSuppressed,
 
-    /// <summary>
-    ///     Hot key down simulated (suppress released).
-    /// </summary>
+    // hotkey down simulated (suppress released).
     Down
 }

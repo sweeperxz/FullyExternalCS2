@@ -129,10 +129,6 @@ public static class Utility
         };
     }
 
-
-    /// <summary>
-    ///     https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-    /// </summary>
     public static bool IsKeyDown(this Keys key)
     {
         return (User32.GetAsyncKeyState((int)key) & 0x8000) != 0;
@@ -141,14 +137,14 @@ public static class Utility
 
     public static void MouseMove(int x, int y)
     {
-        var inputs = new INPUT[1];
+        var inputs = new Input[1];
 
-        inputs[0] = new INPUT
+        inputs[0] = new Input
         {
-            type = InputType.Mouse,
-            union = new InputUnion
+            Type = InputType.Mouse,
+            Union = new InputUnion
             {
-                mouse = new MOUSEINPUT
+                mouse = new MouseInput
                 {
                     deltaX = x,
                     deltaY = y,
@@ -157,59 +153,59 @@ public static class Utility
             }
         };
 
-        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
     }
 
 
     public static void MouseLeftDown()
     {
-        var inputs = new INPUT[1];
+        var inputs = new Input[1];
 
-        inputs[0] = new INPUT
+        inputs[0] = new Input
         {
-            type = InputType.Mouse,
-            union = new InputUnion
+            Type = InputType.Mouse,
+            Union = new InputUnion
             {
-                mouse = new MOUSEINPUT
+                mouse = new MouseInput
                 {
                     flags = MouseFlags.LeftDown
                 }
             }
         };
 
-        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
     }
 
 
     public static void MouseLeftUp()
     {
-        var inputs = new INPUT[1];
+        var inputs = new Input[1];
 
-        inputs[0] = new INPUT
+        inputs[0] = new Input
         {
-            type = InputType.Mouse,
-            union = new InputUnion
+            Type = InputType.Mouse,
+            Union = new InputUnion
             {
-                mouse = new MOUSEINPUT
+                mouse = new MouseInput
                 {
                     flags = MouseFlags.LeftUp
                 }
             }
         };
 
-        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
     }
 
     public static void PressSpace()
     {
-        var inputs = new INPUT[2];
+        var inputs = new Input[2];
 
-        inputs[0] = new INPUT
+        inputs[0] = new Input
         {
-            type = InputType.Keyboard,
-            union = new InputUnion
+            Type = InputType.Keyboard,
+            Union = new InputUnion
             {
-                keyboard = new KEYBDINPUT
+                keyboard = new KeyboardInput
                 {
                     virtualKey = (ushort)Keys.Right,
                     scanCode = 0,
@@ -220,12 +216,12 @@ public static class Utility
             }
         };
 
-        inputs[1] = new INPUT
+        inputs[1] = new Input
         {
-            type = InputType.Keyboard,
-            union = new InputUnion
+            Type = InputType.Keyboard,
+            Union = new InputUnion
             {
-                keyboard = new KEYBDINPUT
+                keyboard = new KeyboardInput
                 {
                     virtualKey = (ushort)Keys.Right,
                     scanCode = 0,
@@ -236,12 +232,12 @@ public static class Utility
             }
         };
 
-        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
     }
 
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct KEYBDINPUT
+    public struct KeyboardInput
     {
         public ushort virtualKey;
         public ushort scanCode;
@@ -251,7 +247,7 @@ public static class Utility
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct MOUSEINPUT
+    public struct MouseInput
     {
         public int deltaX;
         public int deltaY;
@@ -262,7 +258,7 @@ public static class Utility
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct HARDWAREINPUT
+    public struct HardwareInput
     {
         public uint message;
         public ushort wParamL;
@@ -272,15 +268,15 @@ public static class Utility
     [StructLayout(LayoutKind.Explicit)]
     public struct InputUnion
     {
-        [FieldOffset(0)] public MOUSEINPUT mouse;
-        [FieldOffset(0)] public KEYBDINPUT keyboard;
-        [FieldOffset(0)] public HARDWAREINPUT hardware;
+        [FieldOffset(0)] public MouseInput mouse;
+        [FieldOffset(0)] public KeyboardInput keyboard;
+        [FieldOffset(0)] public HardwareInput hardware;
     }
 
-    public struct INPUT
+    public struct Input
     {
-        public InputType type;
-        public InputUnion union;
+        public InputType Type;
+        public InputUnion Union;
     }
 
 
@@ -314,7 +310,7 @@ public static class Utility
         var buffer = ReadBytes(process.Handle, lpBaseAddress, maxLength);
         var nullCharIndex = Array.IndexOf(buffer, (byte)'\0');
         return nullCharIndex >= 0
-            ? Encoding.UTF8.GetString(buffer, 0, nullCharIndex).Trim()
+            ? Encoding.UTF8.GetString(buffer.AsSpan(0, nullCharIndex + 1)).Trim()
             : Encoding.UTF8.GetString(buffer).Trim();
     }
 

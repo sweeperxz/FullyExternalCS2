@@ -1,4 +1,3 @@
-using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using SharpDX;
@@ -14,16 +13,11 @@ public class Entity(int index) : EntityBase
     protected internal bool IsSpotted { get; private set; }
 
     protected internal string Name { get; private set; } = null!;
-    
-    private IntPtr CurrentWeapon { get; set; }
-
-    private short WeaponIndex { get; set; }
 
     protected internal int IsinScope { get; private set; }
 
     protected internal int FlashAlpha { get; private set; }
 
-    protected internal string CurrentWeaponName { get; private set; } = null!;
 
     public Dictionary<string, Vector3> BonePos { get; } = new()
     {
@@ -74,10 +68,6 @@ public class Entity(int index) : EntityBase
 
         Dormant = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_bDormant);
         IsSpotted = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_entitySpottedState + 0x8);
-        CurrentWeapon = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pClippingWeapon);
-        WeaponIndex = gameProcess.Process.Read<short>(CurrentWeapon + Offsets.m_AttributeManager + Offsets.m_Item +
-                                                      Offsets.m_iItemDefinitionIndex);
-        CurrentWeaponName = Enum.GetName(typeof(WeaponIndexes), WeaponIndex)!;
         IsinScope = gameProcess.Process.Read<int>(AddressBase + Offsets.m_bIsScoped);
         FlashAlpha = gameProcess.Process.Read<int>(AddressBase + Offsets.m_flFlashDuration);
         Name = gameProcess.Process.ReadString(ControllerBase + Offsets.m_iszPlayerName);

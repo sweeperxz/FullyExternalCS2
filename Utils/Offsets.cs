@@ -144,7 +144,6 @@ public abstract class Offsets
         destData.m_iszPlayerName = sourceDataClient.CBasePlayerController.data?.m_iszPlayerName.value!;
 
 
-        // Write updated destination JSON
         string updatedDestJson = JsonConvert.SerializeObject(destData, Formatting.Indented);
         File.WriteAllText(destPath, updatedDestJson);
 

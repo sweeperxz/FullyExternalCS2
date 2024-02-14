@@ -80,7 +80,8 @@ public class AimBot : ThreadedServiceBase
 
         if (mouseMessage != MouseMessages.WmLButtonDown) return true;
 
-        if (!GameProcess.IsValid || !GameData.Player.IsAlive() || TriggerBot.IsHotKeyDown()) return true;
+        if (!GameProcess.IsValid || !GameData.Player.IsAlive() || TriggerBot.IsHotKeyDown() ||
+            GameData.Player.IsGrenade()) return true;
 
         if (Monitor.TryEnter(_stateLock))
         {

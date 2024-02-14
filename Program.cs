@@ -7,14 +7,10 @@ using Application = System.Windows.Application;
 
 namespace CS2Cheat;
 
-/// <summary>
-///     Main program class for the CS2Cheat application.
-/// </summary>
 public class Program :
     Application,
     IDisposable
 {
-    /// <summary />
     private Program()
     {
         Offsets.UpdateOffsets();
@@ -22,53 +18,47 @@ public class Program :
         Exit += (_, _) => Dispose();
     }
 
-    /// <inheritdoc cref="GameProcess" />
-    private GameProcess GameProcess { get; set; }
+    private GameProcess GameProcess { get; set; } = null!;
 
-    /// <inheritdoc cref="GameData" />
-    private GameData GameData { get; set; }
+    private GameData GameData { get; set; } = null!;
 
-    /// <inheritdoc cref="WindowOverlay" />
-    private WindowOverlay WindowOverlay { get; set; }
+    private WindowOverlay WindowOverlay { get; set; } = null!;
 
-    /// <inheritdoc cref="Graphics" />
 
-    private Graphics.Graphics Graphics { get; set; }
+    private Graphics.Graphics Graphics { get; set; } = null!;
 
-    private TriggerBot Trigger { get; set; }
+    private TriggerBot Trigger { get; set; } = null!;
 
-    private AimBot AimBot { get; set; }
+    private AimBot AimBot { get; set; } = null!;
 
-    /// <inheritdoc />
     public void Dispose()
     {
         GameProcess.Dispose();
-        GameProcess = default;
+        GameProcess = default!;
 
         GameData.Dispose();
-        GameData = default;
+        GameData = default!;
 
         WindowOverlay.Dispose();
-        WindowOverlay = default;
+        WindowOverlay = default!;
 
         Graphics.Dispose();
-        Graphics = default;
+        Graphics = default!;
 
         Trigger.Dispose();
-        Trigger = default;
+        Trigger = default!;
 
         AimBot.Dispose();
-        AimBot = default;
+        AimBot = default!;
     }
 
-    /// <summary />
+    [STAThread]
     public static void Main()
     {
         new Program().Run();
     }
 
 
-    /// <summary />
     private void InitializeComponent()
     {
         GameProcess = new GameProcess();

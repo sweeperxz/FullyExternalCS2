@@ -24,7 +24,6 @@ public class GlobalHook :
     {
         ReleaseUnmanagedResources();
 
-        // prevent destructor (since we already release unmanaged resources)
         GC.SuppressFinalize(this);
     }
 
@@ -35,7 +34,6 @@ public class GlobalHook :
 
     private void ReleaseUnmanagedResources()
     {
-        // unhook and reset handle
         UnHook(HookHandle);
         HookHandle = default;
         HookProc = default;
