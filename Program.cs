@@ -24,7 +24,6 @@ public class Program :
 
     private WindowOverlay WindowOverlay { get; set; } = null!;
 
-
     private Graphics.Graphics Graphics { get; set; } = null!;
 
     private TriggerBot Trigger { get; set; } = null!;
@@ -52,7 +51,6 @@ public class Program :
         AimBot = default!;
     }
 
-    [STAThread]
     public static void Main()
     {
         new Program().Run();

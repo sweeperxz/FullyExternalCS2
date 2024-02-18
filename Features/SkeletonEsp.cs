@@ -20,8 +20,8 @@ public static class SkeletonEsp
 
     private static void DrawBones(Graphics.Graphics graphics, Entity entity, Color color)
     {
-        (string, string)[] bones = new[]
-        {
+        (string, string)[] bones =
+        [
             ("head", "neck_0"),
             ("neck_0", "spine_1"),
             ("spine_1", "spine_2"),
@@ -38,7 +38,7 @@ public static class SkeletonEsp
             ("pelvis", "leg_upper_R"),
             ("leg_upper_R", "leg_lower_R"),
             ("leg_lower_R", "ankle_R")
-        };
+        ];
 
         foreach (var (startBone, endBone) in bones)
             graphics.DrawLineWorld(color, entity.BonePos[startBone], entity.BonePos[endBone]);
