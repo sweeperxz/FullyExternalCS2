@@ -8,20 +8,31 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 
 ![SS](assets/photo.png)
 
-#### Features
+### Features
 
-- AimBot on key with RCS (default = LBUTTON) (Visibility check)
-- Esp Skeleton (Color team)
-- Esp Box with health bar
-- Esp health numbers
-- Esp name
-- Esp enemy weapon
-- Esp enemy flags (Scoped, Flashed, Shifting, Shifting in scope )
+#### AimBot
+- Key activation with RCS (default = LBUTTON)
+- Visibility check
+
+#### Esp
+- Skeleton (Color team)
+- Box with health bar
+- Health numbers
+- Name
+- Enemy weapon
+- Enemy flags (Scoped, Flashed, Shifting, Shifting in scope)
+
+#### Other Visuals
 - Aim Crosshair
-- Trigger Bot on key (default = LAlt)
-- BunnyHop (
-  Read [this](https://github.com/sweeperxz/FullyExternalCS2/blob/31f90c2fe4825ac86ba6862531dc633ab6d3aef0/Data/Player.cs#L60))
-- OBS bypass
+
+#### Trigger Bot
+- Key activation (default = LAlt)
+
+#### Miscellaneous
+- BunnyHop ([Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/31f90c2fe4825ac86ba6862531dc633ab6d3aef0/Data/Player.cs#L60))
+- OBS Bypass
+
+#### System
 - Auto update offsets
 
 ### Getting started
