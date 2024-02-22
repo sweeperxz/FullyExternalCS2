@@ -24,6 +24,7 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 
 #### Other Visuals
 - Aim Crosshair
+- Bomb timer
 
 #### Trigger Bot
 - Key activation (default = LAlt)
