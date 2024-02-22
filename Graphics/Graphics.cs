@@ -39,8 +39,8 @@ public class Graphics : ThreadedServiceBase
     public GameProcess GameProcess { get; private set; }
     public GameData GameData { get; private set; }
     private Device Device { get; set; }
-    private Font FontAzonix64 { get; set; }
-    public Font FontConsolas32 { get; set; }
+    public Font FontAzonix64 { get; private set; }
+    public Font FontConsolas32 { get; private set; }
     private List<Vertex> Vertices { get; } = [];
 
 
@@ -82,7 +82,7 @@ public class Graphics : ThreadedServiceBase
 
         var azonix64 = new FontDescription
         {
-            Height = 64,
+            Height = 32,
             Italic = false,
             CharacterSet = FontCharacterSet.Ansi,
             FaceName = "Tahoma",
@@ -176,6 +176,7 @@ public class Graphics : ThreadedServiceBase
         WindowOverlay.Draw(GameProcess, this);
         SkeletonEsp.Draw(this);
         EspBox.Draw(this);
+        BombTimer.Draw(this);
     }
 
 

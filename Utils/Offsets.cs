@@ -37,6 +37,10 @@ public abstract class Offsets
     public static int m_bIsScoped;
     public static int m_flFlashDuration;
     public static int m_iszPlayerName;
+    public static int dwPlantedC4;
+    public static int dwGlobalVars;
+    public static int m_nBombSite; 
+    public static int m_bBombDefused; 
 
 
     public static readonly Dictionary<string, int> Bones = new()
@@ -105,6 +109,10 @@ public abstract class Offsets
             m_bIsScoped = destData?.m_bIsScoped;
             m_flFlashDuration = destData?.m_flFlashDuration;
             m_iszPlayerName = destData?.m_iszPlayerName;
+            dwPlantedC4 = destData?.dwPlantedC4;
+            dwGlobalVars = destData?.dwGlobalVars;
+            m_nBombSite = destData?.m_nBombSite;
+            m_bBombDefused = destData?.m_bBombDefused;
             return;
         }
 
@@ -119,6 +127,8 @@ public abstract class Offsets
         destData.dwPlantedC4 = sourceDataDw.client_dll?.data?.dwPlantedC4?.value!;
         destData.dwLocalPlayerPawn = sourceDataDw.client_dll?.data?.dwLocalPlayerPawn?.value!;
         destData.dwViewAngles = sourceDataDw.client_dll?.data?.dwViewAngles?.value!;
+        destData.dwPlantedC4 = sourceDataDw.client_dll?.data?.dwPlantedC4?.value!;
+        destData.dwGlobalVars = sourceDataDw.client_dll?.data?.dwGlobalVars?.value!;
 
         // client.dll
         destData.m_fFlags = sourceDataClient.C_BaseEntity?.data?.m_fFlags?.value!;
@@ -142,6 +152,8 @@ public abstract class Offsets
         destData.m_bIsScoped = sourceDataClient.C_CSPlayerPawnBase.data?.m_bIsScoped.value!;
         destData.m_flFlashDuration = sourceDataClient.C_CSPlayerPawnBase.data?.m_flFlashDuration.value!;
         destData.m_iszPlayerName = sourceDataClient.CBasePlayerController.data?.m_iszPlayerName.value!;
+        destData.m_nBombSite = sourceDataClient.C_PlantedC4.data?.m_nBombSite.value!;
+        destData.m_bBombDefused = sourceDataClient.C_PlantedC4.data?.m_bBombDefused.value!;
 
 
         string updatedDestJson = JsonConvert.SerializeObject(destData, Formatting.Indented);
@@ -181,6 +193,10 @@ public abstract class Offsets
         m_bIsScoped = updatedDestData?.m_bIsScoped;
         m_flFlashDuration = updatedDestData?.m_flFlashDuration;
         m_iszPlayerName = updatedDestData?.m_iszPlayerName;
+        dwPlantedC4 = updatedDestData?.dwPlantedC4;
+        dwGlobalVars = updatedDestData?.dwGlobalVars;
+        m_nBombSite = updatedDestData?.m_nBombSite;
+        m_bBombDefused = updatedDestData?.m_bBombDefused;
     }
 
     private static dynamic FetchJsonAndDeserialize(string url)

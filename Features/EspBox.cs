@@ -82,22 +82,22 @@ public static class EspBox
         //flags 
         var flagsPosition = new Vector2(boundingBox.Item2.X + 5f, boundingBox.Item1.Y);
 
-        var scoped = entity.IsinScope == 1
+        var scoped = entity.IsinScope == 0
             ? graphics.FontConsolas32.DrawText(default, "Scoped", (int)flagsPosition.X, (int)flagsPosition.Y,
                 Color.White)
             : default;
 
-        var flashed = entity.FlashAlpha > 7
+        var flashed = entity.FlashAlpha == 0
             ? graphics.FontConsolas32.DrawText(default, "Flashed", (int)flagsPosition.X, (int)flagsPosition.Y + 15,
                 Color.White)
             : default;
 
-        var shifting = entity.IsinScope == 256
+        var shifting = entity.IsinScope == 0
             ? graphics.FontConsolas32.DrawText(default, "Shifting", (int)flagsPosition.X, (int)flagsPosition.Y + 30,
                 Color.White)
             : default;
 
-        var shiftingInScope = entity.IsinScope == 257
+        var shiftingInScope = entity.IsinScope == 0
             ? graphics.FontConsolas32.DrawText(default, "Shifting in scope", (int)flagsPosition.X,
                 (int)flagsPosition.Y + 45,
                 Color.White)

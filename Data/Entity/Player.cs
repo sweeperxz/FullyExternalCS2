@@ -17,7 +17,6 @@ public class Player : EntityBase
     private Vector3 ViewAngles { get; set; }
     public Vector3 AimPunchAngle { get; private set; }
     public Vector3 AimDirection { get; private set; }
-    public int TargetedEntityIndex { get; private set; }
 
     public Vector3 EyeDirection { get; private set; }
 
@@ -49,13 +48,12 @@ public class Player : EntityBase
         EyePosition = Origin + ViewOffset;
         ViewAngles = gameProcess.ModuleClient.Read<Vector3>(Offsets.dwViewAngles);
         AimPunchAngle = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_AimPunchAngle);
-        TargetedEntityIndex = gameProcess.Process.Read<int>(AddressBase + Offsets.m_iIDEntIndex);
         FFlags = gameProcess.Process.Read<int>(AddressBase + Offsets.m_fFlags);
 
 
         EyeDirection =
             GraphicsMath.GetVectorFromEulerAngles(ViewAngles.X.DegreeToRadian(), ViewAngles.Y.DegreeToRadian());
-        AimDirection = AimDirection = GraphicsMath.GetVectorFromEulerAngles
+        AimDirection = GraphicsMath.GetVectorFromEulerAngles
         (
             (ViewAngles.X + AimPunchAngle.X * Offsets.WeaponRecoilScale).DegreeToRadian(),
             (ViewAngles.Y + AimPunchAngle.Y * Offsets.WeaponRecoilScale).DegreeToRadian()
@@ -82,13 +80,9 @@ public class Player : EntityBase
 
     public bool IsGrenade()
     {
-        var grenades = new HashSet<string>
+        return new HashSet<string>
         {
-            WeaponIndexes.Smokegrenade.ToString(),
-            WeaponIndexes.Flashbang.ToString(),
-            WeaponIndexes.Hegrenade.ToString()
-        };
-
-        return grenades.Contains(CurrentWeaponName);
+            nameof(WeaponIndexes.Smokegrenade), nameof(WeaponIndexes.Flashbang), nameof(WeaponIndexes.Hegrenade)
+        }.Contains(CurrentWeaponName);
     }
 }

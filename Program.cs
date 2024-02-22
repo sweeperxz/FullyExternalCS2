@@ -30,6 +30,8 @@ public class Program :
 
     private AimBot AimBot { get; set; } = null!;
 
+    private BombTimer BombTimer { get; set; } = null!;
+
     public void Dispose()
     {
         GameProcess.Dispose();
@@ -49,6 +51,9 @@ public class Program :
 
         AimBot.Dispose();
         AimBot = default!;
+        
+        BombTimer.Dispose();
+        BombTimer = default!;
     }
 
     public static void Main()
@@ -76,6 +81,10 @@ public class Program :
 
         AimBot = new AimBot(GameProcess, GameData);
         AimBot.Start();
+
+        BombTimer = new BombTimer(Graphics);
+        BombTimer.Start();
+        
 
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
     }
