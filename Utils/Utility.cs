@@ -64,6 +64,9 @@ public static class Utility
 
     private const double PiOver180 = Math.PI / 180.0;
 
+    private static readonly double Sqrt3 = Math.Sqrt(3);
+    private static readonly double Sqrt5 = Math.Sqrt(5);
+
     public static double DegreeToRadian(this double degree)
     {
         return degree * PiOver180;
@@ -156,6 +159,62 @@ public static class Utility
         User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
     }
 
+    /// <summary>
+    ///     https://ben.land/post/2021/04/25/windmouse-human-mouse-movement/
+    /// </summary>
+    /// <param name="G_0">magnitude of the gravitational fornce</param>
+    /// <param name="W_0">magnitude of the wind force fluctuations</param>
+    /// <param name="M_0"> maximum step size (velocity clip threshold)</param>
+    /// <param name="D_0">distance where wind behavior changes from random to damped</param>
+    public static void WindMouseMove(int start_x, int start_y, int dest_x, int dest_y, double G_0, double W_0,
+        double M_0,
+        double D_0)
+    {
+        double v_x = 0, v_y = 0, W_x = 0, W_y = 0;
+
+        var rand = new Random();
+
+        while (true)
+        {
+            var dist = Math.Sqrt(Math.Pow(dest_x - start_x, 2) + Math.Pow(dest_y - start_y, 2));
+
+            if (dist < 1) break;
+
+            var W_mag = Math.Min(W_0, dist);
+
+            if (dist >= D_0)
+            {
+                W_x = W_x / Sqrt3 + (rand.NextDouble() * 2 - 1) * W_mag / Sqrt5;
+                W_y = W_y / Sqrt3 + (rand.NextDouble() * 2 - 1) * W_mag / Sqrt5;
+            }
+            else
+            {
+                W_x /= Sqrt3;
+                W_y /= Sqrt3;
+                if (M_0 < 3)
+                    M_0 = 3 + rand.NextDouble() * 3;
+                else
+                    M_0 /= Sqrt5;
+            }
+
+            v_x += W_x + G_0 * (dest_x - start_x) / dist;
+            v_y += W_y + G_0 * (dest_y - start_y) / dist;
+
+            var v_mag = Math.Sqrt(v_x * v_x + v_y * v_y);
+            if (v_mag > M_0)
+            {
+                var v_clip = M_0 / 2 + rand.NextDouble() * M_0 / 2;
+                v_x = v_x / v_mag * v_clip;
+                v_y = v_y / v_mag * v_clip;
+            }
+
+            start_x += (int)v_x;
+            start_y += (int)v_y;
+
+            MouseMove(start_x, start_y);
+        }
+    }
+
 
     public static void MouseLeftDown()
     {
@@ -207,7 +266,7 @@ public static class Utility
             {
                 keyboard = new KeyboardInput
                 {
-                    virtualKey = (ushort)Keys.Right,
+                    virtualKey = (ushort)Keys.F24,
                     scanCode = 0,
                     flags = 0,
                     timeStamp = 0,
@@ -223,7 +282,7 @@ public static class Utility
             {
                 keyboard = new KeyboardInput
                 {
-                    virtualKey = (ushort)Keys.Right,
+                    virtualKey = (ushort)Keys.F24,
                     scanCode = 0,
                     flags = KeyboardFlags.KeyUp,
                     timeStamp = 0,

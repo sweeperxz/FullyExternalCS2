@@ -8,7 +8,6 @@ using Process.NET.Native.Types;
 using SharpDX;
 using Point = System.Drawing.Point;
 
-
 namespace CS2Cheat.Features;
 
 public class AimBot : ThreadedServiceBase
@@ -16,12 +15,26 @@ public class AimBot : ThreadedServiceBase
     /// <summary>
     ///     Smooth for aimbot, the higher the value the smoother it is
     /// </summary>
-    private const float AimBotSmoothing = 1f;
+    private const float AimBotSmoothing = 15f;
 
     /// <summary>
     ///     FOV aimbot, the higher the value, the higher the radius of enemy detection.
     /// </summary>
     private static readonly float AimBotFov = 30f.DegreeToRadian();
+
+    /// <summary>
+    ///  changed for a different method of AIM 
+    /// </summary>
+    private static MouseMoveMethod MouseMoveMethod =>
+        MouseMoveMethod.TryMouseMoveNew; 
+
+    /// <summary>
+    ///     A bone to aim for
+    /// </summary>
+    private static string AimBonePos => "head";
+
+
+    private static double _anglePerPixel;
 
     private readonly object _stateLock = new();
 
@@ -32,13 +45,7 @@ public class AimBot : ThreadedServiceBase
         MouseHook = new GlobalHook(HookType.WH_MOUSE_LL, MouseHookCallback);
     }
 
-    private double AnglePerPixel { get; set; } = 0.00069;
     private bool IsCalibrated { get; set; }
-
-    /// <summary>
-    ///     A bone to aim for
-    /// </summary>
-    private static string AimBonePos => "head";
 
     protected override string ThreadName => nameof(AimBot);
 
@@ -118,11 +125,12 @@ public class AimBot : ThreadedServiceBase
         if (GetAimTarget(out var aimAngles)) GetAimPixels(aimAngles, out aimPixels);
 
         var wait = TryMouseDown();
-        wait |= TryMouseMove(aimPixels);
+        wait |= MouseMoveMethod == MouseMoveMethod.TryMouseMoveOld
+            ? TryMouseMoveOld(aimPixels)
+            : TryMouseMoveNew(aimPixels);
 
         if (wait) Thread.Sleep(20);
     }
-
 
     private bool GetAimTarget(out Vector2 aimAngles)
     {
@@ -165,19 +173,26 @@ public class AimBot : ThreadedServiceBase
         );
     }
 
-    private void GetAimPixels(Vector2 aimAngles, out Point aimPixels)
+    private static void GetAimPixels(Vector2 aimAngles, out Point aimPixels)
     {
         var fovRatio = 90.0 / Player.Fov;
         aimPixels = new Point(
-            (int)Math.Round(aimAngles.X / AnglePerPixel * fovRatio),
-            (int)Math.Round(aimAngles.Y / AnglePerPixel * fovRatio)
+            (int)Math.Round(aimAngles.X / _anglePerPixel * fovRatio),
+            (int)Math.Round(aimAngles.Y / _anglePerPixel * fovRatio)
         );
     }
 
-    private static bool TryMouseMove(Point aimPixels)
+    private static bool TryMouseMoveOld(Point aimPixels)
     {
         if (aimPixels is { X: 0, Y: 0 }) return false;
         Utility.MouseMove(aimPixels.X, aimPixels.Y);
+        return true;
+    }
+
+    private static bool TryMouseMoveNew(Point aimPixels)
+    {
+        if (aimPixels is { X: 0, Y: 0 }) return false;
+        Utility.WindMouseMove(0, 0, aimPixels.X, aimPixels.Y, 9.0, 3.0, 15.0, 12.0);
         return true;
     }
 
@@ -203,7 +218,7 @@ public class AimBot : ThreadedServiceBase
 
     private void Calibrate()
     {
-        AnglePerPixel = new[]
+        _anglePerPixel = new[]
         {
             CalibrationMeasureAnglePerPixel(100),
             CalibrationMeasureAnglePerPixel(-200),

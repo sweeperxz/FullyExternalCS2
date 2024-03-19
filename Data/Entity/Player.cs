@@ -58,22 +58,18 @@ public class Player : EntityBase
             (ViewAngles.X + AimPunchAngle.X * Offsets.WeaponRecoilScale).DegreeToRadian(),
             (ViewAngles.Y + AimPunchAngle.Y * Offsets.WeaponRecoilScale).DegreeToRadian()
         );
+
         /*
         for bunnyhop to work correctly you need to write this
-        alias j "+jump;-jump";
-        bind space j;
-        bind rightarrow j;
-        fps_max 32;
-        fps_max 0;
+        alias hop "+jump;-jump"; bind space hop; bind f24 hop; fps_max 32; fps_max 0;
         */
-
 
         if (Keys.Space.IsKeyDown() && (FFlags & 1) > 0)
         {
-            Thread.Sleep(7);
+            Task.Delay(1);
             Utility.PressSpace();
+            return true;
         }
-
 
         return true;
     }
@@ -82,7 +78,8 @@ public class Player : EntityBase
     {
         return new HashSet<string>
         {
-            nameof(WeaponIndexes.Smokegrenade), nameof(WeaponIndexes.Flashbang), nameof(WeaponIndexes.Hegrenade)
+            nameof(WeaponIndexes.Smokegrenade), nameof(WeaponIndexes.Flashbang), nameof(WeaponIndexes.Hegrenade),
+            nameof(WeaponIndexes.Molotov)
         }.Contains(CurrentWeaponName);
     }
 }

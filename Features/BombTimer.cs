@@ -1,11 +1,12 @@
+using System.Diagnostics;
 using CS2Cheat.Utils;
 using Color = SharpDX.Color;
-using System.Diagnostics;
 
 namespace CS2Cheat.Features;
 
 internal class BombTimer(Graphics.Graphics graphics) : ThreadedServiceBase
 {
+    private static readonly Stopwatch BombTime = new();
     private IntPtr TempC4 { get; set; }
 
     private IntPtr PlantedC4 { get; set; }
@@ -13,8 +14,6 @@ internal class BombTimer(Graphics.Graphics graphics) : ThreadedServiceBase
     private static string BombPlanted { get; set; } = null!;
 
     private static string BombSite { get; set; } = null!;
-
-    private static readonly Stopwatch BombTime = new();
 
     protected override void FrameAction()
     {

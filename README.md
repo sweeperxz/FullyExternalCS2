@@ -11,10 +11,12 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 ### Features
 
 #### AimBot
+
 - Key activation with RCS (default = LBUTTON)
 - Visibility check
 
 #### Esp
+
 - Skeleton (Color team)
 - Box with health bar
 - Health numbers
@@ -23,17 +25,21 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 - Enemy flags (Scoped, Flashed, Shifting, Shifting in scope)
 
 #### Other Visuals
+
 - Aim Crosshair
 - Bomb timer
 
 #### Trigger Bot
+
 - Key activation (default = LAlt)
 
 #### Miscellaneous
-- BunnyHop ([Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/31f90c2fe4825ac86ba6862531dc633ab6d3aef0/Data/Player.cs#L60))
+
+- BunnyHop ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/31f90c2fe4825ac86ba6862531dc633ab6d3aef0/Data/Player.cs#L60) )
 - OBS Bypass
 
 #### System
+
 - Auto update offsets
 
 ### Getting started
