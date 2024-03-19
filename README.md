@@ -35,7 +35,7 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 
 #### Miscellaneous
 
-- BunnyHop ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/31f90c2fe4825ac86ba6862531dc633ab6d3aef0/Data/Player.cs#L60) )
+- BunnyHop ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/151355b47373acdc3ccaa6f526e94388c4e71f2b/Data/Entity/Player.cs#L64) )
 - OBS Bypass
 
 #### System
