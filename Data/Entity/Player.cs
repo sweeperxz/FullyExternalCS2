@@ -19,10 +19,14 @@ public class Player : EntityBase
     public Vector3 AimDirection { get; private set; }
 
     public Vector3 EyeDirection { get; private set; }
+    
+    public Vector3 Velocity { get; private set; }
+    
+    
 
     public static int Fov => 90;
 
-    private int FFlags { get; set; }
+    public int FFlags { get; private set; }
 
 
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
@@ -49,7 +53,7 @@ public class Player : EntityBase
         ViewAngles = gameProcess.ModuleClient.Read<Vector3>(Offsets.dwViewAngles);
         AimPunchAngle = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_AimPunchAngle);
         FFlags = gameProcess.Process.Read<int>(AddressBase + Offsets.m_fFlags);
-
+        Velocity = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_vecAbsVelocity);
 
         EyeDirection =
             GraphicsMath.GetVectorFromEulerAngles(ViewAngles.X.DegreeToRadian(), ViewAngles.Y.DegreeToRadian());

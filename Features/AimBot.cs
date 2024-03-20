@@ -15,7 +15,7 @@ public class AimBot : ThreadedServiceBase
     /// <summary>
     ///     Smooth for aimbot, the higher the value the smoother it is
     /// </summary>
-    private const float AimBotSmoothing = 15f;
+    private const float AimBotSmoothing = 7f;
 
     /// <summary>
     ///     FOV aimbot, the higher the value, the higher the radius of enemy detection.

@@ -40,8 +40,11 @@ public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedSe
         var entity = GameProcess.Process.Read<IntPtr>(entityEntry + 120 * (entityId & 0x1FF));
         var entityTeam = GameProcess.Process.Read<int>(entity + Offsets.m_iTeamNum);
 
-        if (GameData.Player.Team == entityTeam.ToTeam()) return;
 
+        var shouldTrigger = (GameData.Player.Team != entityTeam.ToTeam() || GameData.Player.FFlags == 65664) &&
+                            Math.Abs(GameData.Player.Velocity.Z) <= 18f;
+
+        if (!shouldTrigger) return;
         Task.Delay(5);
         Utility.MouseLeftDown();
         Utility.MouseLeftUp();

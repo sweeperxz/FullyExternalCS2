@@ -32,6 +32,7 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 #### Trigger Bot
 
 - Key activation (default = LAlt)
+- [No Spread](https://streamable.com/0iax7f)
 
 #### Miscellaneous
 

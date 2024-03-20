@@ -41,6 +41,7 @@ public abstract class Offsets
     public static int dwGlobalVars;
     public static int m_nBombSite; 
     public static int m_bBombDefused; 
+    public static int m_vecAbsVelocity;
 
 
     public static readonly Dictionary<string, int> Bones = new()
@@ -113,6 +114,7 @@ public abstract class Offsets
             dwGlobalVars = destData?.dwGlobalVars;
             m_nBombSite = destData?.m_nBombSite;
             m_bBombDefused = destData?.m_bBombDefused;
+            m_vecAbsVelocity = destData?.m_vecAbsVelocity;
             return;
         }
 
@@ -154,6 +156,7 @@ public abstract class Offsets
         destData.m_iszPlayerName = sourceDataClient.CBasePlayerController.data?.m_iszPlayerName.value!;
         destData.m_nBombSite = sourceDataClient.C_PlantedC4.data?.m_nBombSite.value!;
         destData.m_bBombDefused = sourceDataClient.C_PlantedC4.data?.m_bBombDefused.value!;
+        destData.m_vecAbsVelocity = sourceDataClient.C_BaseEntity .data?.m_vecAbsVelocity.value!;
 
 
         string updatedDestJson = JsonConvert.SerializeObject(destData, Formatting.Indented);
@@ -197,6 +200,7 @@ public abstract class Offsets
         dwGlobalVars = updatedDestData?.dwGlobalVars;
         m_nBombSite = updatedDestData?.m_nBombSite;
         m_bBombDefused = updatedDestData?.m_bBombDefused;
+        m_vecAbsVelocity = updatedDestData?.m_vecAbsVelocity;
     }
 
     private static dynamic FetchJsonAndDeserialize(string url)
