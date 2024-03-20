@@ -39,9 +39,12 @@ public abstract class Offsets
     public static int m_iszPlayerName;
     public static int dwPlantedC4;
     public static int dwGlobalVars;
-    public static int m_nBombSite; 
-    public static int m_bBombDefused; 
+    public static int m_nBombSite;
+    public static int m_bBombDefused;
     public static int m_vecAbsVelocity;
+    public static int m_flDefuseCountDown;
+    public static int m_flC4Blow;
+    public static int m_bBeingDefused;
 
 
     public static readonly Dictionary<string, int> Bones = new()
@@ -114,6 +117,9 @@ public abstract class Offsets
             dwGlobalVars = destData?.dwGlobalVars;
             m_nBombSite = destData?.m_nBombSite;
             m_bBombDefused = destData?.m_bBombDefused;
+            m_flDefuseCountDown = destData?.m_flDefuseCountDown;
+            m_flC4Blow = destData?.m_flC4Blow;
+            m_bBeingDefused = destData?.m_bBeingDefused;
             m_vecAbsVelocity = destData?.m_vecAbsVelocity;
             return;
         }
@@ -155,8 +161,11 @@ public abstract class Offsets
         destData.m_flFlashDuration = sourceDataClient.C_CSPlayerPawnBase.data?.m_flFlashDuration.value!;
         destData.m_iszPlayerName = sourceDataClient.CBasePlayerController.data?.m_iszPlayerName.value!;
         destData.m_nBombSite = sourceDataClient.C_PlantedC4.data?.m_nBombSite.value!;
+        destData.m_flDefuseCountDown = sourceDataClient.C_PlantedC4.data?.m_flDefuseCountDown.value!;
         destData.m_bBombDefused = sourceDataClient.C_PlantedC4.data?.m_bBombDefused.value!;
-        destData.m_vecAbsVelocity = sourceDataClient.C_BaseEntity .data?.m_vecAbsVelocity.value!;
+        destData.m_flC4Blow = sourceDataClient.C_PlantedC4.data?.m_flC4Blow.value!;
+        destData.m_bBeingDefused = sourceDataClient.C_PlantedC4.data?.m_bBeingDefused.value!;
+        destData.m_vecAbsVelocity = sourceDataClient.C_BaseEntity.data?.m_vecAbsVelocity.value!;
 
 
         string updatedDestJson = JsonConvert.SerializeObject(destData, Formatting.Indented);
@@ -200,6 +209,9 @@ public abstract class Offsets
         dwGlobalVars = updatedDestData?.dwGlobalVars;
         m_nBombSite = updatedDestData?.m_nBombSite;
         m_bBombDefused = updatedDestData?.m_bBombDefused;
+        m_flDefuseCountDown = updatedDestData?.m_flDefuseCountDown;
+        m_flC4Blow = updatedDestData?.m_flC4Blow;
+        m_bBeingDefused = updatedDestData?.m_bBeingDefused;
         m_vecAbsVelocity = updatedDestData?.m_vecAbsVelocity;
     }
 

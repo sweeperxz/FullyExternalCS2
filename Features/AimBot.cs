@@ -26,7 +26,7 @@ public class AimBot : ThreadedServiceBase
     ///  changed for a different method of AIM 
     /// </summary>
     private static MouseMoveMethod MouseMoveMethod =>
-        MouseMoveMethod.TryMouseMoveNew; 
+        MouseMoveMethod.TryMouseMoveNew;
 
     /// <summary>
     ///     A bone to aim for

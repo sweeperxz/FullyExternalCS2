@@ -19,10 +19,9 @@ public class Player : EntityBase
     public Vector3 AimDirection { get; private set; }
 
     public Vector3 EyeDirection { get; private set; }
-    
+
     public Vector3 Velocity { get; private set; }
-    
-    
+
 
     public static int Fov => 90;
 

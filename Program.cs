@@ -51,7 +51,7 @@ public class Program :
 
         AimBot.Dispose();
         AimBot = default!;
-        
+
         BombTimer.Dispose();
         BombTimer = default!;
     }
@@ -84,7 +84,7 @@ public class Program :
 
         BombTimer = new BombTimer(Graphics);
         BombTimer.Start();
-        
+
 
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
     }
