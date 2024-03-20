@@ -27,7 +27,7 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 #### Other Visuals
 
 - Aim Crosshair
-- Bomb timer
+- [Bomb timer](https://streamable.com/4mag5y)
 
 #### Trigger Bot
 
@@ -36,7 +36,7 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 
 #### Miscellaneous
 
-- BunnyHop ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/151355b47373acdc3ccaa6f526e94388c4e71f2b/Data/Entity/Player.cs#L64) )
+- [BunnyHop](https://streamable.com/6r5wud) ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/151355b47373acdc3ccaa6f526e94388c4e71f2b/Data/Entity/Player.cs#L64) )
 - OBS Bypass
 
 #### System
