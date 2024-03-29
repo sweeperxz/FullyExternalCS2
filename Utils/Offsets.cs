@@ -71,8 +71,8 @@ public abstract class Offsets
 
     public static void UpdateOffsets()
     {
-        const string offsetsDw = "https://github.com/a2x/cs2-dumper/raw/main/generated/offsets.json";
-        const string offsetsClient = "https://github.com/a2x/cs2-dumper/raw/main/generated/client.dll.json";
+        const string offsetsDw = "https://raw.githubusercontent.com/a2x/cs2-dumper/archive/offsets.json";
+        const string offsetsClient = "https://raw.githubusercontent.com/a2x/cs2-dumper/archive/client.dll.json";
         const string destPath = "offsets.json";
 
         if (!File.Exists(destPath)) File.Create(destPath).Dispose();
