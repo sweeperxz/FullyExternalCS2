@@ -61,7 +61,6 @@ public class Program :
         new Program().Run();
     }
 
-
     private void InitializeComponent()
     {
         GameProcess = new GameProcess();
@@ -84,7 +83,6 @@ public class Program :
 
         BombTimer = new BombTimer(Graphics);
         BombTimer.Start();
-
 
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
     }

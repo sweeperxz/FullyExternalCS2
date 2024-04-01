@@ -22,6 +22,8 @@ public abstract class EntityBase
 
     private short WeaponIndex { get; set; }
 
+    public Vector3 Velocity { get; private set; }
+
 
     public virtual bool IsAlive()
     {
@@ -53,6 +55,7 @@ public abstract class EntityBase
         WeaponIndex = gameProcess.Process.Read<short>(CurrentWeapon + Offsets.m_AttributeManager + Offsets.m_Item +
                                                       Offsets.m_iItemDefinitionIndex);
         CurrentWeaponName = Enum.GetName(typeof(WeaponIndexes), WeaponIndex)!;
+        Velocity = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_vecAbsVelocity);
 
         return true;
     }

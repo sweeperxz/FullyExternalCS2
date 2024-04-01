@@ -12,27 +12,9 @@ namespace CS2Cheat.Features;
 
 public class AimBot : ThreadedServiceBase
 {
-    /// <summary>
-    ///     Smooth for aimbot, the higher the value the smoother it is
-    /// </summary>
-    private const float AimBotSmoothing = 7f;
+    private const float AimBotSmoothing = 3f;
 
-    /// <summary>
-    ///     FOV aimbot, the higher the value, the higher the radius of enemy detection.
-    /// </summary>
-    private static readonly float AimBotFov = 30f.DegreeToRadian();
-
-    /// <summary>
-    ///  changed for a different method of AIM 
-    /// </summary>
-    private static MouseMoveMethod MouseMoveMethod =>
-        MouseMoveMethod.TryMouseMoveNew;
-
-    /// <summary>
-    ///     A bone to aim for
-    /// </summary>
-    private static string AimBonePos => "head";
-
+    private static readonly float AimFov = 15f.DegreeToRadian();
 
     private static double _anglePerPixel;
 
@@ -45,6 +27,11 @@ public class AimBot : ThreadedServiceBase
         MouseHook = new GlobalHook(HookType.WH_MOUSE_LL, MouseHookCallback);
     }
 
+    private static MouseMoveMethod MouseMoveMethod =>
+        MouseMoveMethod.TryMouseMoveNew;
+
+    private static string AimBonePos => "pelvis";
+
     private bool IsCalibrated { get; set; }
 
     protected override string ThreadName => nameof(AimBot);
@@ -53,6 +40,7 @@ public class AimBot : ThreadedServiceBase
     private GameData GameData { get; set; }
     private GlobalHook MouseHook { get; set; }
     private AimBotState State { get; set; }
+    private float CurrentSmoothing { get; set; } = AimBotSmoothing;
 
     public override void Dispose()
     {
@@ -100,6 +88,7 @@ public class AimBot : ThreadedServiceBase
         return true;
     }
 
+
     protected override void FrameAction()
     {
         if (!GameProcess.IsValid || !GameData.Player.IsAlive()) return;
@@ -121,8 +110,23 @@ public class AimBot : ThreadedServiceBase
             Monitor.Exit(_stateLock);
         }
 
-        var aimPixels = Point.Empty;
-        if (GetAimTarget(out var aimAngles)) GetAimPixels(aimAngles, out aimPixels);
+        Point aimPixels;
+        if (GetAimTarget(out var aimAngles))
+        {
+            GetAimPixels(aimAngles, out aimPixels);
+        }
+        else
+        {
+            aimPixels = Point.Empty;
+            aimAngles = new Vector2(0, 0);
+            var rand = new Random();
+            var horizontalRecoil = rand.Next(-3, 4);
+            var verticalRecoil = rand.Next(-5, 6);
+
+
+            aimAngles.X += horizontalRecoil;
+            aimAngles.Y += verticalRecoil;
+        }
 
         var wait = TryMouseDown();
         wait |= MouseMoveMethod == MouseMoveMethod.TryMouseMoveOld
@@ -132,19 +136,25 @@ public class AimBot : ThreadedServiceBase
         if (wait) Thread.Sleep(20);
     }
 
+
     private bool GetAimTarget(out Vector2 aimAngles)
     {
         var minAngleSize = float.MaxValue;
         aimAngles = new Vector2((float)Math.PI, (float)Math.PI);
         var targetFound = false;
+        var aimPosition = Vector3.Zero;
 
         foreach (var entity in GameData.Entities.Where(entity =>
                      entity.IsAlive() && entity.AddressBase != GameData.Player.AddressBase &&
                      entity.Team != GameData.Player.Team && entity.IsSpotted))
         {
-            GetAimAngles(entity.BonePos[AimBonePos], out var angleToBoneSize, out var anglesToBone);
+            aimPosition = entity.BonePos.TryGetValue(AimBonePos, out var entityBonePo)
+                ? entityBonePo
+                : entity.BonePos[AimBonePos];
 
-            if (angleToBoneSize > AimBotFov) continue;
+            GetAimAngles(aimPosition, out var angleToBoneSize, out var anglesToBone);
+
+            if (angleToBoneSize > AimFov) continue;
 
             if (angleToBoneSize < minAngleSize)
             {
@@ -154,24 +164,42 @@ public class AimBot : ThreadedServiceBase
             }
         }
 
-        if (targetFound) aimAngles *= 1 / Math.Max(AimBotSmoothing, 1);
+        if (targetFound)
+        {
+            CurrentSmoothing = AimBotSmoothing;
+
+            var distanceToTarget = Vector3.Distance(GameData.Player.EyePosition, aimPosition);
+            var smoothingAcceleration = Math.Max(1.0f, distanceToTarget / 100.0f);
+
+            CurrentSmoothing *= smoothingAcceleration;
+            CurrentSmoothing = Math.Min(CurrentSmoothing, 50.0f);
+
+            aimAngles *= 1 / Math.Max(CurrentSmoothing, 1);
+        }
+        else
+        {
+            CurrentSmoothing = AimBotSmoothing;
+        }
 
         return targetFound;
     }
+
 
     private void GetAimAngles(Vector3 pointWorld, out float angleSize, out Vector2 aimAngles)
     {
         var aimDirection = GameData.Player.AimDirection;
         var aimDirectionDesired = (pointWorld - GameData.Player.EyePosition).GetNormalized();
 
-        angleSize = aimDirection.GetAngleTo(aimDirectionDesired);
+        var horizontalAngle = aimDirectionDesired.GetSignedAngleTo(aimDirection, new Vector3(0, 0, 1));
+        var verticalAngle = aimDirectionDesired.GetSignedAngleTo(aimDirection,
+            Vector3.Cross(aimDirectionDesired, new Vector3(0, 0, 1)).GetNormalized());
 
-        aimAngles = new Vector2(
-            aimDirectionDesired.GetSignedAngleTo(aimDirection, new Vector3(0, 0, 1)),
-            aimDirectionDesired.GetSignedAngleTo(aimDirection,
-                Vector3.Cross(aimDirectionDesired, new Vector3(0, 0, 1)).GetNormalized())
-        );
+        aimAngles = new Vector2(horizontalAngle, verticalAngle);
+
+
+        angleSize = aimDirection.GetAngleTo(aimDirectionDesired);
     }
+
 
     private static void GetAimPixels(Vector2 aimAngles, out Point aimPixels)
     {

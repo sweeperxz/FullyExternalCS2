@@ -5,18 +5,18 @@ namespace CS2Cheat.Features;
 
 internal class BombTimer(Graphics.Graphics graphics) : ThreadedServiceBase
 {
-    private IntPtr _tempC4;
-    private IntPtr _plantedC4;
     private static string _bombPlanted = string.Empty;
     private static string _bombSite = string.Empty;
     private static bool _isBombPlanted;
-    private IntPtr _globalVars;
-    private float _currentTime;
     private static float _defuseLeft;
     private static float _timeLeft;
     private static float _defuseCountDown;
     private static float _c4Blow;
     private static bool _beingDefused;
+    private float _currentTime;
+    private IntPtr _globalVars;
+    private IntPtr _plantedC4;
+    private IntPtr _tempC4;
 
 
     protected override void FrameAction()
