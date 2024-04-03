@@ -39,7 +39,7 @@ public static class EspBox
         graphics.DrawRectangle(color, boundingBox.Item1, boundingBox.Item2);
 
         var healthBarTopLeft = new Vector2(boundingBox.Item1.X - 10.0f - OutlineThickness, boundingBox.Item1.Y);
-        var healthBarBottomRight = new Vector2(healthBarTopLeft.X + 6.0f, boundingBox.Item2.Y); 
+        var healthBarBottomRight = new Vector2(healthBarTopLeft.X + 6.0f, boundingBox.Item2.Y);
         DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
 
         DrawHealthNumber(graphics, boundingBox.Item1, boundingBox.Item2, entity.Health);
@@ -66,7 +66,7 @@ public static class EspBox
         graphics.DrawRectangle(Color.Green, filledTopLeft, filledBottomRight);
 
         var outlineTopLeft =
-            new Vector2(topLeft.X - OutlineThickness, filledTopLeft.Y - OutlineThickness); 
+            new Vector2(topLeft.X - OutlineThickness, filledTopLeft.Y - OutlineThickness);
         var outlineBottomRight = new Vector2(bottomRight.X + OutlineThickness, bottomRight.Y + OutlineThickness);
         graphics.DrawRectangle(Color.Black, outlineTopLeft, outlineBottomRight);
     }
@@ -121,7 +121,8 @@ public static class EspBox
     {
         var healthText = health.ToString();
         var positionX = (int)(bottomRight.X + 2);
-        var positionY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y) / 2 - graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center).Bottom / 2); 
+        var positionY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y) / 2 -
+                              graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center).Bottom / 2);
 
         graphics.FontConsolas32.DrawText(default, healthText, positionX, positionY, Color.White);
     }

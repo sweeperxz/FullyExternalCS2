@@ -38,13 +38,12 @@ public static class EspAimCrosshair
 
     private static void Draw(Graphics.Graphics graphics, Vector2 pointScreen)
     {
-        const int crosshairRadius = 6; 
+        const int crosshairRadius = 6;
         DrawCrosshair(graphics, pointScreen, crosshairRadius);
     }
 
     private static void DrawCrosshair(Graphics.Graphics graphics, Vector2 pointScreen, int radius)
     {
-        
         var color = Color.White;
 
         graphics.DrawLine(color, pointScreen - new Vector2(radius, 0),
