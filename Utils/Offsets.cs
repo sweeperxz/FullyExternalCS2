@@ -1,5 +1,5 @@
 ﻿using System.Dynamic;
-using System.IO;
+using System.Net.Http;
 using CS2Cheat.DTO.ClientDllDTO;
 using CS2Cheat.Utils.DTO;
 using Newtonsoft.Json;
@@ -46,7 +46,6 @@ public abstract class Offsets
     public static int m_flC4Blow;
     public static int m_bBeingDefused;
 
-
     public static readonly Dictionary<string, int> Bones = new()
     {
         { "head", 6 },
@@ -68,181 +67,119 @@ public abstract class Offsets
         { "ankle_R", 27 }
     };
 
-
-    public static void UpdateOffsets()
+    public static async Task UpdateOffsets()
     {
         try
         {
-            const string offsetsDw = "OffsetData/offsets.json";
-            const string offsetsClient = "OffsetData/client.dll.json";
-            const string destPath = "offsets.json";
-            const string destDirectory = "OffsetData";
+            var sourceDataDw = JsonConvert.DeserializeObject<OffsetsDTO>(
+                await FetchJson("https://raw.githubusercontent.com/a2x/cs2-dumper/main/output/offsets.json"));
+            var sourceDataClient = JsonConvert.DeserializeObject<ClientDllDTO>(
+                await FetchJson("https://raw.githubusercontent.com/a2x/cs2-dumper/main/output/client.dll.json"));
 
+            dynamic destData = new ExpandoObject();
 
-            if (!File.Exists(destPath) || !Directory.Exists(destDirectory)) Directory.CreateDirectory(destDirectory);
-            File.Create(destPath).Dispose();
-
-
-            var sourceDataDw = JsonConvert.DeserializeObject<OffsetsDTO>(FetchJson(offsetsDw));
-            var sourceDataClient = JsonConvert.DeserializeObject<ClientDllDTO>(FetchJson(offsetsClient));
-
-
-            var destJson = File.ReadAllText(destPath);
-            dynamic destData = JsonConvert.DeserializeObject(destJson)!;
-
-            if (destData != null && destData?.dwBuildNumber != 0 && destData?.dwBuildNumber != null &&
-                sourceDataDw!.engine2dll.dwBuildNumber! == (int)destData?.dwBuildNumber!)
-            {
-                dwLocalPlayerPawn = destData?.dwLocalPlayerPawn;
-                m_vOldOrigin = destData?.m_vOldOrigin;
-                m_vecViewOffset = destData?.m_vecViewOffset;
-                m_AimPunchAngle = destData?.m_aimPunchAngle;
-                m_modelState = destData?.m_modelState;
-                m_pGameSceneNode = destData?.m_pGameSceneNode;
-                m_iIDEntIndex = destData?.m_iIDEntIndex;
-                m_lifeState = destData?.m_lifeState;
-                m_iHealth = destData?.m_iHealth;
-                m_iTeamNum = destData?.m_iTeamNum;
-                m_bDormant = destData?.m_bDormant;
-                m_iShotsFired = destData?.m_iShotsFired;
-                m_hPawn = destData?.m_hPawn;
-                m_fFlags = destData?.m_fFlags;
-                dwLocalPlayerController = destData?.dwLocalPlayerController;
-                dwViewMatrix = destData?.dwViewMatrix;
-                dwViewAngles = destData?.dwViewAngles;
-                dwEntityList = destData?.dwEntityList;
-                m_entitySpottedState = destData?.m_entitySpottedState;
-                m_Item = destData?.m_Item;
-                m_pClippingWeapon = destData?.m_pClippingWeapon;
-                m_AttributeManager = destData?.m_AttributeManager;
-                m_iItemDefinitionIndex = destData?.m_iItemDefinitionIndex;
-                m_bIsScoped = destData?.m_bIsScoped;
-                m_flFlashDuration = destData?.m_flFlashDuration;
-                m_iszPlayerName = destData?.m_iszPlayerName;
-                dwPlantedC4 = destData?.dwPlantedC4;
-                dwGlobalVars = destData?.dwGlobalVars;
-                m_nBombSite = destData?.m_nBombSite;
-                m_bBombDefused = destData?.m_bBombDefused;
-                m_vecAbsVelocity = destData?.m_vecAbsVelocity;
-                m_flDefuseCountDown = destData?.m_flDefuseCountDown;
-                m_flC4Blow = destData?.m_flC4Blow;
-                m_bBeingDefused = destData?.m_bBeingDefused;
-                return;
-            }
-
-            if (destData == null) destData = new ExpandoObject();
-
-
-            // offsets
-            destData.dwBuildNumber = sourceDataDw.engine2dll.dwBuildNumber!;
-            destData.dwLocalPlayerController = sourceDataDw.clientdll.dwLocalPlayerController!;
-            destData.dwEntityList = sourceDataDw.clientdll.dwEntityList!;
-            destData.dwViewMatrix = sourceDataDw.clientdll.dwViewMatrix!;
-            destData.dwPlantedC4 = sourceDataDw.clientdll.dwPlantedC4!;
-            destData.dwLocalPlayerPawn = sourceDataDw.clientdll.dwLocalPlayerPawn!;
-            destData.dwViewAngles = sourceDataDw.clientdll.dwViewAngles!;
-            destData.dwPlantedC4 = sourceDataDw.clientdll.dwPlantedC4!;
-            destData.dwGlobalVars = sourceDataDw.clientdll.dwGlobalVars!;
+            // Offsets
+            destData.dwBuildNumber = sourceDataDw.engine2dll.dwBuildNumber;
+            destData.dwLocalPlayerController = sourceDataDw.clientdll.dwLocalPlayerController;
+            destData.dwEntityList = sourceDataDw.clientdll.dwEntityList;
+            destData.dwViewMatrix = sourceDataDw.clientdll.dwViewMatrix;
+            destData.dwPlantedC4 = sourceDataDw.clientdll.dwPlantedC4;
+            destData.dwLocalPlayerPawn = sourceDataDw.clientdll.dwLocalPlayerPawn;
+            destData.dwViewAngles = sourceDataDw.clientdll.dwViewAngles;
+            destData.dwPlantedC4 = sourceDataDw.clientdll.dwPlantedC4;
+            destData.dwGlobalVars = sourceDataDw.clientdll.dwGlobalVars;
 
             // client.dll
-            destData.m_fFlags = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_fFlags!;
-            destData.m_vOldOrigin = sourceDataClient.clientdll.classes.C_BasePlayerPawn.fields.m_vOldOrigin!;
-            destData.m_vecViewOffset = sourceDataClient.clientdll.classes.C_BaseModelEntity.fields.m_vecViewOffset!;
-            destData.m_aimPunchAngle = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_aimPunchAngle!;
-            destData.m_modelState = sourceDataClient.clientdll.classes.CSkeletonInstance.fields.m_modelState!;
-            destData.m_pGameSceneNode = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_pGameSceneNode!;
-            destData.m_iIDEntIndex = sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_iIDEntIndex!;
-            destData.m_lifeState = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_lifeState!;
-            destData.m_iHealth = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_iHealth!;
-            destData.m_iTeamNum = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_iTeamNum!;
-            destData.m_bDormant = sourceDataClient.clientdll.classes.CGameSceneNode.fields.m_bDormant!;
-            destData.m_iShotsFired = sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_iShotsFired!;
-            destData.m_hPawn = sourceDataClient.clientdll.classes.CBasePlayerController.fields.m_hPawn!;
+            destData.m_fFlags = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_fFlags;
+            destData.m_vOldOrigin = sourceDataClient.clientdll.classes.C_BasePlayerPawn.fields.m_vOldOrigin;
+            destData.m_vecViewOffset =
+                sourceDataClient.clientdll.classes.C_BaseModelEntity.fields.m_vecViewOffset;
+            destData.m_aimPunchAngle = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_aimPunchAngle;
+            destData.m_modelState = sourceDataClient.clientdll.classes.CSkeletonInstance.fields.m_modelState;
+            destData.m_pGameSceneNode = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_pGameSceneNode;
+            destData.m_iIDEntIndex = sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_iIDEntIndex;
+            destData.m_lifeState = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_lifeState;
+            destData.m_iHealth = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_iHealth;
+            destData.m_iTeamNum = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_iTeamNum;
+            destData.m_bDormant = sourceDataClient.clientdll.classes.CGameSceneNode.fields.m_bDormant;
+            destData.m_iShotsFired = sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_iShotsFired;
+            destData.m_hPawn = sourceDataClient.clientdll.classes.CBasePlayerController.fields.m_hPawn;
             destData.m_entitySpottedState =
-                sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_entitySpottedState!;
-            destData.m_Item = sourceDataClient.clientdll.classes.C_AttributeContainer.fields.m_Item!;
+                sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_entitySpottedState;
+            destData.m_Item = sourceDataClient.clientdll.classes.C_AttributeContainer.fields.m_Item;
             destData.m_pClippingWeapon =
-                sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_pClippingWeapon!;
-            destData.m_AttributeManager = sourceDataClient.clientdll.classes.C_EconEntity.fields.m_AttributeManager!;
+                sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_pClippingWeapon;
+            destData.m_AttributeManager =
+                sourceDataClient.clientdll.classes.C_EconEntity.fields.m_AttributeManager;
             destData.m_iItemDefinitionIndex =
-                sourceDataClient.clientdll.classes.C_EconItemView.fields.m_iItemDefinitionIndex!;
-            destData.m_bIsScoped = sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_bIsScoped!;
+                sourceDataClient.clientdll.classes.C_EconItemView.fields.m_iItemDefinitionIndex;
+            destData.m_bIsScoped = sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_bIsScoped;
             destData.m_flFlashDuration =
-                sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_flFlashDuration!;
-            destData.m_iszPlayerName = sourceDataClient.clientdll.classes.CBasePlayerController.fields.m_iszPlayerName!;
-            destData.m_nBombSite = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_nBombSite!;
-            destData.m_bBombDefused = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_bBombDefused!;
-            destData.m_vecAbsVelocity = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_vecAbsVelocity!;
-            destData.m_flDefuseCountDown = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_flDefuseCountDown!;
-            destData.m_flC4Blow = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_flC4Blow!;
-            destData.m_bBeingDefused = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_bBeingDefused!;
+                sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_flFlashDuration;
+            destData.m_iszPlayerName =
+                sourceDataClient.clientdll.classes.CBasePlayerController.fields.m_iszPlayerName;
+            destData.m_nBombSite = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_nBombSite;
+            destData.m_bBombDefused = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_bBombDefused;
+            destData.m_vecAbsVelocity =
+                sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_vecAbsVelocity;
+            destData.m_flDefuseCountDown =
+                sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_flDefuseCountDown;
+            destData.m_flC4Blow = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_flC4Blow;
+            destData.m_bBeingDefused = sourceDataClient.clientdll.classes.C_PlantedC4.fields.m_bBeingDefused;
 
 
-            string updatedDestJson = JsonConvert.SerializeObject(destData, Formatting.Indented);
-            File.WriteAllText(destPath, updatedDestJson);
-
-            Console.WriteLine("Offsets updated in the local file.");
-
-
-            var jsonContent = File.ReadAllText(destPath);
-
-            dynamic updatedDestData = JsonConvert.DeserializeObject(jsonContent)!;
-
-
-            dwLocalPlayerPawn = updatedDestData?.dwLocalPlayerPawn;
-            m_vOldOrigin = updatedDestData?.m_vOldOrigin;
-            m_vecViewOffset = updatedDestData?.m_vecViewOffset;
-            m_AimPunchAngle = updatedDestData?.m_aimPunchAngle;
-            m_modelState = updatedDestData?.m_modelState;
-            m_pGameSceneNode = updatedDestData?.m_pGameSceneNode;
-            m_iIDEntIndex = updatedDestData?.m_iIDEntIndex;
-            m_lifeState = updatedDestData?.m_lifeState;
-            m_iHealth = updatedDestData?.m_iHealth;
-            m_iTeamNum = updatedDestData?.m_iTeamNum;
-            m_bDormant = updatedDestData?.m_bDormant;
-            m_iShotsFired = updatedDestData?.m_iShotsFired;
-            m_hPawn = updatedDestData?.m_hPawn;
-            m_fFlags = updatedDestData?.m_fFlags;
-            dwLocalPlayerController = updatedDestData?.dwLocalPlayerController;
-            dwViewMatrix = updatedDestData?.dwViewMatrix;
-            dwViewAngles = updatedDestData?.dwViewAngles;
-            dwEntityList = updatedDestData?.dwEntityList;
-            m_entitySpottedState = updatedDestData?.m_entitySpottedState;
-            m_Item = updatedDestData?.m_Item;
-            m_pClippingWeapon = updatedDestData?.m_pClippingWeapon;
-            m_AttributeManager = updatedDestData?.m_AttributeManager;
-            m_iItemDefinitionIndex = updatedDestData?.m_iItemDefinitionIndex;
-            m_bIsScoped = updatedDestData?.m_bIsScoped;
-            m_flFlashDuration = updatedDestData?.m_flFlashDuration;
-            m_iszPlayerName = updatedDestData?.m_iszPlayerName;
-            dwPlantedC4 = updatedDestData?.dwPlantedC4;
-            dwGlobalVars = updatedDestData?.dwGlobalVars;
-            m_nBombSite = updatedDestData?.m_nBombSite;
-            m_bBombDefused = updatedDestData?.m_bBombDefused;
-            m_vecAbsVelocity = updatedDestData?.m_vecAbsVelocity;
-            m_flDefuseCountDown = updatedDestData?.m_flDefuseCountDown;
-            m_flC4Blow = updatedDestData?.m_flC4Blow;
+            UpdateStaticFields(destData);
         }
-        catch (FileNotFoundException)
+        catch (Exception ex)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(
-                "No files found in OffsetData folder, please add the files \"offsets.json\" and \"client.dll.json\" to the folder from \ngithub.com/a2x/cs2-dumper.");
-            throw;
-        }
-        catch (NullReferenceException)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(
-                "Make sure that the files (client.dll.json and offsets.json) do not have empty fields.");
+            Console.WriteLine($"An error occurred: {ex.Message}");
             throw;
         }
     }
 
-
-    private static string FetchJson(string path)
+    private static async Task<string> FetchJson(string url)
     {
-        return File.ReadAllText(path);
+        using var client = new HttpClient();
+        return await client.GetStringAsync(url);
+    }
+
+    private static void UpdateStaticFields(dynamic data)
+    {
+        dwLocalPlayerPawn = data.dwLocalPlayerPawn;
+        m_vOldOrigin = data.m_vOldOrigin;
+        m_vecViewOffset = data.m_vecViewOffset;
+        m_AimPunchAngle = data.m_aimPunchAngle;
+        m_modelState = data.m_modelState;
+        m_pGameSceneNode = data.m_pGameSceneNode;
+        m_iIDEntIndex = data.m_iIDEntIndex;
+        m_lifeState = data.m_lifeState;
+        m_iHealth = data.m_iHealth;
+        m_iTeamNum = data.m_iTeamNum;
+        m_bDormant = data.m_bDormant;
+        m_iShotsFired = data.m_iShotsFired;
+        m_hPawn = data.m_hPawn;
+        m_fFlags = data.m_fFlags;
+        dwLocalPlayerController = data.dwLocalPlayerController;
+        dwViewMatrix = data.dwViewMatrix;
+        dwViewAngles = data.dwViewAngles;
+        dwEntityList = data.dwEntityList;
+        m_entitySpottedState = data.m_entitySpottedState;
+        m_Item = data.m_Item;
+        m_pClippingWeapon = data.m_pClippingWeapon;
+        m_AttributeManager = data.m_AttributeManager;
+        m_iItemDefinitionIndex = data.m_iItemDefinitionIndex;
+        m_bIsScoped = data.m_bIsScoped;
+        m_flFlashDuration = data.m_flFlashDuration;
+        m_iszPlayerName = data.m_iszPlayerName;
+        dwPlantedC4 = data.dwPlantedC4;
+        dwGlobalVars = data.dwGlobalVars;
+        m_nBombSite = data.m_nBombSite;
+        m_bBombDefused = data.m_bBombDefused;
+        m_vecAbsVelocity = data.m_vecAbsVelocity;
+        m_flDefuseCountDown = data.m_flDefuseCountDown;
+        m_flC4Blow = data.m_flC4Blow;
+        m_bBeingDefused = data.m_bBeingDefused;
     }
 
     #endregion
