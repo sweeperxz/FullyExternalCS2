@@ -22,7 +22,7 @@ internal class BombTimer(Graphics.Graphics graphics) : ThreadedServiceBase
     protected override void FrameAction()
     {
         _globalVars = graphics.GameProcess.ModuleClient.Read<IntPtr>(Offsets.dwGlobalVars);
-        _currentTime = graphics.GameProcess.Process.Read<float>(_globalVars + 0x2C);
+        _currentTime = graphics.GameProcess.Process.Read<float>(_globalVars + Offsets.m_nCurrentTickThisFrame);
         graphics.GameProcess.Process.Read<float>(_globalVars + 0x30);
 
         _tempC4 = graphics.GameProcess.ModuleClient.Read<IntPtr>(Offsets.dwPlantedC4);

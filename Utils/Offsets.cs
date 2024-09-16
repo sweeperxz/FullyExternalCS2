@@ -45,6 +45,7 @@ public abstract class Offsets
     public static int m_flDefuseCountDown;
     public static int m_flC4Blow;
     public static int m_bBeingDefused;
+    public const nint m_nCurrentTickThisFrame = 0x34;
 
     public static readonly Dictionary<string, int> Bones = new()
     {
@@ -74,7 +75,7 @@ public abstract class Offsets
             var sourceDataDw = JsonConvert.DeserializeObject<OffsetsDTO>(
                 await FetchJson("https://raw.githubusercontent.com/a2x/cs2-dumper/main/output/offsets.json"));
             var sourceDataClient = JsonConvert.DeserializeObject<ClientDllDTO>(
-                await FetchJson("https://raw.githubusercontent.com/a2x/cs2-dumper/main/output/client.dll.json"));
+                await FetchJson("https://raw.githubusercontent.com/a2x/cs2-dumper/main/output/client_dll.json"));
 
             dynamic destData = new ExpandoObject();
 
@@ -102,10 +103,10 @@ public abstract class Offsets
             destData.m_iHealth = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_iHealth;
             destData.m_iTeamNum = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_iTeamNum;
             destData.m_bDormant = sourceDataClient.clientdll.classes.CGameSceneNode.fields.m_bDormant;
-            destData.m_iShotsFired = sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_iShotsFired;
+            destData.m_iShotsFired = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_iShotsFired;
             destData.m_hPawn = sourceDataClient.clientdll.classes.CBasePlayerController.fields.m_hPawn;
             destData.m_entitySpottedState =
-                sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_entitySpottedState;
+                sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_entitySpottedState;
             destData.m_Item = sourceDataClient.clientdll.classes.C_AttributeContainer.fields.m_Item;
             destData.m_pClippingWeapon =
                 sourceDataClient.clientdll.classes.C_CSPlayerPawnBase.fields.m_pClippingWeapon;

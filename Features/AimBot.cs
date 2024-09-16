@@ -30,7 +30,7 @@ public class AimBot : ThreadedServiceBase
     private static MouseMoveMethod MouseMoveMethod =>
         MouseMoveMethod.TryMouseMoveNew;
 
-    private static string AimBonePos => "pelvis";
+    private static string AimBonePos => "head";
 
     private bool IsCalibrated { get; set; }
 
@@ -164,10 +164,9 @@ public class AimBot : ThreadedServiceBase
             }
         }
 
+        CurrentSmoothing = AimBotSmoothing;
         if (targetFound)
         {
-            CurrentSmoothing = AimBotSmoothing;
-
             var distanceToTarget = Vector3.Distance(GameData.Player.EyePosition, aimPosition);
             var smoothingAcceleration = Math.Max(1.0f, distanceToTarget / 100.0f);
 
@@ -175,10 +174,6 @@ public class AimBot : ThreadedServiceBase
             CurrentSmoothing = Math.Min(CurrentSmoothing, 50.0f);
 
             aimAngles *= 1 / Math.Max(CurrentSmoothing, 1);
-        }
-        else
-        {
-            CurrentSmoothing = AimBotSmoothing;
         }
 
         return targetFound;

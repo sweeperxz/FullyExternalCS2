@@ -11,6 +11,7 @@
         <Platforms>AnyCPU;x64;x86</Platforms>
         <ApplicationIcon>assets\logo.ico</ApplicationIcon>
         <Version>1.7</Version>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
