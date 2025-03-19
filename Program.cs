@@ -63,6 +63,7 @@ public class Program :
 
     private void InitializeComponent()
     {
+        var features = ConfigManager.Load();
         GameProcess = new GameProcess();
         GameProcess.Start();
 
@@ -76,13 +77,23 @@ public class Program :
         Graphics.Start();
 
         Trigger = new TriggerBot(GameProcess, GameData);
-        Trigger.Start();
+        if (features.TriggerBot)
+        {
+            Trigger.Start();
+        }
+
 
         AimBot = new AimBot(GameProcess, GameData);
-        AimBot.Start();
+        if (features.AimBot)
+        {
+            AimBot.Start();
+        }
 
         BombTimer = new BombTimer(Graphics);
-        BombTimer.Start();
+        if (features.BombTimer)
+        {
+            BombTimer.Start();
+        }
 
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
     }

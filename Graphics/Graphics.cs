@@ -46,10 +46,6 @@ public class Graphics : ThreadedServiceBase
     public Font FontAzonix64 { get; private set; }
     public Font FontConsolas32 { get; private set; }
     public Font Undefeated { get; private set; }
-    public bool EspEnabled { get; set; }
-    public bool BoxEspEnabled { get; set; }
-    public bool SkeletonEspEnabled { get; set; }
-    public bool ShowCrosshair { get; set; }
 
     public override void Dispose()
     {
@@ -169,11 +165,12 @@ public class Graphics : ThreadedServiceBase
 
     private void DrawFeatures()
     {
-        EspAimCrosshair.Draw(this);
         WindowOverlay.Draw(GameProcess, this);
-        SkeletonEsp.Draw(this);
-        EspBox.Draw(this);
-        BombTimer.Draw(this);
+        var features = ConfigManager.Load();
+        if (features.EspAimCrosshair) EspAimCrosshair.Draw(this);
+        if (features.EspBox) EspBox.Draw(this);
+        if (features.SkeletonEsp) SkeletonEsp.Draw(this);
+        if (features.BombTimer) BombTimer.Draw(this);
     }
 
     private void RenderVertices()
