@@ -1,4 +1,4 @@
-﻿using System.Windows.Threading;
+using System.Windows.Threading;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
 using GameOverlay.Windows;

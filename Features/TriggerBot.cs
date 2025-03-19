@@ -1,52 +1,90 @@
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
+using System.Threading.Tasks;
 using Keys = Process.NET.Native.Types.Keys;
 
 namespace CS2Cheat.Features;
 
-public class TriggerBot(GameProcess gameProcess, GameData gameData) : ThreadedServiceBase
+public sealed class TriggerBot : ThreadedServiceBase
 {
+    private const float MaxVelocityThreshold = 18f;
+    private const int TriggerDelayMs = 5;
+    private const int EntityListMultiplier = 0x8;
+    private const int EntityEntryOffset = 0x10;
+    private const int EntityStride = 120;
+    private const int EntityIndexMask = 0x1FF;
+    private const int EntityIndexShift = 9;
+
     protected override string ThreadName => nameof(TriggerBot);
-
-    private GameProcess GameProcess { get; set; } = gameProcess;
-
-    private GameData GameData { get; set; } = gameData;
-
     private static Keys TriggerBotHotKey => Keys.LMenu;
+
+    private readonly GameProcess _gameProcess;
+    private readonly GameData _gameData;
+
+    public TriggerBot(GameProcess gameProcess, GameData gameData)
+    {
+        _gameProcess = gameProcess ?? throw new ArgumentNullException(nameof(gameProcess));
+        _gameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
+    }
+
+    protected override async void FrameAction()
+    {
+        if (!ShouldExecuteTriggerBot())
+            return;
+
+        var targetEntity = GetTargetEntity();
+        if (targetEntity == IntPtr.Zero)
+            return;
+
+        var entityTeam = _gameProcess.Process.Read<int>(targetEntity + Offsets.m_iTeamNum);
+        if (!ShouldTriggerOnEntity(entityTeam))
+            return;
+
+        await ExecuteTrigger();
+    }
+
+    private bool ShouldExecuteTriggerBot()
+    {
+        return _gameProcess.IsValid && IsHotKeyDown();
+    }
+
+    private IntPtr GetTargetEntity()
+    {
+        var localPlayerPawn = _gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn);
+        var entityId = _gameProcess.Process.Read<int>(localPlayerPawn + Offsets.m_iIDEntIndex);
+
+        if (entityId < 0)
+            return IntPtr.Zero;
+
+        var entityList = _gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList);
+        var entityEntry = _gameProcess.Process.Read<IntPtr>(
+            entityList + EntityListMultiplier * (entityId >> EntityIndexShift) + EntityEntryOffset);
+
+        return _gameProcess.Process.Read<IntPtr>(
+            entityEntry + EntityStride * (entityId & EntityIndexMask));
+    }
+
+    private bool ShouldTriggerOnEntity(int entityTeam)
+    {
+        var isDifferentTeam = _gameData.Player.Team != entityTeam.ToTeam();
+        var isSpecialCondition = _gameData.Player.FFlags == 65664;
+        var isWithinVelocityLimit = Math.Abs(_gameData.Player.Velocity.Z) <= MaxVelocityThreshold;
+
+        return (isDifferentTeam || isSpecialCondition) && isWithinVelocityLimit;
+    }
+
+    private static async Task ExecuteTrigger()
+    {
+        await Task.Delay(TriggerDelayMs);
+        Utility.MouseLeftDown();
+        Utility.MouseLeftUp();
+    }
+
+    public static bool IsHotKeyDown() => TriggerBotHotKey.IsKeyDown();
 
     public override void Dispose()
     {
         base.Dispose();
-
-        GameData = default;
-        GameProcess = default;
-    }
-
-    public static bool IsHotKeyDown()
-    {
-        return TriggerBotHotKey.IsKeyDown();
-    }
-
-    protected override void FrameAction()
-    {
-        var entityId = GameProcess.Process.Read<int>(GameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn) +
-                                                     Offsets.m_iIDEntIndex);
-        if (!GameProcess.IsValid || !IsHotKeyDown()) return;
-
-        if (entityId < 0) return;
-
-        var entityEntry = GameProcess.Process.Read<IntPtr>(GameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList) +
-                                                           0x8 * (entityId >> 9) + 0x10);
-        var entity = GameProcess.Process.Read<IntPtr>(entityEntry + 120 * (entityId & 0x1FF));
-        var entityTeam = GameProcess.Process.Read<int>(entity + Offsets.m_iTeamNum);
-
-
-        var shouldTrigger = (GameData.Player.Team != entityTeam.ToTeam() || GameData.Player.FFlags == 65664) &&
-                            Math.Abs(GameData.Player.Velocity.Z) <= 18f;
-
-        if (!shouldTrigger) return;
-        Task.Delay(5);
-        Utility.MouseLeftDown();
-        Utility.MouseLeftUp();
+        GC.SuppressFinalize(this);
     }
 }

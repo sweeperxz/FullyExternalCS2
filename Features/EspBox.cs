@@ -10,144 +10,132 @@ namespace CS2Cheat.Features;
 public static class EspBox
 {
     private const int OutlineThickness = 2;
+    private static readonly Dictionary<string, string> GunIcons = new()
+    {
+        ["knife_ct"] = "]", ["knife_t"] = "[", ["deagle"] = "A", ["elite"] = "B",
+        ["fiveseven"] = "C", ["glock"] = "D", ["revolver"] = "J", ["hkp2000"] = "E",
+        ["p250"] = "F", ["usp_silencer"] = "G", ["tec9"] = "H", ["cz75a"] = "I",
+        ["mac10"] = "K", ["ump45"] = "L", ["bizon"] = "M", ["mp7"] = "N",
+        ["mp9"] = "R", ["p90"] = "O", ["galilar"] = "Q", ["famas"] = "R",
+        ["m4a1_silencer"] = "T", ["m4a1"] = "S", ["aug"] = "U", ["sg556"] = "V",
+        ["ak47"] = "W", ["g3sg1"] = "X", ["scar20"] = "Y", ["awp"] = "Z",
+        ["ssg08"] = "a", ["xm1014"] = "b", ["sawedoff"] = "c", ["mag7"] = "d",
+        ["nova"] = "e", ["negev"] = "f", ["m249"] = "g", ["taser"] = "h",
+        ["flashbang"] = "i", ["hegrenade"] = "j", ["smokegrenade"] = "k",
+        ["molotov"] = "l", ["decoy"] = "m", ["incgrenade"] = "n", ["c4"] = "o"
+    };
 
+    
     public static void Draw(Graphics.Graphics graphics)
     {
-        var boundingBoxes = new Dictionary<Entity, (Vector2, Vector2)>();
-
+        
         foreach (var entity in graphics.GameData.Entities)
         {
             if (!entity.IsAlive() || entity.AddressBase == graphics.GameData.Player.AddressBase)
                 continue;
 
             var boundingBox = GetEntityBoundingBox(graphics, entity);
-            boundingBoxes.Add(entity, boundingBox);
-        }
+            if (boundingBox.Item1.X > boundingBox.Item2.X || boundingBox.Item1.Y > boundingBox.Item2.Y)
+                continue;
 
-        foreach (var entity in boundingBoxes.Keys)
-        {
             var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
-            DrawEntityRectangle(graphics, entity, colorBox, boundingBoxes[entity]);
+            DrawEntityInfo(graphics, entity, colorBox, boundingBox);
         }
     }
 
-    private static void DrawEntityRectangle(Graphics.Graphics graphics, Entity entity, Color color,
+    private static void DrawEntityInfo(Graphics.Graphics graphics, Entity entity, Color color,
         (Vector2, Vector2) boundingBox)
     {
-        var healthPercentage = (float)entity.Health / 100;
+        var (topLeft, bottomRight) = boundingBox;
+        var healthPercentage = entity.Health / 100f;
 
-        graphics.DrawRectangle(color, boundingBox.Item1, boundingBox.Item2);
+        graphics.DrawRectangle(color, topLeft, bottomRight);
 
-        var healthBarTopLeft = new Vector2(boundingBox.Item1.X - 10.0f - OutlineThickness, boundingBox.Item1.Y);
-        var healthBarBottomRight = new Vector2(healthBarTopLeft.X + 6.0f, boundingBox.Item2.Y);
+        // Health bar
+        var healthBarLeft = topLeft.X - 10f - OutlineThickness;
+        var healthBarTopLeft = new Vector2(healthBarLeft, topLeft.Y);
+        var healthBarBottomRight = new Vector2(healthBarLeft + 6f, bottomRight.Y);
         DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
 
-        DrawHealthNumber(graphics, boundingBox.Item1, boundingBox.Item2, entity.Health);
+        // Health number
+        var healthText = entity.Health.ToString();
+        var healthX = (int)(bottomRight.X + 2);
+        var healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y - 
+            graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center).Bottom) / 2);
+        graphics.FontConsolas32.DrawText(default, healthText, healthX, healthY, Color.White);
 
-        DrawWeaponName(graphics, boundingBox, entity.CurrentWeaponName);
+        // Weapon
+        var weaponIcon = GetWeaponIcon(entity.CurrentWeaponName);
+        if (!string.IsNullOrEmpty(weaponIcon))
+        {
+            var textSize = graphics.Undefeated.MeasureText(null, weaponIcon, FontDrawFlags.Center);
+            var weaponX = (int)((topLeft.X + bottomRight.X - textSize.Right) / 2);
+            var weaponY = (int)(bottomRight.Y + 2.5f);
+            graphics.Undefeated.DrawText(null, weaponIcon, weaponX, weaponY, Color.White);
+        }
 
+        // Enemy name
         if (graphics.GameData.Player.Team != entity.Team)
-            DrawEnemyName(graphics, boundingBox, entity.Name);
+        {
+            var name = entity.Name ?? "UNKNOWN";
+            var textWidth = graphics.FontConsolas32.MeasureText(null, name, FontDrawFlags.Center).Right + 10f;
+            var nameX = (int)((topLeft.X + bottomRight.X) / 2 - textWidth / 2);
+            var nameY = (int)(topLeft.Y - 15f);
+            graphics.FontConsolas32.DrawText(default, name, nameX, nameY, Color.White);
+        }
 
-        DrawFlags(graphics, boundingBox, entity);
+        // Status flags
+        var flagX = (int)(bottomRight.X + 5f);
+        var flagY = (int)topLeft.Y;
+        var spacing = 15;
+        
+        if (entity.IsInScope == 1)
+            graphics.FontConsolas32.DrawText(default, "Scoped", flagX, flagY, Color.White);
+        
+        if (entity.FlashAlpha > 7)
+            graphics.FontConsolas32.DrawText(default, "Flashed", flagX, flagY + spacing, Color.White);
+        
+        if (entity.IsInScope == 256)
+            graphics.FontConsolas32.DrawText(default, "Shifting", flagX, flagY + spacing * 2, Color.White);
+        else if (entity.IsInScope == 257)
+            graphics.FontConsolas32.DrawText(default, "Shifting in scope", flagX, flagY + spacing * 3, Color.White);
     }
 
     private static void DrawHealthBar(Graphics.Graphics graphics, Vector2 topLeft, Vector2 bottomRight,
         float healthPercentage)
     {
-        var barHeight = bottomRight.Y - topLeft.Y;
-        var filledHeight = barHeight * healthPercentage;
-        var filledTopLeft = new Vector2(topLeft.X, bottomRight.Y - filledHeight);
-        var filledBottomRight = bottomRight;
-
-        filledTopLeft.Y = Math.Max(filledTopLeft.Y, topLeft.Y);
-        filledBottomRight.Y = Math.Min(filledBottomRight.Y, bottomRight.Y);
-
-        graphics.DrawRectangle(Color.Green, filledTopLeft, filledBottomRight);
-
-        var outlineTopLeft =
-            new Vector2(topLeft.X - OutlineThickness, filledTopLeft.Y - OutlineThickness);
-        var outlineBottomRight = new Vector2(bottomRight.X + OutlineThickness, bottomRight.Y + OutlineThickness);
-        graphics.DrawRectangle(Color.Black, outlineTopLeft, outlineBottomRight);
+        var filledHeight = (bottomRight.Y - topLeft.Y) * healthPercentage;
+        var filledTop = new Vector2(topLeft.X, Math.Max(bottomRight.Y - filledHeight, topLeft.Y));
+        
+        graphics.DrawRectangle(Color.Green, filledTop, bottomRight);
+        graphics.DrawRectangle(Color.Black,
+            new Vector2(topLeft.X - OutlineThickness, filledTop.Y - OutlineThickness),
+            new Vector2(bottomRight.X + OutlineThickness, bottomRight.Y + OutlineThickness));
     }
 
-    private static void DrawWeaponName(Graphics.Graphics graphics, (Vector2, Vector2) boundingBox,
-        string currentWeaponName)
-    {
-        var textWidth = graphics.FontConsolas32.MeasureText(null, currentWeaponName ?? "NONE", FontDrawFlags.Center)
-            .Right + 30;
-        var weaponNamePosition = new Vector2((boundingBox.Item1.X + boundingBox.Item2.X - textWidth) / 2,
-            boundingBox.Item2.Y + 5f);
-        graphics.FontConsolas32.DrawText(default, currentWeaponName ?? "NONE", (int)weaponNamePosition.X,
-            (int)weaponNamePosition.Y, Color.White);
-    }
-
-    private static void DrawEnemyName(Graphics.Graphics graphics, (Vector2, Vector2) boundingBox, string enemyName)
-    {
-        var textWidth = graphics.FontConsolas32.MeasureText(null, enemyName ?? "UNKNOWN", FontDrawFlags.Center).Right +
-                        10f;
-        var enemyNamePosition = new Vector2((boundingBox.Item1.X + boundingBox.Item2.X) / 2 - textWidth / 2,
-            boundingBox.Item1.Y - 15f);
-        graphics.FontConsolas32.DrawText(default, enemyName ?? "UNKNOWN", (int)enemyNamePosition.X,
-            (int)enemyNamePosition.Y, Color.White);
-    }
-
-    private static void DrawFlags(Graphics.Graphics graphics, (Vector2, Vector2) boundingBox, Entity entity)
-    {
-        var flagsPosition = new Vector2(boundingBox.Item2.X + 5f, boundingBox.Item1.Y);
-
-        if (entity.IsinScope == 1)
-            graphics.FontConsolas32.DrawText(default, "Scoped", (int)flagsPosition.X, (int)flagsPosition.Y,
-                Color.White);
-
-        if (entity.FlashAlpha > 7)
-            graphics.FontConsolas32.DrawText(default, "Flashed", (int)flagsPosition.X, (int)flagsPosition.Y + 15,
-                Color.White);
-
-        switch (entity.IsinScope)
-        {
-            case 256:
-                graphics.FontConsolas32.DrawText(default, "Shifting", (int)flagsPosition.X, (int)flagsPosition.Y + 30,
-                    Color.White);
-                break;
-            case 257:
-                graphics.FontConsolas32.DrawText(default, "Shifting in scope", (int)flagsPosition.X,
-                    (int)flagsPosition.Y + 45, Color.White);
-                break;
-        }
-    }
-
-    private static void DrawHealthNumber(Graphics.Graphics graphics, Vector2 topLeft, Vector2 bottomRight, int health)
-    {
-        var healthText = health.ToString();
-        var positionX = (int)(bottomRight.X + 2);
-        var positionY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y) / 2 -
-                              graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center).Bottom / 2);
-
-        graphics.FontConsolas32.DrawText(default, healthText, positionX, positionY, Color.White);
-    }
+    private static string GetWeaponIcon(string weapon) =>
+        GunIcons.TryGetValue(weapon.ToLower(), out var icon) ? icon : string.Empty;
 
     private static (Vector2, Vector2) GetEntityBoundingBox(Graphics.Graphics graphics, Entity entity)
     {
         const float padding = 5.0f;
-        var minScreenPos = new Vector2(float.MaxValue, float.MaxValue);
-        var maxScreenPos = new Vector2(float.MinValue, float.MinValue);
+        var minPos = new Vector2(float.MaxValue, float.MaxValue);
+        var maxPos = new Vector2(float.MinValue, float.MinValue);
+        var matrix = graphics.GameData.Player.MatrixViewProjectionViewport;
 
-        foreach (var transformedPos in entity.BonePos
-                     .Select(bonePos => graphics.GameData.Player.MatrixViewProjectionViewport.Transform(bonePos.Value))
-                     .Where(transformedPos => transformedPos.Z < 1))
+        foreach (var bonePos in entity.BonePos.Values)
         {
-            minScreenPos.X = Math.Min(minScreenPos.X, transformedPos.X);
-            minScreenPos.Y = Math.Min(minScreenPos.Y, transformedPos.Y);
-            maxScreenPos.X = Math.Max(maxScreenPos.X, transformedPos.X);
-            maxScreenPos.Y = Math.Max(maxScreenPos.Y, transformedPos.Y);
+            var transformed = matrix.Transform(bonePos);
+            if (transformed.Z >= 1) continue;
+
+            minPos.X = Math.Min(minPos.X, transformed.X);
+            minPos.Y = Math.Min(minPos.Y, transformed.Y);
+            maxPos.X = Math.Max(maxPos.X, transformed.X);
+            maxPos.Y = Math.Max(maxPos.Y, transformed.Y);
         }
 
-        var healthPercentage = (float)entity.Health / 100;
-        var sizeMultiplier = 1.0f + (1.0f - healthPercentage);
-        minScreenPos -= new Vector2(padding * sizeMultiplier, padding * sizeMultiplier);
-        maxScreenPos += new Vector2(padding * sizeMultiplier, padding * sizeMultiplier);
-
-        return (minScreenPos, maxScreenPos);
+        var sizeMultiplier = 2f - entity.Health / 100f;
+        var paddingVector = new Vector2(padding * sizeMultiplier);
+        return (minPos - paddingVector, maxPos + paddingVector);
     }
 }

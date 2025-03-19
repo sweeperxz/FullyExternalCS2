@@ -21,157 +21,154 @@ public class Graphics : ThreadedServiceBase
         VertexElement.VertexDeclarationEnd
     };
 
+    private readonly List<Vertex> _vertices = [];
+    private readonly object _deviceLock = new();
+    
+    private Vector2 _currentResolution;
+    private Device _device;
+    private bool _isDisposed;
 
     public Graphics(GameProcess gameProcess, GameData gameData, WindowOverlay windowOverlay)
     {
-        WindowOverlay = windowOverlay;
-        OldRes = new Vector2(WindowOverlay.Window.Width, WindowOverlay.Window.Height);
-        GameProcess = gameProcess;
-        GameData = gameData;
-
-        InitDevice();
+        WindowOverlay = windowOverlay ?? throw new ArgumentNullException(nameof(windowOverlay));
+        GameProcess = gameProcess ?? throw new ArgumentNullException(nameof(gameProcess));
+        GameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
+        
+        _currentResolution = new Vector2(WindowOverlay.Window.Width, WindowOverlay.Window.Height);
+        InitializeDevice();
     }
 
     protected override string ThreadName => nameof(Graphics);
 
-    private WindowOverlay WindowOverlay { get; set; }
-    private Vector2 OldRes { get; set; }
-    public GameProcess GameProcess { get; private set; }
-    public GameData GameData { get; private set; }
-    private Device Device { get; set; }
+    private WindowOverlay WindowOverlay { get; }
+    public GameProcess GameProcess { get; }
+    public GameData GameData { get; }
     public Font FontAzonix64 { get; private set; }
     public Font FontConsolas32 { get; private set; }
-    private List<Vertex> Vertices { get; } = [];
-
+    public Font Undefeated { get; private set; }
+    public bool EspEnabled { get; set; }
+    public bool BoxEspEnabled { get; set; }
+    public bool SkeletonEspEnabled { get; set; }
+    public bool ShowCrosshair { get; set; }
 
     public override void Dispose()
     {
+        if (_isDisposed) return;
+        
         base.Dispose();
 
-        FontAzonix64.Dispose();
-        FontAzonix64 = default;
-        FontConsolas32.Dispose();
-        FontConsolas32 = default;
-        Device.Dispose();
-        Device = default;
-
-        GameData = default;
-        GameProcess = default;
-        WindowOverlay = default;
+        lock (_deviceLock)
+        {
+            DisposeResources();
+            _isDisposed = true;
+        }
     }
 
-    private void InitDevice()
+    private void InitializeDevice()
     {
-        var parameters = new PresentParameters
-        {
-            Windowed = true,
-            SwapEffect = SwapEffect.Discard,
-            DeviceWindowHandle = WindowOverlay.Window.Handle,
-            MultiSampleQuality = 0,
-            BackBufferFormat = Format.A8R8G8B8,
-            BackBufferWidth = WindowOverlay.Window.Width,
-            BackBufferHeight = WindowOverlay.Window.Height,
-            EnableAutoDepthStencil = true,
-            AutoDepthStencilFormat = Format.D16,
-            PresentationInterval = PresentInterval.Immediate,
-            MultiSampleType = MultisampleType.TwoSamples
-        };
-
-        Device = new Device(new Direct3D(), 0, DeviceType.Hardware, WindowOverlay.Window.Handle,
+        var parameters = CreatePresentParameters();
+        _device = new Device(new Direct3D(), 0, DeviceType.Hardware, WindowOverlay.Window.Handle,
             CreateFlags.HardwareVertexProcessing, parameters);
 
-        var azonix64 = new FontDescription
-        {
-            Height = 32,
-            Italic = false,
-            CharacterSet = FontCharacterSet.Ansi,
-            FaceName = "Tahoma",
-            MipLevels = 0,
-            OutputPrecision = FontPrecision.TrueType,
-            PitchAndFamily = FontPitchAndFamily.Default,
-            Quality = FontQuality.ClearType,
-            Weight = FontWeight.Regular
-        };
-        FontAzonix64 = new Font(Device, azonix64);
-
-        var consolas32 = new FontDescription
-        {
-            Height = 12,
-            Italic = false,
-            CharacterSet = FontCharacterSet.Ansi,
-            FaceName = "Verdana",
-            MipLevels = 0,
-            OutputPrecision = FontPrecision.TrueType,
-            PitchAndFamily = FontPitchAndFamily.Default,
-            Quality = FontQuality.ClearType,
-            Weight = FontWeight.Regular
-        };
-        FontConsolas32 = new Font(Device, consolas32);
+        InitializeFonts();
     }
+
+    private PresentParameters CreatePresentParameters() => new()
+    {
+        Windowed = true,
+        SwapEffect = SwapEffect.Discard,
+        DeviceWindowHandle = WindowOverlay.Window.Handle,
+        MultiSampleQuality = 0,
+        BackBufferFormat = Format.A8R8G8B8,
+        BackBufferWidth = WindowOverlay.Window.Width,
+        BackBufferHeight = WindowOverlay.Window.Height,
+        EnableAutoDepthStencil = true,
+        AutoDepthStencilFormat = Format.D16,
+        PresentationInterval = PresentInterval.Immediate,
+        MultiSampleType = MultisampleType.TwoSamples
+    };
+
+    private void InitializeFonts()
+    {
+        FontAzonix64 = new Font(_device, CreateFontDescription("Tahoma", 32));
+        FontConsolas32 = new Font(_device, CreateFontDescription("Verdana", 12));
+        Undefeated = new Font(_device, CreateFontDescription("undefeated", 12, FontCharacterSet.Default));
+    }
+
+    private static FontDescription CreateFontDescription(string faceName, int height, 
+        FontCharacterSet characterSet = FontCharacterSet.Ansi) => new()
+    {
+        Height = height,
+        Italic = false,
+        CharacterSet = characterSet,
+        FaceName = faceName,
+        MipLevels = 0,
+        OutputPrecision = FontPrecision.TrueType,
+        PitchAndFamily = FontPitchAndFamily.Default,
+        Quality = FontQuality.ClearType,
+        Weight = FontWeight.Regular
+    };
 
     protected override void FrameAction()
     {
         if (!GameProcess.IsValid) return;
 
-        var newRes = new Vector2(WindowOverlay.Window.Width, WindowOverlay.Window.Height);
-        if (!Equals(OldRes, newRes))
-            Current.Dispatcher.Invoke(() =>
-            {
-                Device.Dispose();
-                FontAzonix64.Dispose();
-                FontConsolas32.Dispose();
-                Vertices.Clear();
-                InitDevice();
-            }, DispatcherPriority.Render);
-
-        OldRes = newRes;
-
-        Current.Dispatcher.Invoke(() =>
+        var newResolution = new Vector2(WindowOverlay.Window.Width, WindowOverlay.Window.Height);
+        if (!_currentResolution.Equals(newResolution))
         {
-            Device.SetRenderState(RenderState.AlphaBlendEnable, true);
-            Device.SetRenderState(RenderState.AlphaTestEnable, false);
-            Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
-            Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
-            Device.SetRenderState(RenderState.Lighting, false);
-            Device.SetRenderState(RenderState.CullMode, Cull.None);
-            Device.SetRenderState(RenderState.ZEnable, true);
-            Device.SetRenderState(RenderState.ZFunc, Compare.Always);
+            Current.Dispatcher.Invoke(RecreateDevice, DispatcherPriority.Render);
+            _currentResolution = newResolution;
+        }
 
-            Device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.FromAbgr(0), 1, 0);
-
-            Device.BeginScene();
-            Render();
-            Device.EndScene();
-
-            Device.Present();
-        }, DispatcherPriority.Normal);
+        Current.Dispatcher.Invoke(RenderFrame, DispatcherPriority.Normal);
     }
 
-
-    private void Render()
+    private void RecreateDevice()
     {
-        Vertices.Clear();
-
-        Draw();
-
-        var count = Vertices.Count;
-        var vertices = new VertexBuffer(Device, count * 20, Usage.WriteOnly, VertexFormat.None, Pool.Managed);
-        vertices.Lock(0, 0, LockFlags.None)
-            .WriteRange(Vertices.ToArray());
-        vertices.Unlock();
-
-        Device.SetStreamSource(0, vertices, 0, 20);
-        var vertexDecl = new VertexDeclaration(Device, VertexElements);
-        Device.VertexDeclaration = vertexDecl;
-        Device.DrawPrimitives(PrimitiveType.LineList, 0, count / 2);
-
-        vertices.Dispose();
-        vertexDecl.Dispose();
+        lock (_deviceLock)
+        {
+            DisposeResources();
+            _vertices.Clear();
+            InitializeDevice();
+        }
     }
 
-    private void Draw()
+    private void RenderFrame()
     {
-        // draw here
+        lock (_deviceLock)
+        {
+            ConfigureRenderState();
+            _device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.FromAbgr(0), 1, 0);
+            _device.BeginScene();
+            
+            RenderScene();
+            
+            _device.EndScene();
+            _device.Present();
+        }
+    }
+
+    private void ConfigureRenderState()
+    {
+        _device.SetRenderState(RenderState.AlphaBlendEnable, true);
+        _device.SetRenderState(RenderState.AlphaTestEnable, false);
+        _device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
+        _device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
+        _device.SetRenderState(RenderState.Lighting, false);
+        _device.SetRenderState(RenderState.CullMode, Cull.None);
+        _device.SetRenderState(RenderState.ZEnable, true);
+        _device.SetRenderState(RenderState.ZFunc, Compare.Always);
+    }
+
+    private void RenderScene()
+    {
+        _vertices.Clear();
+        DrawFeatures();
+        RenderVertices();
+    }
+
+    private void DrawFeatures()
+    {
         EspAimCrosshair.Draw(this);
         WindowOverlay.Draw(GameProcess, this);
         SkeletonEsp.Draw(this);
@@ -179,35 +176,67 @@ public class Graphics : ThreadedServiceBase
         BombTimer.Draw(this);
     }
 
+    private void RenderVertices()
+    {
+        if (_vertices.Count == 0) return;
+
+        using var vertices = new VertexBuffer(_device, _vertices.Count * 20, Usage.WriteOnly, VertexFormat.None, Pool.Managed);
+        vertices.Lock(0, 0, LockFlags.None).WriteRange(_vertices.ToArray());
+        vertices.Unlock();
+
+        _device.SetStreamSource(0, vertices, 0, 20);
+        using var vertexDecl = new VertexDeclaration(_device, VertexElements);
+        _device.VertexDeclaration = vertexDecl;
+        _device.DrawPrimitives(PrimitiveType.LineList, 0, _vertices.Count / 2);
+    }
+
+    private void DisposeResources()
+    {
+        FontAzonix64?.Dispose();
+        FontConsolas32?.Dispose();
+        Undefeated?.Dispose();
+        _device?.Dispose();
+    }
 
     public void DrawLine(Color color, params Vector2[] verts)
     {
         if (verts.Length < 2 || verts.Length % 2 != 0) return;
 
         foreach (var vertex in verts)
-            Vertices.Add(new Vertex { Color = color, Position = new Vector4(vertex.X, vertex.Y, 0.5f, 1.0f) });
+        {
+            _vertices.Add(new Vertex 
+            { 
+                Color = color, 
+                Position = new Vector4(vertex.X, vertex.Y, 0.5f, 1.0f) 
+            });
+        }
     }
 
     public void DrawLineWorld(Color color, params Vector3[] verticesWorld)
     {
-        var verticesScreen = verticesWorld
+        var screenVertices = verticesWorld
             .Select(v => GameData.Player.MatrixViewProjectionViewport.Transform(v))
             .Where(v => v.Z < 1)
-            .Select(v => new Vector2(v.X, v.Y)).ToArray();
-        DrawLine(color, verticesScreen);
+            .Select(v => new Vector2(v.X, v.Y))
+            .ToArray();
+
+        DrawLine(color, screenVertices);
     }
 
     public void DrawRectangle(Color color, Vector2 topLeft, Vector2 bottomRight)
     {
-        var verts = new Vector2[]
+        var vertices = new[]
         {
-            new(topLeft.X, topLeft.Y),
-            new(bottomRight.X, topLeft.Y),
-            new(bottomRight.X, bottomRight.Y),
-            new(topLeft.X, bottomRight.Y),
-            new(topLeft.X, topLeft.Y)
+            topLeft,
+            new Vector2(bottomRight.X, topLeft.Y),
+            bottomRight,
+            new Vector2(topLeft.X, bottomRight.Y),
+            topLeft
         };
 
-        for (var i = 0; i < verts.Length - 1; i++) DrawLine(color, verts[i], verts[i + 1]);
+        for (var i = 0; i < vertices.Length - 1; i++)
+        {
+            DrawLine(color, vertices[i], vertices[i + 1]);
+        }
     }
 }
