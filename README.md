@@ -38,7 +38,7 @@ It was created for the _purpose_ of _improving_ Windows API skills. \
 
 - [BunnyHop](https://streamable.com/3r09m1) ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/151355b47373acdc3ccaa6f526e94388c4e71f2b/Data/Entity/Player.cs#L64) )
 - OBS Bypass
-- Hitsound (**_in the same folder with the cheat there should be a file called "hitsound.wav"_**)
+- Hitsound (**_in the same folder with the cheat there should be a file called "hit.wav"_**)
 - Basic Config
 
 #### System
