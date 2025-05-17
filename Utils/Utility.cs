@@ -86,11 +86,11 @@ public static class Utility
     }
 
 
-    public static Module GetModule(this System.Diagnostics.Process process, string moduleName)
+    public static Module? GetModule(this System.Diagnostics.Process process, string moduleName)
     {
         var processModule = process.GetProcessModule(moduleName);
         return processModule is null || processModule.BaseAddress == IntPtr.Zero
-            ? default
+            ? null
             : new Module(process, processModule);
     }
 
@@ -98,8 +98,11 @@ public static class Utility
     private static ProcessModule GetProcessModule(this System.Diagnostics.Process process,
         string moduleName)
     {
-        return process?.Modules.OfType<ProcessModule>()
+        var module = process?.Modules.OfType<ProcessModule>()
             .FirstOrDefault(a => string.Equals(a.ModuleName.ToLower(), moduleName.ToLower()));
+        if (module == null)
+            throw new InvalidOperationException($"Module '{moduleName}' not found in process.");
+        return module;
     }
 
 
@@ -359,9 +362,21 @@ public static class Utility
         where T : unmanaged
     {
         var size = Marshal.SizeOf<T>();
-        var buffer = default(T) as object;
-        Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, buffer, size, out var lpNumberOfBytesRead);
-        return lpNumberOfBytesRead == size ? (T)buffer : default;
+        var buffer = new byte[size];
+        var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+        try
+        {
+            Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, handle.AddrOfPinnedObject(), size, out var lpNumberOfBytesRead);
+            if (lpNumberOfBytesRead == size)
+            {
+                return Marshal.PtrToStructure<T>(handle.AddrOfPinnedObject());
+            }
+        }
+        finally
+        {
+            handle.Free();
+        }
+        return default;
     }
 
     public static string ReadString(this System.Diagnostics.Process process, IntPtr lpBaseAddress, int maxLength = 256)
@@ -376,7 +391,15 @@ public static class Utility
     private static byte[] ReadBytes(IntPtr hProcess, IntPtr lpBaseAddress, int maxLength)
     {
         var buffer = new byte[maxLength];
-        Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, buffer, maxLength, out _);
+        var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+        try
+        {
+            Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, handle.AddrOfPinnedObject(), maxLength, out _);
+        }
+        finally
+        {
+            handle.Free();
+        }
         return buffer;
     }
 

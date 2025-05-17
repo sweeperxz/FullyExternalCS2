@@ -58,9 +58,9 @@ public class ConfigManager
     {
         return new ConfigManager
         {
-            AimBot = true,
+            AimBot = false,
             BombTimer = true,
-            EspAimCrosshair = true,
+            EspAimCrosshair = false,
             EspBox = true,
             SkeletonEsp = true,
             TriggerBot = true

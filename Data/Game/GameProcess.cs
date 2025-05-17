@@ -1,5 +1,6 @@
 ﻿using CS2Cheat.Core;
 using CS2Cheat.Utils;
+using System.Diagnostics;
 
 namespace CS2Cheat.Data.Game;
 
@@ -21,9 +22,9 @@ public class GameProcess : ThreadedServiceBase
 
     protected override TimeSpan ThreadFrameSleep { get; set; } = new(0, 0, 0, 0, 500);
 
-    public System.Diagnostics.Process Process { get; private set; }
+    public System.Diagnostics.Process? Process { get; private set; }
 
-    public Module ModuleClient { get; private set; }
+    public Module? ModuleClient { get; private set; }
 
     private IntPtr WindowHwnd { get; set; }
 
@@ -71,13 +72,25 @@ public class GameProcess : ThreadedServiceBase
         WindowActive = false;
     }
 
-    private bool EnsureProcessAndModules()
+private bool EnsureProcessAndModules()
+{
+    Process ??= System.Diagnostics.Process.GetProcessesByName(NameProcess).FirstOrDefault()!;
+    if (Process == null || Process.HasExited) return false;
+
+    if (ModuleClient == null && Process != null)
     {
-        Process ??= System.Diagnostics.Process.GetProcessesByName(NameProcess).FirstOrDefault();
-        if (Process is null || !Process.IsRunning()) return false;
-        ModuleClient ??= Process.GetModule(NameModule);
-        return true;
+        var processModule = Process.Modules
+            .OfType<ProcessModule>()
+            .FirstOrDefault(m => m.ModuleName.Equals(NameModule, StringComparison.OrdinalIgnoreCase));
+        if (processModule != null)
+        {
+            ModuleClient = new Module(Process, processModule); // Pass both Process and ProcessModule as required
+        }
     }
+
+    return ModuleClient != null;
+}
+
 
     private bool EnsureWindow()
     {
@@ -87,7 +100,7 @@ public class GameProcess : ThreadedServiceBase
         WindowRectangleClient = Utility.GetClientRectangle(WindowHwnd);
         if (WindowRectangleClient.Width <= 0 || WindowRectangleClient.Height <= 0) return false;
 
-        WindowActive = WindowHwnd == User32.GetForegroundWindow();
+        WindowActive = WindowHwnd == User32 .GetForegroundWindow();
 
         return WindowActive;
     }

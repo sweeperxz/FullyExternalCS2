@@ -25,7 +25,7 @@ public class Graphics : ThreadedServiceBase
     private readonly object _deviceLock = new();
     
     private Vector2 _currentResolution;
-    private Device _device;
+    private Device? _device;
     private bool _isDisposed;
 
     public Graphics(GameProcess gameProcess, GameData gameData, WindowOverlay windowOverlay)
@@ -43,9 +43,9 @@ public class Graphics : ThreadedServiceBase
     private WindowOverlay WindowOverlay { get; }
     public GameProcess GameProcess { get; }
     public GameData GameData { get; }
-    public Font FontAzonix64 { get; private set; }
-    public Font FontConsolas32 { get; private set; }
-    public Font Undefeated { get; private set; }
+    public Font? FontAzonix64 { get; private set; }
+    public Font? FontConsolas32 { get; private set; }
+    public Font? Undefeated { get; private set; }
 
     public override void Dispose()
     {
@@ -133,6 +133,9 @@ public class Graphics : ThreadedServiceBase
     {
         lock (_deviceLock)
         {
+            if (_device == null)
+                return;
+
             ConfigureRenderState();
             _device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.FromAbgr(0), 1, 0);
             _device.BeginScene();
@@ -146,6 +149,9 @@ public class Graphics : ThreadedServiceBase
 
     private void ConfigureRenderState()
     {
+        if (_device == null)
+            return;
+
         _device.SetRenderState(RenderState.AlphaBlendEnable, true);
         _device.SetRenderState(RenderState.AlphaTestEnable, false);
         _device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
@@ -176,6 +182,9 @@ public class Graphics : ThreadedServiceBase
     private void RenderVertices()
     {
         if (_vertices.Count == 0) return;
+
+        if (_device == null)
+            return;
 
         using var vertices = new VertexBuffer(_device, _vertices.Count * 20, Usage.WriteOnly, VertexFormat.None, Pool.Managed);
         vertices.Lock(0, 0, LockFlags.None).WriteRange(_vertices.ToArray());
@@ -211,6 +220,9 @@ public class Graphics : ThreadedServiceBase
 
     public void DrawLineWorld(Color color, params Vector3[] verticesWorld)
     {
+        if (GameData.Player == null)
+            return;
+
         var screenVertices = verticesWorld
             .Select(v => GameData.Player.MatrixViewProjectionViewport.Transform(v))
             .Where(v => v.Z < 1)
