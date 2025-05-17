@@ -46,8 +46,10 @@ using CS2Cheat.Data.Game;
     
         protected override IntPtr ReadAddressBase(GameProcess gameProcess)
         {
-            if (gameProcess?.Process == null)
-                return IntPtr.Zero;
+        if (gameProcess?.Process == null)
+        {
+            return IntPtr.Zero;
+        }
 
             var playerPawn = gameProcess.Process.Read<int>(ControllerBase + Offsets.m_hPawn);
             var pawnIndex = (playerPawn & 0x7FFF) >> 9;

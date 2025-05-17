@@ -240,8 +240,14 @@ public class AimBot : ThreadedServiceBase
 
     private static bool TryMouseMoveOld(Point aimPixels)
     {
-        if (aimPixels.X == 0 && aimPixels.Y == 0) return false;
-        if (Math.Abs(aimPixels.X) > 100 || Math.Abs(aimPixels.Y) > 100) return false;
+        if (aimPixels.X == 0 && aimPixels.Y == 0)
+        {
+            return false;
+        }
+        if (Math.Abs(aimPixels.X) > 100 || Math.Abs(aimPixels.Y) > 100)
+            {
+                return false;
+            }
         Utility.MouseMove(aimPixels.X, aimPixels.Y);
         return true;
     }

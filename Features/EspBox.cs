@@ -36,8 +36,10 @@ public static class EspBox
 
         foreach (var entity in graphics.GameData.Entities)
             {
-                if (!entity.IsAlive() || entity.AddressBase == player.AddressBase)
-                    continue;
+            if (!entity.IsAlive() || entity.AddressBase == player.AddressBase)
+            {
+                continue;
+            }
 
                 var boundingBox = GetEntityBoundingBox(graphics, entity);
                 if (boundingBox == null)
@@ -54,7 +56,9 @@ public static class EspBox
     {
         var (topLeft, bottomRight) = boundingBox;
         if (topLeft.X > bottomRight.X || topLeft.Y > bottomRight.Y)
+        {
             return;
+        }
 
         float healthPercentage = Math.Clamp(entity.Health / 100f, 0f, 1f);
 

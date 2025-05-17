@@ -152,7 +152,9 @@ public class Graphics : ThreadedServiceBase
     private void ConfigureRenderState()
     {
         if (_device == null)
+        {
             return;
+        }
 
         _device.SetRenderState(RenderState.AlphaBlendEnable, true);
         _device.SetRenderState(RenderState.AlphaTestEnable, false);

@@ -35,7 +35,9 @@ public class Player : EntityBase
     protected override IntPtr ReadAddressBase(GameProcess gameProcess)
     {
         if (gameProcess.ModuleClient == null)
+        {
             throw new ArgumentNullException(nameof(gameProcess.ModuleClient), "ModuleClient cannot be null.");
+        }
         return gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn);
     }
 
