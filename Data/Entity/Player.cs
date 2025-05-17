@@ -47,7 +47,9 @@ public class Player : EntityBase
 
 
         if (gameProcess.ModuleClient == null)
+        {
             throw new ArgumentNullException(nameof(gameProcess.ModuleClient), "ModuleClient cannot be null.");
+        }
         MatrixViewProjection = Matrix.Transpose(gameProcess.ModuleClient.Read<Matrix>(Offsets.dwViewMatrix));
         MatrixViewport = Utility.GetMatrixViewport(gameProcess.WindowRectangleClient.Size);
         MatrixViewProjectionViewport = MatrixViewProjection * MatrixViewport;

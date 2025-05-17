@@ -188,7 +188,9 @@ public class Graphics : ThreadedServiceBase
         if (_vertices.Count == 0) return;
 
         if (_device == null)
+        {
             return;
+        }
 
         using var vertices = new VertexBuffer(_device, _vertices.Count * 20, Usage.WriteOnly, VertexFormat.None, Pool.Managed);
         vertices.Lock(0, 0, LockFlags.None).WriteRange(_vertices.ToArray());

@@ -87,8 +87,10 @@ using CS2Cheat.Data.Game;
         {
             try
             {
-                if (gameProcess?.Process == null)
-                    return false;
+            if (gameProcess?.Process == null)
+            {
+                return false;
+            }
 
                 var gameSceneNode = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pGameSceneNode);
                 var boneArray = gameProcess.Process.Read<IntPtr>(gameSceneNode + Offsets.m_modelState + 128);

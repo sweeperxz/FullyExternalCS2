@@ -67,7 +67,9 @@ public sealed class TriggerBot : ThreadedServiceBase
         }
 
         if (_gameProcess.Process == null)
-                return IntPtr.Zero;
+        {
+            return IntPtr.Zero;
+        }
 
         var entityId = _gameProcess.Process.Read<int>(localPlayerPawn + Offsets.m_iIDEntIndex);
 
