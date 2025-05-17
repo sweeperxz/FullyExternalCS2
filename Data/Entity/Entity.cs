@@ -32,8 +32,10 @@ using CS2Cheat.Data.Game;
         {
             var entryIndex = (_index & 0x7FFF) >> 9;
 
-            if (gameProcess?.Process == null)
-                return IntPtr.Zero;
+        if (gameProcess?.Process == null)
+        {
+            return IntPtr.Zero;
+        }
 
             var listEntry = gameProcess.Process.Read<IntPtr>(EntityList + (8 * entryIndex) + 16);
 

@@ -38,11 +38,14 @@ public class GameData : ThreadedServiceBase
 
     protected override void FrameAction()
     {
-        if (GameProcess == null || !GameProcess.IsValid) return;
-        if (Player != null)
+        if (GameProcess == null || !GameProcess.IsValid)
         {
-            Player.Update(GameProcess);
+            return;
         }
+        if (Player != null)
+            {
+                Player.Update(GameProcess);
+            }
 
         if (Entities != null)
         {

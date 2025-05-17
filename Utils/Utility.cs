@@ -101,7 +101,9 @@ public static class Utility
         var module = process?.Modules.OfType<ProcessModule>()
             .FirstOrDefault(a => string.Equals(a.ModuleName.ToLower(), moduleName.ToLower()));
         if (module == null)
+        {
             throw new InvalidOperationException($"Module '{moduleName}' not found in process.");
+        }
         return module;
     }
 

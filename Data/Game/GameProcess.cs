@@ -75,18 +75,21 @@ public class GameProcess : ThreadedServiceBase
 private bool EnsureProcessAndModules()
 {
     Process ??= System.Diagnostics.Process.GetProcessesByName(NameProcess).FirstOrDefault()!;
-    if (Process == null || Process.HasExited) return false;
+        if (Process == null || Process.HasExited)
+        {
+            return false;
+        }
 
     if (ModuleClient == null && Process != null)
-    {
-        var processModule = Process.Modules
-            .OfType<ProcessModule>()
-            .FirstOrDefault(m => m.ModuleName.Equals(NameModule, StringComparison.OrdinalIgnoreCase));
-        if (processModule != null)
-        {
-            ModuleClient = new Module(Process, processModule); // Pass both Process and ProcessModule as required
-        }
-    }
+            {
+                var processModule = Process.Modules
+                    .OfType<ProcessModule>()
+                    .FirstOrDefault(m => m.ModuleName.Equals(NameModule, StringComparison.OrdinalIgnoreCase));
+                if (processModule != null)
+                {
+                    ModuleClient = new Module(Process, processModule); // Pass both Process and ProcessModule as required
+                }
+            }
 
     return ModuleClient != null;
 }

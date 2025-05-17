@@ -134,7 +134,9 @@ public class Graphics : ThreadedServiceBase
         lock (_deviceLock)
         {
             if (_device == null)
+            {
                 return;
+            }
 
             ConfigureRenderState();
             _device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.FromAbgr(0), 1, 0);
@@ -221,7 +223,9 @@ public class Graphics : ThreadedServiceBase
     public void DrawLineWorld(Color color, params Vector3[] verticesWorld)
     {
         if (GameData.Player == null)
+        {
             return;
+        }
 
         var screenVertices = verticesWorld
             .Select(v => GameData.Player.MatrixViewProjectionViewport.Transform(v))

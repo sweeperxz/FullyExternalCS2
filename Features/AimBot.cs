@@ -81,7 +81,10 @@ public class AimBot : ThreadedServiceBase
         if (GameProcess == null || !GameProcess.IsValid ||
             GameData == null || GameData.Player == null || !GameData.Player.IsAlive() ||
             TriggerBot.IsHotKeyDown() ||
-            GameData.Player.IsGrenade()) return true;
+            GameData.Player.IsGrenade())
+        {
+            return true;
+        } 
 
         if (Monitor.TryEnter(_stateLock))
         {
@@ -92,18 +95,18 @@ public class AimBot : ThreadedServiceBase
 
         return true;
     }
-
-
     protected override void FrameAction()
     {
         if (GameProcess == null || !GameProcess.IsValid || GameData?.Player == null || !GameData.Player.IsAlive())
+        {
             return;
+        }
 
         if (!IsCalibrated)
-        {
-            Calibrate();
-            IsCalibrated = true;
-        }
+            {
+                Calibrate();
+                IsCalibrated = true;
+            }
 
         if (Monitor.TryEnter(_stateLock))
         {
@@ -117,7 +120,7 @@ public class AimBot : ThreadedServiceBase
         }
 
         Point aimPixels = Point.Empty;
-        Vector2 aimAngles = Vector2.Zero;
+        Vector2 aimAngles;
 
         if (GetAimTarget(out aimAngles))
         {
@@ -134,12 +137,18 @@ public class AimBot : ThreadedServiceBase
         bool shouldWait = TryMouseDown();
 
         if (MouseMoveMethod == MouseMoveMethod.TryMouseMoveOld)
+        {
             shouldWait |= TryMouseMoveOld(aimPixels);
+        }
         else
+        {
             shouldWait |= TryMouseMoveNew(aimPixels);
+        }
 
         if (shouldWait)
+        {
             Thread.Sleep(20);
+        }
     }
 
 
@@ -163,7 +172,10 @@ public class AimBot : ThreadedServiceBase
 
                 GetAimAngles(aimPosition, out var angleToBoneSize, out var anglesToBone);
 
-                if (angleToBoneSize > AimFov) continue;
+                if (angleToBoneSize > AimFov)
+                {
+                    continue;
+                }
 
                 if (angleToBoneSize < minAngleSize)
                 {
@@ -200,7 +212,9 @@ public class AimBot : ThreadedServiceBase
         angleSize = 0f;
 
         if (GameData == null || GameData.Player == null)
+        {
             return;
+        }
 
         var aimDirection = GameData.Player.AimDirection;
         var aimDirectionDesired = (pointWorld - GameData.Player.EyePosition).GetNormalized();
@@ -234,8 +248,15 @@ public class AimBot : ThreadedServiceBase
 
     private static bool TryMouseMoveNew(Point aimPixels)
     {
-        if (aimPixels.X == 0 && aimPixels.Y == 0) return false;
-        if (Math.Abs(aimPixels.X) > 100 || Math.Abs(aimPixels.Y) > 100) return false;
+        if (aimPixels.X == 0 && aimPixels.Y == 0)
+        {
+            return false;
+        }
+
+        if (Math.Abs(aimPixels.X) > 100 || Math.Abs(aimPixels.Y) > 100)
+        {
+            return false;
+        }
         Utility.WindMouseMove(0, 0, aimPixels.X, aimPixels.Y, 9.0, 3.0, 15.0, 12.0);
         return true;
     }
@@ -279,7 +300,9 @@ public class AimBot : ThreadedServiceBase
         Thread.Sleep(100);
 
         if (GameData == null || GameData.Player == null)
+        {
             return 0.0;
+        }
 
         var eyeDirectionStart = GameData.Player.EyeDirection;
         eyeDirectionStart.Z = 0;
@@ -289,7 +312,9 @@ public class AimBot : ThreadedServiceBase
         Thread.Sleep(100);
 
         if (GameData == null || GameData.Player == null)
+        {
             return 0.0;
+        }
 
         var eyeDirectionEnd = GameData.Player.EyeDirection;
         eyeDirectionEnd.Z = 0;

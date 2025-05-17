@@ -30,20 +30,24 @@ public static class EspBox
     {
         var player = graphics.GameData.Player;
         if (player == null || graphics.GameData.Entities == null)
+        {
             return;
+        }
 
         foreach (var entity in graphics.GameData.Entities)
-        {
-            if (!entity.IsAlive() || entity.AddressBase == player.AddressBase)
-                continue;
+            {
+                if (!entity.IsAlive() || entity.AddressBase == player.AddressBase)
+                    continue;
 
-            var boundingBox = GetEntityBoundingBox(graphics, entity);
-            if (boundingBox == null)
-                continue;
+                var boundingBox = GetEntityBoundingBox(graphics, entity);
+                if (boundingBox == null)
+                {
+                    continue;
+                }
 
-            var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
-            DrawEntityInfo(graphics, entity, colorBox, boundingBox.Value);
-        }
+                var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
+                DrawEntityInfo(graphics, entity, colorBox, boundingBox.Value);
+            }
     }
 
     private static void DrawEntityInfo(Graphics.Graphics graphics, Entity entity, Color color, (Vector2, Vector2) boundingBox)
@@ -128,14 +132,18 @@ public static class EspBox
 
         var matrix = graphics.GameData.Player?.MatrixViewProjectionViewport;
         if (matrix == null || entity.BonePos == null || entity.BonePos.Count == 0)
+        {
             return null;
+        }
 
         bool anyValid = false;
         foreach (var bone in entity.BonePos.Values)
         {
             var transformed = GraphicsMath.Transform(matrix.Value, bone);
             if (transformed.Z >= 1 || transformed.X < 0 || transformed.Y < 0)
+            {
                 continue;
+            }
 
             anyValid = true;
             minPos.X = Math.Min(minPos.X, transformed.X);
@@ -146,7 +154,9 @@ public static class EspBox
 
 
         if (!anyValid)
+        {
             return null;
+        }
 
         var sizeMultiplier = 2f - entity.Health / 100f;
         var paddingVector = new Vector2(padding * sizeMultiplier);

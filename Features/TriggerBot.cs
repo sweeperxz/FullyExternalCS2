@@ -37,7 +37,9 @@ public sealed class TriggerBot : ThreadedServiceBase
             return;
 
         if (_gameProcess.Process == null)
+        {
             return;
+        }
 
         var entityTeam = _gameProcess.Process.Read<int>(targetEntity + Offsets.m_iTeamNum);
         if (!ShouldTriggerOnEntity(entityTeam))
@@ -54,14 +56,18 @@ public sealed class TriggerBot : ThreadedServiceBase
     private IntPtr GetTargetEntity()
     {
         if (_gameProcess.ModuleClient == null)
+        {
             return IntPtr.Zero;
+        }
 
         var localPlayerPawn = _gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn);
         if (localPlayerPawn == IntPtr.Zero)
+        {
             return IntPtr.Zero;
+        }
 
         if (_gameProcess.Process == null)
-            return IntPtr.Zero;
+                return IntPtr.Zero;
 
         var entityId = _gameProcess.Process.Read<int>(localPlayerPawn + Offsets.m_iIDEntIndex);
 
@@ -79,7 +85,9 @@ public sealed class TriggerBot : ThreadedServiceBase
     private bool ShouldTriggerOnEntity(int entityTeam)
     {
         if (_gameData.Player == null)
+        {
             return false;
+        }
 
         var isDifferentTeam = _gameData.Player.Team != entityTeam.ToTeam();
         var isSpecialCondition = _gameData.Player.FFlags == 65664;
