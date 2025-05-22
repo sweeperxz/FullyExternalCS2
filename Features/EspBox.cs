@@ -10,6 +10,7 @@ namespace CS2Cheat.Features;
 public static class EspBox
 {
     private const int OutlineThickness = 2;
+
     private static readonly Dictionary<string, string> GunIcons = new()
     {
         ["knife_ct"] = "]", ["knife_t"] = "[", ["deagle"] = "A", ["elite"] = "B",
@@ -25,29 +26,41 @@ public static class EspBox
         ["molotov"] = "l", ["decoy"] = "m", ["incgrenade"] = "n", ["c4"] = "o"
     };
 
-    
     public static void Draw(Graphics.Graphics graphics)
     {
-        
-        foreach (var entity in graphics.GameData.Entities)
+        var player = graphics.GameData.Player;
+        if (player == null || graphics.GameData.Entities == null)
         {
-            if (!entity.IsAlive() || entity.AddressBase == graphics.GameData.Player.AddressBase)
-                continue;
-
-            var boundingBox = GetEntityBoundingBox(graphics, entity);
-            if (boundingBox.Item1.X > boundingBox.Item2.X || boundingBox.Item1.Y > boundingBox.Item2.Y)
-                continue;
-
-            var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
-            DrawEntityInfo(graphics, entity, colorBox, boundingBox);
+            return;
         }
+
+        foreach (var entity in graphics.GameData.Entities)
+            {
+            if (!entity.IsAlive() || entity.AddressBase == player.AddressBase)
+            {
+                continue;
+            }
+
+                var boundingBox = GetEntityBoundingBox(graphics, entity);
+                if (boundingBox == null)
+                {
+                    continue;
+                }
+
+                var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
+                DrawEntityInfo(graphics, entity, colorBox, boundingBox.Value);
+            }
     }
 
-    private static void DrawEntityInfo(Graphics.Graphics graphics, Entity entity, Color color,
-        (Vector2, Vector2) boundingBox)
+    private static void DrawEntityInfo(Graphics.Graphics graphics, Entity entity, Color color, (Vector2, Vector2) boundingBox)
     {
         var (topLeft, bottomRight) = boundingBox;
-        var healthPercentage = entity.Health / 100f;
+        if (topLeft.X > bottomRight.X || topLeft.Y > bottomRight.Y)
+        {
+            return;
+        }
+
+        float healthPercentage = Math.Clamp(entity.Health / 100f, 0f, 1f);
 
         graphics.DrawRectangle(color, topLeft, bottomRight);
 
@@ -60,7 +73,7 @@ public static class EspBox
         // Health number
         var healthText = entity.Health.ToString();
         var healthX = (int)(bottomRight.X + 2);
-        var healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y - 
+        var healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y -
             graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center).Bottom) / 2);
         graphics.FontConsolas32.DrawText(default, healthText, healthX, healthY, Color.White);
 
@@ -88,25 +101,24 @@ public static class EspBox
         var flagX = (int)(bottomRight.X + 5f);
         var flagY = (int)topLeft.Y;
         var spacing = 15;
-        
+
         if (entity.IsInScope == 1)
             graphics.FontConsolas32.DrawText(default, "Scoped", flagX, flagY, Color.White);
-        
+
         if (entity.FlashAlpha > 7)
             graphics.FontConsolas32.DrawText(default, "Flashed", flagX, flagY + spacing, Color.White);
-        
+
         if (entity.IsInScope == 256)
             graphics.FontConsolas32.DrawText(default, "Shifting", flagX, flagY + spacing * 2, Color.White);
         else if (entity.IsInScope == 257)
             graphics.FontConsolas32.DrawText(default, "Shifting in scope", flagX, flagY + spacing * 3, Color.White);
     }
 
-    private static void DrawHealthBar(Graphics.Graphics graphics, Vector2 topLeft, Vector2 bottomRight,
-        float healthPercentage)
+    private static void DrawHealthBar(Graphics.Graphics graphics, Vector2 topLeft, Vector2 bottomRight, float healthPercentage)
     {
         var filledHeight = (bottomRight.Y - topLeft.Y) * healthPercentage;
         var filledTop = new Vector2(topLeft.X, Math.Max(bottomRight.Y - filledHeight, topLeft.Y));
-        
+
         graphics.DrawRectangle(Color.Green, filledTop, bottomRight);
         graphics.DrawRectangle(Color.Black,
             new Vector2(topLeft.X - OutlineThickness, filledTop.Y - OutlineThickness),
@@ -114,24 +126,40 @@ public static class EspBox
     }
 
     private static string GetWeaponIcon(string weapon) =>
-        GunIcons.TryGetValue(weapon.ToLower(), out var icon) ? icon : string.Empty;
+        GunIcons.TryGetValue(weapon?.ToLower() ?? string.Empty, out var icon) ? icon : string.Empty;
 
-    private static (Vector2, Vector2) GetEntityBoundingBox(Graphics.Graphics graphics, Entity entity)
+    private static (Vector2, Vector2)? GetEntityBoundingBox(Graphics.Graphics graphics, Entity entity)
     {
         const float padding = 5.0f;
         var minPos = new Vector2(float.MaxValue, float.MaxValue);
         var maxPos = new Vector2(float.MinValue, float.MinValue);
-        var matrix = graphics.GameData.Player.MatrixViewProjectionViewport;
 
-        foreach (var bonePos in entity.BonePos.Values)
+        var matrix = graphics.GameData.Player?.MatrixViewProjectionViewport;
+        if (matrix == null || entity.BonePos == null || entity.BonePos.Count == 0)
         {
-            var transformed = matrix.Transform(bonePos);
-            if (transformed.Z >= 1) continue;
+            return null;
+        }
 
+        bool anyValid = false;
+        foreach (var bone in entity.BonePos.Values)
+        {
+            var transformed = GraphicsMath.Transform(matrix.Value, bone);
+            if (transformed.Z >= 1 || transformed.X < 0 || transformed.Y < 0)
+            {
+                continue;
+            }
+
+            anyValid = true;
             minPos.X = Math.Min(minPos.X, transformed.X);
             minPos.Y = Math.Min(minPos.Y, transformed.Y);
             maxPos.X = Math.Max(maxPos.X, transformed.X);
             maxPos.Y = Math.Max(maxPos.Y, transformed.Y);
+        }
+
+
+        if (!anyValid)
+        {
+            return null;
         }
 
         var sizeMultiplier = 2f - entity.Health / 100f;

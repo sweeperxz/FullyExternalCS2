@@ -31,8 +31,14 @@ using CS2Cheat.Data.Game;
         protected override IntPtr ReadControllerBase(GameProcess gameProcess)
         {
             var entryIndex = (_index & 0x7FFF) >> 9;
+
+        if (gameProcess?.Process == null)
+        {
+            return IntPtr.Zero;
+        }
+
             var listEntry = gameProcess.Process.Read<IntPtr>(EntityList + (8 * entryIndex) + 16);
-            
+
             return listEntry != IntPtr.Zero 
                 ? gameProcess.Process.Read<IntPtr>(listEntry + 120 * (_index & 0x1FF)) 
                 : IntPtr.Zero;
@@ -40,6 +46,11 @@ using CS2Cheat.Data.Game;
     
         protected override IntPtr ReadAddressBase(GameProcess gameProcess)
         {
+        if (gameProcess?.Process == null)
+        {
+            return IntPtr.Zero;
+        }
+
             var playerPawn = gameProcess.Process.Read<int>(ControllerBase + Offsets.m_hPawn);
             var pawnIndex = (playerPawn & 0x7FFF) >> 9;
             var listEntry = gameProcess.Process.Read<IntPtr>(EntityList + 0x8 * pawnIndex + 16);
@@ -53,11 +64,21 @@ using CS2Cheat.Data.Game;
         {
             if (!base.Update(gameProcess)) return false;
     
-            _dormant = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_bDormant);
-            IsSpotted = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_entitySpottedState + 0x8);
-            IsInScope = gameProcess.Process.Read<int>(AddressBase + Offsets.m_bIsScoped);
-            FlashAlpha = gameProcess.Process.Read<int>(AddressBase + Offsets.m_flFlashDuration);
-            Name = gameProcess.Process.ReadString(ControllerBase + Offsets.m_iszPlayerName);
+            _dormant = gameProcess.Process != null 
+                ? gameProcess.Process.Read<bool>(AddressBase + Offsets.m_bDormant) 
+                : false;
+            IsSpotted = gameProcess.Process != null 
+                ? gameProcess.Process.Read<bool>(AddressBase + Offsets.m_entitySpottedState + 0x8) 
+                : false;
+            IsInScope = gameProcess.Process != null 
+                ? gameProcess.Process.Read<int>(AddressBase + Offsets.m_bIsScoped) 
+                : 0;
+            FlashAlpha = gameProcess.Process != null 
+                ? gameProcess.Process.Read<int>(AddressBase + Offsets.m_flFlashDuration) 
+                : 0;
+            Name = gameProcess.Process != null 
+                ? gameProcess.Process.ReadString(ControllerBase + Offsets.m_iszPlayerName) 
+                : string.Empty;
     
             return !IsAlive() || UpdateBonePositions(gameProcess);
         }
@@ -66,6 +87,11 @@ using CS2Cheat.Data.Game;
         {
             try
             {
+            if (gameProcess?.Process == null)
+            {
+                return false;
+            }
+
                 var gameSceneNode = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pGameSceneNode);
                 var boneArray = gameProcess.Process.Read<IntPtr>(gameSceneNode + Offsets.m_modelState + 128);
     

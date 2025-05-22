@@ -9,11 +9,11 @@ public class GameData : ThreadedServiceBase
 
     protected override string ThreadName => nameof(GameData);
 
-    private GameProcess GameProcess { get; set; }
+    private GameProcess? GameProcess { get; set; }
 
-    public Player Player { get; private set; }
+    public Player? Player { get; private set; }
 
-    public Entity.Entity[] Entities { get; private set; }
+    public Entity.Entity[]? Entities { get; private set; }
 
     #endregion
 
@@ -31,17 +31,26 @@ public class GameData : ThreadedServiceBase
     {
         base.Dispose();
 
-        Entities = default;
-        Player = default;
-        GameProcess = default;
+        Entities = null;
+        Player = null;
+        GameProcess = null;
     }
 
     protected override void FrameAction()
     {
-        if (!GameProcess.IsValid) return;
-        Player.Update(GameProcess);
+        if (GameProcess == null || !GameProcess.IsValid)
+        {
+            return;
+        }
+        if (Player != null)
+            {
+                Player.Update(GameProcess);
+            }
 
-        foreach (var entity in Entities) entity.Update(GameProcess);
+        if (Entities != null)
+        {
+            foreach (var entity in Entities) entity.Update(GameProcess);
+        }
     }
 
     #endregion

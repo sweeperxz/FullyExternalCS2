@@ -39,11 +39,19 @@ public abstract class EntityBase
 
     public virtual bool Update(GameProcess gameProcess)
     {
+        if (gameProcess.ModuleClient == null)
+        {
+            throw new ArgumentNullException(nameof(gameProcess.ModuleClient), "ModuleClient cannot be null.");
+        }
         EntityList = gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList);
         ControllerBase = ReadControllerBase(gameProcess);
         AddressBase = ReadAddressBase(gameProcess);
         if (ControllerBase == IntPtr.Zero || AddressBase == IntPtr.Zero) return false;
 
+        if (gameProcess.Process == null)
+        {
+            throw new ArgumentNullException(nameof(gameProcess.Process), "Process cannot be null.");
+        }
 
         LifeState = gameProcess.Process.Read<bool>(AddressBase + Offsets.m_lifeState);
         Health = gameProcess.Process.Read<int>(AddressBase + Offsets.m_iHealth);
