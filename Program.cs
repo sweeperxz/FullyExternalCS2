@@ -77,23 +77,14 @@ public class Program :
         Graphics.Start();
 
         Trigger = new TriggerBot(GameProcess, GameData);
-        if (features.TriggerBot)
-        {
-            Trigger.Start();
-        }
+        if (features.TriggerBot) Trigger.Start();
 
 
         AimBot = new AimBot(GameProcess, GameData);
-        if (features.AimBot)
-        {
-            AimBot.Start();
-        }
+        if (features.AimBot) AimBot.Start();
 
         BombTimer = new BombTimer(Graphics);
-        if (features.BombTimer)
-        {
-            BombTimer.Start();
-        }
+        if (features.BombTimer) BombTimer.Start();
 
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
     }

@@ -5,14 +5,13 @@ namespace CS2Cheat.Utils;
 
 public class ConfigManager
 {
+    private const string ConfigFile = "config.json";
     public bool AimBot { get; set; }
     public bool BombTimer { get; set; }
     public bool EspAimCrosshair { get; set; }
     public bool EspBox { get; set; }
     public bool SkeletonEsp { get; set; }
     public bool TriggerBot { get; set; }
-
-    private const string ConfigFile = "config.json";
 
     public static ConfigManager Load()
     {

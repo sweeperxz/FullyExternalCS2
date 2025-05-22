@@ -1,6 +1,5 @@
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
-using System.Threading.Tasks;
 using Keys = Process.NET.Native.Types.Keys;
 
 namespace CS2Cheat.Features;
@@ -14,18 +13,18 @@ public sealed class TriggerBot : ThreadedServiceBase
     private const int EntityStride = 120;
     private const int EntityIndexMask = 0x1FF;
     private const int EntityIndexShift = 9;
-
-    protected override string ThreadName => nameof(TriggerBot);
-    private static Keys TriggerBotHotKey => Keys.LMenu;
+    private readonly GameData _gameData;
 
     private readonly GameProcess _gameProcess;
-    private readonly GameData _gameData;
 
     public TriggerBot(GameProcess gameProcess, GameData gameData)
     {
         _gameProcess = gameProcess ?? throw new ArgumentNullException(nameof(gameProcess));
         _gameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
     }
+
+    protected override string ThreadName => nameof(TriggerBot);
+    private static Keys TriggerBotHotKey => Keys.LMenu;
 
     protected override async void FrameAction()
     {
@@ -36,10 +35,7 @@ public sealed class TriggerBot : ThreadedServiceBase
         if (targetEntity == IntPtr.Zero)
             return;
 
-        if (_gameProcess.Process == null)
-        {
-            return;
-        }
+        if (_gameProcess.Process == null) return;
 
         var entityTeam = _gameProcess.Process.Read<int>(targetEntity + Offsets.m_iTeamNum);
         if (!ShouldTriggerOnEntity(entityTeam))
@@ -55,21 +51,12 @@ public sealed class TriggerBot : ThreadedServiceBase
 
     private IntPtr GetTargetEntity()
     {
-        if (_gameProcess.ModuleClient == null)
-        {
-            return IntPtr.Zero;
-        }
+        if (_gameProcess.ModuleClient == null) return IntPtr.Zero;
 
         var localPlayerPawn = _gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn);
-        if (localPlayerPawn == IntPtr.Zero)
-        {
-            return IntPtr.Zero;
-        }
+        if (localPlayerPawn == IntPtr.Zero) return IntPtr.Zero;
 
-        if (_gameProcess.Process == null)
-        {
-            return IntPtr.Zero;
-        }
+        if (_gameProcess.Process == null) return IntPtr.Zero;
 
         var entityId = _gameProcess.Process.Read<int>(localPlayerPawn + Offsets.m_iIDEntIndex);
 
@@ -86,10 +73,7 @@ public sealed class TriggerBot : ThreadedServiceBase
 
     private bool ShouldTriggerOnEntity(int entityTeam)
     {
-        if (_gameData.Player == null)
-        {
-            return false;
-        }
+        if (_gameData.Player == null) return false;
 
         var isDifferentTeam = _gameData.Player.Team != entityTeam.ToTeam();
         var isSpecialCondition = _gameData.Player.FFlags == 65664;
@@ -105,7 +89,10 @@ public sealed class TriggerBot : ThreadedServiceBase
         Utility.MouseLeftUp();
     }
 
-    public static bool IsHotKeyDown() => TriggerBotHotKey.IsKeyDown();
+    public static bool IsHotKeyDown()
+    {
+        return TriggerBotHotKey.IsKeyDown();
+    }
 
     public override void Dispose()
     {

@@ -21,9 +21,10 @@ public class Graphics : ThreadedServiceBase
         VertexElement.VertexDeclarationEnd
     };
 
-    private readonly List<Vertex> _vertices = [];
     private readonly object _deviceLock = new();
-    
+
+    private readonly List<Vertex> _vertices = [];
+
     private Vector2 _currentResolution;
     private Device? _device;
     private bool _isDisposed;
@@ -33,7 +34,7 @@ public class Graphics : ThreadedServiceBase
         WindowOverlay = windowOverlay ?? throw new ArgumentNullException(nameof(windowOverlay));
         GameProcess = gameProcess ?? throw new ArgumentNullException(nameof(gameProcess));
         GameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
-        
+
         _currentResolution = new Vector2(WindowOverlay.Window.Width, WindowOverlay.Window.Height);
         InitializeDevice();
     }
@@ -50,7 +51,7 @@ public class Graphics : ThreadedServiceBase
     public override void Dispose()
     {
         if (_isDisposed) return;
-        
+
         base.Dispose();
 
         lock (_deviceLock)
@@ -69,20 +70,23 @@ public class Graphics : ThreadedServiceBase
         InitializeFonts();
     }
 
-    private PresentParameters CreatePresentParameters() => new()
+    private PresentParameters CreatePresentParameters()
     {
-        Windowed = true,
-        SwapEffect = SwapEffect.Discard,
-        DeviceWindowHandle = WindowOverlay.Window.Handle,
-        MultiSampleQuality = 0,
-        BackBufferFormat = Format.A8R8G8B8,
-        BackBufferWidth = WindowOverlay.Window.Width,
-        BackBufferHeight = WindowOverlay.Window.Height,
-        EnableAutoDepthStencil = true,
-        AutoDepthStencilFormat = Format.D16,
-        PresentationInterval = PresentInterval.Immediate,
-        MultiSampleType = MultisampleType.TwoSamples
-    };
+        return new PresentParameters
+        {
+            Windowed = true,
+            SwapEffect = SwapEffect.Discard,
+            DeviceWindowHandle = WindowOverlay.Window.Handle,
+            MultiSampleQuality = 0,
+            BackBufferFormat = Format.A8R8G8B8,
+            BackBufferWidth = WindowOverlay.Window.Width,
+            BackBufferHeight = WindowOverlay.Window.Height,
+            EnableAutoDepthStencil = true,
+            AutoDepthStencilFormat = Format.D16,
+            PresentationInterval = PresentInterval.Immediate,
+            MultiSampleType = MultisampleType.TwoSamples
+        };
+    }
 
     private void InitializeFonts()
     {
@@ -91,19 +95,22 @@ public class Graphics : ThreadedServiceBase
         Undefeated = new Font(_device, CreateFontDescription("undefeated", 12, FontCharacterSet.Default));
     }
 
-    private static FontDescription CreateFontDescription(string faceName, int height, 
-        FontCharacterSet characterSet = FontCharacterSet.Ansi) => new()
+    private static FontDescription CreateFontDescription(string faceName, int height,
+        FontCharacterSet characterSet = FontCharacterSet.Ansi)
     {
-        Height = height,
-        Italic = false,
-        CharacterSet = characterSet,
-        FaceName = faceName,
-        MipLevels = 0,
-        OutputPrecision = FontPrecision.TrueType,
-        PitchAndFamily = FontPitchAndFamily.Default,
-        Quality = FontQuality.ClearType,
-        Weight = FontWeight.Regular
-    };
+        return new FontDescription
+        {
+            Height = height,
+            Italic = false,
+            CharacterSet = characterSet,
+            FaceName = faceName,
+            MipLevels = 0,
+            OutputPrecision = FontPrecision.TrueType,
+            PitchAndFamily = FontPitchAndFamily.Default,
+            Quality = FontQuality.ClearType,
+            Weight = FontWeight.Regular
+        };
+    }
 
     protected override void FrameAction()
     {
@@ -133,17 +140,14 @@ public class Graphics : ThreadedServiceBase
     {
         lock (_deviceLock)
         {
-            if (_device == null)
-            {
-                return;
-            }
+            if (_device == null) return;
 
             ConfigureRenderState();
             _device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.FromAbgr(0), 1, 0);
             _device.BeginScene();
-            
+
             RenderScene();
-            
+
             _device.EndScene();
             _device.Present();
         }
@@ -151,10 +155,7 @@ public class Graphics : ThreadedServiceBase
 
     private void ConfigureRenderState()
     {
-        if (_device == null)
-        {
-            return;
-        }
+        if (_device == null) return;
 
         _device.SetRenderState(RenderState.AlphaBlendEnable, true);
         _device.SetRenderState(RenderState.AlphaTestEnable, false);
@@ -187,12 +188,10 @@ public class Graphics : ThreadedServiceBase
     {
         if (_vertices.Count == 0) return;
 
-        if (_device == null)
-        {
-            return;
-        }
+        if (_device == null) return;
 
-        using var vertices = new VertexBuffer(_device, _vertices.Count * 20, Usage.WriteOnly, VertexFormat.None, Pool.Managed);
+        using var vertices = new VertexBuffer(_device, _vertices.Count * 20, Usage.WriteOnly, VertexFormat.None,
+            Pool.Managed);
         vertices.Lock(0, 0, LockFlags.None).WriteRange(_vertices.ToArray());
         vertices.Unlock();
 
@@ -215,21 +214,16 @@ public class Graphics : ThreadedServiceBase
         if (verts.Length < 2 || verts.Length % 2 != 0) return;
 
         foreach (var vertex in verts)
-        {
-            _vertices.Add(new Vertex 
-            { 
-                Color = color, 
-                Position = new Vector4(vertex.X, vertex.Y, 0.5f, 1.0f) 
+            _vertices.Add(new Vertex
+            {
+                Color = color,
+                Position = new Vector4(vertex.X, vertex.Y, 0.5f, 1.0f)
             });
-        }
     }
 
     public void DrawLineWorld(Color color, params Vector3[] verticesWorld)
     {
-        if (GameData.Player == null)
-        {
-            return;
-        }
+        if (GameData.Player == null) return;
 
         var screenVertices = verticesWorld
             .Select(v => GameData.Player.MatrixViewProjectionViewport.Transform(v))
@@ -251,9 +245,6 @@ public class Graphics : ThreadedServiceBase
             topLeft
         };
 
-        for (var i = 0; i < vertices.Length - 1; i++)
-        {
-            DrawLine(color, vertices[i], vertices[i + 1]);
-        }
+        for (var i = 0; i < vertices.Length - 1; i++) DrawLine(color, vertices[i], vertices[i + 1]);
     }
 }

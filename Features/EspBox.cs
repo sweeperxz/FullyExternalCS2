@@ -29,38 +29,27 @@ public static class EspBox
     public static void Draw(Graphics.Graphics graphics)
     {
         var player = graphics.GameData.Player;
-        if (player == null || graphics.GameData.Entities == null)
-        {
-            return;
-        }
+        if (player == null || graphics.GameData.Entities == null) return;
 
         foreach (var entity in graphics.GameData.Entities)
-            {
-            if (!entity.IsAlive() || entity.AddressBase == player.AddressBase)
-            {
-                continue;
-            }
+        {
+            if (!entity.IsAlive() || entity.AddressBase == player.AddressBase) continue;
 
-                var boundingBox = GetEntityBoundingBox(graphics, entity);
-                if (boundingBox == null)
-                {
-                    continue;
-                }
+            var boundingBox = GetEntityBoundingBox(graphics, entity);
+            if (boundingBox == null) continue;
 
-                var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
-                DrawEntityInfo(graphics, entity, colorBox, boundingBox.Value);
-            }
+            var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
+            DrawEntityInfo(graphics, entity, colorBox, boundingBox.Value);
+        }
     }
 
-    private static void DrawEntityInfo(Graphics.Graphics graphics, Entity entity, Color color, (Vector2, Vector2) boundingBox)
+    private static void DrawEntityInfo(Graphics.Graphics graphics, Entity entity, Color color,
+        (Vector2, Vector2) boundingBox)
     {
         var (topLeft, bottomRight) = boundingBox;
-        if (topLeft.X > bottomRight.X || topLeft.Y > bottomRight.Y)
-        {
-            return;
-        }
+        if (topLeft.X > bottomRight.X || topLeft.Y > bottomRight.Y) return;
 
-        float healthPercentage = Math.Clamp(entity.Health / 100f, 0f, 1f);
+        var healthPercentage = Math.Clamp(entity.Health / 100f, 0f, 1f);
 
         graphics.DrawRectangle(color, topLeft, bottomRight);
 
@@ -74,7 +63,8 @@ public static class EspBox
         var healthText = entity.Health.ToString();
         var healthX = (int)(bottomRight.X + 2);
         var healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y -
-            graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center).Bottom) / 2);
+                                         graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center)
+                                             .Bottom) / 2);
         graphics.FontConsolas32.DrawText(default, healthText, healthX, healthY, Color.White);
 
         // Weapon
@@ -114,7 +104,8 @@ public static class EspBox
             graphics.FontConsolas32.DrawText(default, "Shifting in scope", flagX, flagY + spacing * 3, Color.White);
     }
 
-    private static void DrawHealthBar(Graphics.Graphics graphics, Vector2 topLeft, Vector2 bottomRight, float healthPercentage)
+    private static void DrawHealthBar(Graphics.Graphics graphics, Vector2 topLeft, Vector2 bottomRight,
+        float healthPercentage)
     {
         var filledHeight = (bottomRight.Y - topLeft.Y) * healthPercentage;
         var filledTop = new Vector2(topLeft.X, Math.Max(bottomRight.Y - filledHeight, topLeft.Y));
@@ -125,8 +116,10 @@ public static class EspBox
             new Vector2(bottomRight.X + OutlineThickness, bottomRight.Y + OutlineThickness));
     }
 
-    private static string GetWeaponIcon(string weapon) =>
-        GunIcons.TryGetValue(weapon?.ToLower() ?? string.Empty, out var icon) ? icon : string.Empty;
+    private static string GetWeaponIcon(string weapon)
+    {
+        return GunIcons.TryGetValue(weapon?.ToLower() ?? string.Empty, out var icon) ? icon : string.Empty;
+    }
 
     private static (Vector2, Vector2)? GetEntityBoundingBox(Graphics.Graphics graphics, Entity entity)
     {
@@ -135,19 +128,13 @@ public static class EspBox
         var maxPos = new Vector2(float.MinValue, float.MinValue);
 
         var matrix = graphics.GameData.Player?.MatrixViewProjectionViewport;
-        if (matrix == null || entity.BonePos == null || entity.BonePos.Count == 0)
-        {
-            return null;
-        }
+        if (matrix == null || entity.BonePos == null || entity.BonePos.Count == 0) return null;
 
-        bool anyValid = false;
+        var anyValid = false;
         foreach (var bone in entity.BonePos.Values)
         {
-            var transformed = GraphicsMath.Transform(matrix.Value, bone);
-            if (transformed.Z >= 1 || transformed.X < 0 || transformed.Y < 0)
-            {
-                continue;
-            }
+            var transformed = matrix.Value.Transform(bone);
+            if (transformed.Z >= 1 || transformed.X < 0 || transformed.Y < 0) continue;
 
             anyValid = true;
             minPos.X = Math.Min(minPos.X, transformed.X);
@@ -157,10 +144,7 @@ public static class EspBox
         }
 
 
-        if (!anyValid)
-        {
-            return null;
-        }
+        if (!anyValid) return null;
 
         var sizeMultiplier = 2f - entity.Health / 100f;
         var paddingVector = new Vector2(padding * sizeMultiplier);

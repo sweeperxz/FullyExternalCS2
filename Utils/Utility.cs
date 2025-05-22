@@ -100,10 +100,7 @@ public static class Utility
     {
         var module = process?.Modules.OfType<ProcessModule>()
             .FirstOrDefault(a => string.Equals(a.ModuleName.ToLower(), moduleName.ToLower()));
-        if (module == null)
-        {
-            throw new InvalidOperationException($"Module '{moduleName}' not found in process.");
-        }
+        if (module == null) throw new InvalidOperationException($"Module '{moduleName}' not found in process.");
         return module;
     }
 
@@ -368,16 +365,15 @@ public static class Utility
         var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
         try
         {
-            Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, handle.AddrOfPinnedObject(), size, out var lpNumberOfBytesRead);
-            if (lpNumberOfBytesRead == size)
-            {
-                return Marshal.PtrToStructure<T>(handle.AddrOfPinnedObject());
-            }
+            Kernel32.ReadProcessMemory(hProcess, lpBaseAddress, handle.AddrOfPinnedObject(), size,
+                out var lpNumberOfBytesRead);
+            if (lpNumberOfBytesRead == size) return Marshal.PtrToStructure<T>(handle.AddrOfPinnedObject());
         }
         finally
         {
             handle.Free();
         }
+
         return default;
     }
 
@@ -402,6 +398,7 @@ public static class Utility
         {
             handle.Free();
         }
+
         return buffer;
     }
 

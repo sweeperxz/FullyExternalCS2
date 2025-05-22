@@ -6,7 +6,6 @@ namespace CS2Cheat.Features;
 
 public static class SkeletonEsp
 {
-
     private static readonly (string Start, string End)[] BoneConnections =
     [
         // Spine chain
@@ -38,7 +37,6 @@ public static class SkeletonEsp
 
     public static void Draw(Graphics.Graphics graphics)
     {
-       
         var player = graphics.GameData.Player;
         foreach (var entity in graphics.GameData.Entities)
         {
@@ -56,8 +54,10 @@ public static class SkeletonEsp
                entity.AddressBase != player.AddressBase;
     }
 
-    private static Color GetTeamColor(Team team) =>
-        team == Team.Terrorists ? Color.Yellow : Color.Blue;
+    private static Color GetTeamColor(Team team)
+    {
+        return team == Team.Terrorists ? Color.Yellow : Color.Blue;
+    }
 
     private static void DrawSkeleton(Graphics.Graphics graphics, Entity entity, Color color)
     {

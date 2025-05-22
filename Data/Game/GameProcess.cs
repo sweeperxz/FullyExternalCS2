@@ -1,6 +1,6 @@
-﻿using CS2Cheat.Core;
+﻿using System.Diagnostics;
+using CS2Cheat.Core;
 using CS2Cheat.Utils;
-using System.Diagnostics;
 
 namespace CS2Cheat.Data.Game;
 
@@ -72,27 +72,22 @@ public class GameProcess : ThreadedServiceBase
         WindowActive = false;
     }
 
-private bool EnsureProcessAndModules()
-{
-    Process ??= System.Diagnostics.Process.GetProcessesByName(NameProcess).FirstOrDefault()!;
-        if (Process == null || Process.HasExited)
+    private bool EnsureProcessAndModules()
+    {
+        Process ??= System.Diagnostics.Process.GetProcessesByName(NameProcess).FirstOrDefault()!;
+        if (Process == null || Process.HasExited) return false;
+
+        if (ModuleClient == null && Process != null)
         {
-            return false;
+            var processModule = Process.Modules
+                .OfType<ProcessModule>()
+                .FirstOrDefault(m => m.ModuleName.Equals(NameModule, StringComparison.OrdinalIgnoreCase));
+            if (processModule != null)
+                ModuleClient = new Module(Process, processModule); // Pass both Process and ProcessModule as required
         }
 
-    if (ModuleClient == null && Process != null)
-            {
-                var processModule = Process.Modules
-                    .OfType<ProcessModule>()
-                    .FirstOrDefault(m => m.ModuleName.Equals(NameModule, StringComparison.OrdinalIgnoreCase));
-                if (processModule != null)
-                {
-                    ModuleClient = new Module(Process, processModule); // Pass both Process and ProcessModule as required
-                }
-            }
-
-    return ModuleClient != null;
-}
+        return ModuleClient != null;
+    }
 
 
     private bool EnsureWindow()
@@ -103,7 +98,7 @@ private bool EnsureProcessAndModules()
         WindowRectangleClient = Utility.GetClientRectangle(WindowHwnd);
         if (WindowRectangleClient.Width <= 0 || WindowRectangleClient.Height <= 0) return false;
 
-        WindowActive = WindowHwnd == User32 .GetForegroundWindow();
+        WindowActive = WindowHwnd == User32.GetForegroundWindow();
 
         return WindowActive;
     }

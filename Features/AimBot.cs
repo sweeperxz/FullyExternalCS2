@@ -82,9 +82,7 @@ public class AimBot : ThreadedServiceBase
             GameData == null || GameData.Player == null || !GameData.Player.IsAlive() ||
             TriggerBot.IsHotKeyDown() ||
             GameData.Player.IsGrenade())
-        {
             return true;
-        } 
 
         if (Monitor.TryEnter(_stateLock))
         {
@@ -95,18 +93,17 @@ public class AimBot : ThreadedServiceBase
 
         return true;
     }
+
     protected override void FrameAction()
     {
-        if (GameProcess == null || !GameProcess.IsValid || GameData?.Player == null || !GameData.Player.IsAlive())
-        {
-            return;
-        }
+        if (GameProcess == null || !GameProcess.IsValid || GameData?.Player == null ||
+            !GameData.Player.IsAlive()) return;
 
         if (!IsCalibrated)
-            {
-                Calibrate();
-                IsCalibrated = true;
-            }
+        {
+            Calibrate();
+            IsCalibrated = true;
+        }
 
         if (Monitor.TryEnter(_stateLock))
         {
@@ -119,36 +116,25 @@ public class AimBot : ThreadedServiceBase
             Monitor.Exit(_stateLock);
         }
 
-        Point aimPixels = Point.Empty;
+        var aimPixels = Point.Empty;
         Vector2 aimAngles;
 
         if (GetAimTarget(out aimAngles))
-        {
             if (!float.IsNaN(aimAngles.X) && !float.IsNaN(aimAngles.Y))
-            {
                 GetAimPixels(aimAngles, out aimPixels);
-            }
-        }
 
         // Clamp pixel movement to prevent huge jumps (which cause spinning)
         aimPixels.X = Math.Max(Math.Min(aimPixels.X, 50), -50);
         aimPixels.Y = Math.Max(Math.Min(aimPixels.Y, 50), -50);
 
-        bool shouldWait = TryMouseDown();
+        var shouldWait = TryMouseDown();
 
         if (MouseMoveMethod == MouseMoveMethod.TryMouseMoveOld)
-        {
             shouldWait |= TryMouseMoveOld(aimPixels);
-        }
         else
-        {
             shouldWait |= TryMouseMoveNew(aimPixels);
-        }
 
-        if (shouldWait)
-        {
-            Thread.Sleep(20);
-        }
+        if (shouldWait) Thread.Sleep(20);
     }
 
 
@@ -160,7 +146,6 @@ public class AimBot : ThreadedServiceBase
         var aimPosition = Vector3.Zero;
 
         if (GameData != null && GameData.Entities != null)
-        {
             foreach (var entity in GameData.Entities.Where(entity =>
                          GameData.Player != null &&
                          entity.IsAlive() && entity.AddressBase != GameData.Player.AddressBase &&
@@ -172,10 +157,7 @@ public class AimBot : ThreadedServiceBase
 
                 GetAimAngles(aimPosition, out var angleToBoneSize, out var anglesToBone);
 
-                if (angleToBoneSize > AimFov)
-                {
-                    continue;
-                }
+                if (angleToBoneSize > AimFov) continue;
 
                 if (angleToBoneSize < minAngleSize)
                 {
@@ -184,16 +166,13 @@ public class AimBot : ThreadedServiceBase
                     targetFound = true;
                 }
             }
-        }
 
         CurrentSmoothing = AimBotSmoothing;
         if (targetFound)
         {
-            float distanceToTarget = 0.0f;
+            var distanceToTarget = 0.0f;
             if (GameData != null && GameData.Player != null)
-            {
                 distanceToTarget = Vector3.Distance(GameData.Player.EyePosition, aimPosition);
-            }
             var smoothingAcceleration = Math.Max(1.0f, distanceToTarget / 100.0f);
 
             CurrentSmoothing *= smoothingAcceleration;
@@ -211,10 +190,7 @@ public class AimBot : ThreadedServiceBase
         aimAngles = Vector2.Zero;
         angleSize = 0f;
 
-        if (GameData == null || GameData.Player == null)
-        {
-            return;
-        }
+        if (GameData == null || GameData.Player == null) return;
 
         var aimDirection = GameData.Player.AimDirection;
         var aimDirectionDesired = (pointWorld - GameData.Player.EyePosition).GetNormalized();
@@ -224,6 +200,7 @@ public class AimBot : ThreadedServiceBase
             Vector3.Cross(aimDirectionDesired, new Vector3(0, 0, 1)).GetNormalized());
 
         aimAngles = new Vector2(horizontalAngle, verticalAngle);
+
 
         angleSize = aimDirection.GetAngleTo(aimDirectionDesired);
     }
@@ -240,29 +217,17 @@ public class AimBot : ThreadedServiceBase
 
     private static bool TryMouseMoveOld(Point aimPixels)
     {
-        if (aimPixels.X == 0 && aimPixels.Y == 0)
-        {
-            return false;
-        }
-        if (Math.Abs(aimPixels.X) > 100 || Math.Abs(aimPixels.Y) > 100)
-            {
-                return false;
-            }
+        if (aimPixels.X == 0 && aimPixels.Y == 0) return false;
+        if (Math.Abs(aimPixels.X) > 100 || Math.Abs(aimPixels.Y) > 100) return false;
         Utility.MouseMove(aimPixels.X, aimPixels.Y);
         return true;
     }
 
     private static bool TryMouseMoveNew(Point aimPixels)
     {
-        if (aimPixels.X == 0 && aimPixels.Y == 0)
-        {
-            return false;
-        }
+        if (aimPixels.X == 0 && aimPixels.Y == 0) return false;
 
-        if (Math.Abs(aimPixels.X) > 100 || Math.Abs(aimPixels.Y) > 100)
-        {
-            return false;
-        }
+        if (Math.Abs(aimPixels.X) > 100 || Math.Abs(aimPixels.Y) > 100) return false;
         Utility.WindMouseMove(0, 0, aimPixels.X, aimPixels.Y, 9.0, 3.0, 15.0, 12.0);
         return true;
     }
@@ -305,10 +270,7 @@ public class AimBot : ThreadedServiceBase
     {
         Thread.Sleep(100);
 
-        if (GameData == null || GameData.Player == null)
-        {
-            return 0.0;
-        }
+        if (GameData == null || GameData.Player == null) return 0.0;
 
         var eyeDirectionStart = GameData.Player.EyeDirection;
         eyeDirectionStart.Z = 0;
@@ -317,10 +279,7 @@ public class AimBot : ThreadedServiceBase
 
         Thread.Sleep(100);
 
-        if (GameData == null || GameData.Player == null)
-        {
-            return 0.0;
-        }
+        if (GameData == null || GameData.Player == null) return 0.0;
 
         var eyeDirectionEnd = GameData.Player.EyeDirection;
         eyeDirectionEnd.Z = 0;

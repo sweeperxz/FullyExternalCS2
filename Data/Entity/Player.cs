@@ -26,18 +26,14 @@ public class Player : EntityBase
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
     {
         if (gameProcess.ModuleClient == null)
-        {
             throw new ArgumentNullException(nameof(gameProcess.ModuleClient), "ModuleClient cannot be null.");
-        }
         return gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerController);
     }
 
     protected override IntPtr ReadAddressBase(GameProcess gameProcess)
     {
         if (gameProcess.ModuleClient == null)
-        {
             throw new ArgumentNullException(nameof(gameProcess.ModuleClient), "ModuleClient cannot be null.");
-        }
         return gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwLocalPlayerPawn);
     }
 
@@ -47,17 +43,13 @@ public class Player : EntityBase
 
 
         if (gameProcess.ModuleClient == null)
-        {
             throw new ArgumentNullException(nameof(gameProcess.ModuleClient), "ModuleClient cannot be null.");
-        }
         MatrixViewProjection = Matrix.Transpose(gameProcess.ModuleClient.Read<Matrix>(Offsets.dwViewMatrix));
         MatrixViewport = Utility.GetMatrixViewport(gameProcess.WindowRectangleClient.Size);
         MatrixViewProjectionViewport = MatrixViewProjection * MatrixViewport;
 
         if (gameProcess.Process == null)
-        {
             throw new ArgumentNullException(nameof(gameProcess.Process), "Process cannot be null.");
-        }
 
         ViewOffset = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_vecViewOffset);
         EyePosition = Origin + ViewOffset;
