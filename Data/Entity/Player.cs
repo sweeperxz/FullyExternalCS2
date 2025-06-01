@@ -45,7 +45,6 @@ public class Player : EntityBase
     {
         if (!base.Update(gameProcess)) return false;
 
-
         if (gameProcess.ModuleClient == null)
         {
             throw new ArgumentNullException(nameof(gameProcess.ModuleClient), "ModuleClient cannot be null.");
@@ -72,6 +71,7 @@ public class Player : EntityBase
             (ViewAngles.X + AimPunchAngle.X * Offsets.WeaponRecoilScale).DegreeToRadian(),
             (ViewAngles.Y + AimPunchAngle.Y * Offsets.WeaponRecoilScale).DegreeToRadian()
         );
+        
 
 
         try

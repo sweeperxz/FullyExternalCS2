@@ -73,13 +73,17 @@ public static class EspBox
         // Health number
         var healthText = entity.Health.ToString();
         var healthX = (int)(bottomRight.X + 2);
-        var healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y -
-            graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center).Bottom) / 2);
-        graphics.FontConsolas32.DrawText(default, healthText, healthX, healthY, Color.White);
+        int healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y) / 2);
+        if (graphics.FontConsolas32 != null)
+        {
+            var healthTextSize = graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center);
+            healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y - healthTextSize.Bottom) / 2);
+            graphics.FontConsolas32.DrawText(default, healthText, healthX, healthY, Color.White);
+        }
 
         // Weapon
         var weaponIcon = GetWeaponIcon(entity.CurrentWeaponName);
-        if (!string.IsNullOrEmpty(weaponIcon))
+        if (!string.IsNullOrEmpty(weaponIcon) && graphics.Undefeated != null)
         {
             var textSize = graphics.Undefeated.MeasureText(null, weaponIcon, FontDrawFlags.Center);
             var weaponX = (int)((topLeft.X + bottomRight.X - textSize.Right) / 2);
@@ -88,7 +92,7 @@ public static class EspBox
         }
 
         // Enemy name
-        if (graphics.GameData.Player.Team != entity.Team)
+        if (graphics.GameData.Player != null && graphics.GameData.Player.Team != entity.Team)
         {
             var name = entity.Name ?? "UNKNOWN";
             var textWidth = graphics.FontConsolas32.MeasureText(null, name, FontDrawFlags.Center).Right + 10f;

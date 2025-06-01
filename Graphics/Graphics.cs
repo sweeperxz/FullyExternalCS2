@@ -175,7 +175,7 @@ public class Graphics : ThreadedServiceBase
 
     private void DrawFeatures()
     {
-        WindowOverlay.Draw(GameProcess, this);
+        WindowOverlay.Draw(GameProcess, this, GameData);
         var features = ConfigManager.Load();
         if (features.EspAimCrosshair) EspAimCrosshair.Draw(this);
         if (features.EspBox) EspBox.Draw(this);

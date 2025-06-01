@@ -6,6 +6,7 @@ using SharpDX;
 using static System.Windows.Application;
 using Color = SharpDX.Color;
 using Rectangle = System.Drawing.Rectangle;
+using GameData = CS2Cheat.Data.Game.GameData;
 
 namespace CS2Cheat.Graphics;
 
@@ -81,7 +82,7 @@ public class WindowOverlay : ThreadedServiceBase
         }, DispatcherPriority.Normal);
     }
 
-    public static void Draw(GameProcess gameProcess, Graphics graphics)
+    public static void Draw(GameProcess gameProcess, Graphics graphics, GameData gameData)
     {
         // window border
         graphics.DrawLine(Color.DarkGray,
@@ -95,6 +96,15 @@ public class WindowOverlay : ThreadedServiceBase
             new Vector2(0, 0)
         );
         //fps count
-        graphics.FontConsolas32.DrawText(default, $"{FpsCounter!.Fps} FPS", 5, 5, Color.White);
+        if (FpsCounter != null)
+        {
+            graphics.FontConsolas32?.DrawText(default, $"{FpsCounter.Fps} FPS", 5, 5, Color.White);
+        }
+
+        if (gameData.IsBeingSpectated())
+        {
+            graphics.FontConsolas32?.DrawText(null, "⚠ You are being spectated!", 20, 60, Color.Yellow);
+            Console.WriteLine("⚠ You are being spectated!");
+        }
     }
 }
