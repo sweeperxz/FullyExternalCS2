@@ -55,19 +55,22 @@ public class GameData : ThreadedServiceBase
     public bool IsBeingSpectated()
     {
         if (LocalEntity == null || Entities == null)
+        {
             return false;
-
+        }
+        // Check if the local player is being spectated by another player
         foreach (var entity in Entities)
         {
-            //Testing output for debugging
             // Skip if the entity is null or if it is the local player
             if (entity == null || entity.AddressBase == LocalEntity.AddressBase)
+            {
                 continue;
+            }
 
             if (entity.IsDead && entity.Team == LocalEntity.Team && !entity.IsDormant)
             {
+                // If the entity is dead and on the same team, check if they are observing the local player
                 if (entity.ObserverTarget == LocalEntity.ObserverTarget)
-                //Need to get Local Player OBserver target
                 {
                     Console.WriteLine($"Entity {entity.EntityIndex} is observing the local player.");
                     return true;

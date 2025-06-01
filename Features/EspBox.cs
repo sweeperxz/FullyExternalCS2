@@ -71,13 +71,13 @@ public static class EspBox
         DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
 
         // Health number
-        var healthText = entity.Health.ToString();
-        var healthX = (int)(bottomRight.X + 2);
-        int healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y) / 2);
+        
         if (graphics.FontConsolas32 != null)
         {
+            var healthText = entity.Health.ToString();
+            var healthX = (int)(bottomRight.X + 2);
             var healthTextSize = graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center);
-            healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y - healthTextSize.Bottom) / 2);
+            var healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y - healthTextSize.Bottom) / 2);
             graphics.FontConsolas32.DrawText(default, healthText, healthX, healthY, Color.White);
         }
 
