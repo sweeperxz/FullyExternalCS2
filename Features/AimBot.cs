@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using CS2Cheat.Core;
 using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Entity;
@@ -6,26 +8,66 @@ using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
 using Process.NET.Native.Types;
 using SharpDX;
+using Keys = Process.NET.Native.Types.Keys;
 using Point = System.Drawing.Point;
 
 namespace CS2Cheat.Features;
 
 public class AimBot : ThreadedServiceBase
 {
-    private const float AimBotSmoothing = 3f;
-
-    private static readonly float AimFov = 15f.DegreeToRadian();
-
+    private const float AimBotSmoothing = 1f;
+    private const float PredictionTime = 0.12f;
+    private const double HumanReactThreshold = 30.0;
+    private const int SuppressMs = 200;
+    private const int UserMouseDeltaResetMs = 50;
+    private const int AimUpdateIntervalMs = 500;
+    private const int AimEventWindowMs = 1000;
     private static double _anglePerPixel;
 
+    private static ConfigManager? _config;
+
     private readonly object _stateLock = new();
+
+    private readonly Keys AimBotHotKey;
+    private double _aiAggressiveness = 2;
+
+    private int _aimSuccessCount;
+    private int _aimTotalCount;
+    private double _dynamicFov = 15f.DegreeToRadian();
+    private double _dynamicSmoothing = AimBotSmoothing;
+    private DateTime _lastAimEvent = DateTime.MinValue;
+    private DateTime _lastAiUpdate = DateTime.MinValue;
+    private DateTime _lastMouseMoveTime = DateTime.MinValue;
+
+    private int _lastMouseX;
+    private int _lastMouseY;
+
+    private DateTime _lastSuppressed = DateTime.MinValue;
+    private int _lastTargetId = -1;
+
+
+    private Vector3 _lastTargetPos = Vector3.Zero;
+    private DateTime _lastTargetUpdate = DateTime.MinValue;
+    private Vector3 _lastTargetVel = Vector3.Zero;
+
+
+    private int _userMouseDeltaX;
+    private int _userMouseDeltaY;
+    private double _userMoveAvg;
+    private int _userMoveCount;
+
+
+    private double _userMoveSum;
 
     public AimBot(GameProcess gameProcess, GameData gameData)
     {
         GameProcess = gameProcess;
         GameData = gameData;
         MouseHook = new GlobalHook(HookType.WH_MOUSE_LL, MouseHookCallback);
+        AimBotHotKey = Config.AimBotKey;
     }
+
+    private static ConfigManager Config => _config ??= ConfigManager.Load();
 
     private static MouseMoveMethod MouseMoveMethod =>
         MouseMoveMethod.TryMouseMoveNew;
@@ -58,6 +100,21 @@ public class AimBot : ThreadedServiceBase
 
     private IntPtr MouseHookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
+        if (nCode >= 0 && (MouseMessages)wParam == MouseMessages.WmMouseMove)
+        {
+            var mouseInput = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
+            var dx = mouseInput.Point.X - _lastMouseX;
+            var dy = mouseInput.Point.Y - _lastMouseY;
+            _userMouseDeltaX = dx;
+            _userMouseDeltaY = dy;
+            _lastMouseMoveTime = DateTime.Now;
+            _lastMouseX = mouseInput.Point.X;
+            _lastMouseY = mouseInput.Point.Y;
+            var moveLen = Math.Sqrt(dx * dx + dy * dy);
+            _userMoveSum += moveLen;
+            _userMoveCount++;
+        }
+
         return nCode < 0 || ProcessMouseMessage((MouseMessages)wParam)
             ? User32.CallNextHookEx(MouseHook != null ? MouseHook.HookHandle : IntPtr.Zero, nCode, wParam, lParam)
             : new IntPtr(1);
@@ -67,10 +124,9 @@ public class AimBot : ThreadedServiceBase
     {
         if (mouseMessage == MouseMessages.WmLButtonUp)
         {
-            if (Monitor.TryEnter(_stateLock))
+            lock (_stateLock)
             {
                 State = AimBotState.Up;
-                Monitor.Exit(_stateLock);
             }
 
             return true;
@@ -84,11 +140,9 @@ public class AimBot : ThreadedServiceBase
             GameData.Player.IsGrenade())
             return true;
 
-        if (Monitor.TryEnter(_stateLock))
+        lock (_stateLock)
         {
             if (State == AimBotState.Up) State = AimBotState.DownSuppressed;
-
-            Monitor.Exit(_stateLock);
         }
 
         return true;
@@ -96,54 +150,96 @@ public class AimBot : ThreadedServiceBase
 
     protected override void FrameAction()
     {
-        if (GameProcess == null || !GameProcess.IsValid || GameData?.Player == null ||
-            !GameData.Player.IsAlive()) return;
-
-        if (!IsCalibrated)
+        try
         {
-            Calibrate();
-            IsCalibrated = true;
-        }
+            if (GameProcess == null || !GameProcess.IsValid || GameData?.Player == null ||
+                !GameData.Player.IsAlive()) return;
 
-        if (Monitor.TryEnter(_stateLock))
-        {
-            if (State == AimBotState.Up)
+
+            var userMoveLen = Math.Sqrt(_userMouseDeltaX * _userMouseDeltaX + _userMouseDeltaY * _userMouseDeltaY);
+            if (userMoveLen > HumanReactThreshold) _lastSuppressed = DateTime.Now;
+
+            if ((DateTime.Now - _lastSuppressed).TotalMilliseconds < SuppressMs) return;
+
+            if (!IsCalibrated)
             {
-                Monitor.Exit(_stateLock);
-                return;
+                Calibrate();
+                IsCalibrated = true;
             }
 
-            Monitor.Exit(_stateLock);
+            lock (_stateLock)
+            {
+                if (State == AimBotState.Up) return;
+            }
+
+            if ((DateTime.Now - _lastAiUpdate).TotalMilliseconds > AimUpdateIntervalMs && _userMoveCount > 0)
+            {
+                _userMoveAvg = _userMoveSum / _userMoveCount;
+                _aiAggressiveness = 1.0 - Math.Min(_userMoveAvg / 20.0, 0.7);
+                _userMoveSum = 0;
+                _userMoveCount = 0;
+                _lastAiUpdate = DateTime.Now;
+            }
+
+            if (_aimTotalCount > 0 && (DateTime.Now - _lastAimEvent).TotalMilliseconds > AimEventWindowMs)
+            {
+                var successRate = _aimSuccessCount / (double)_aimTotalCount;
+                if (successRate < 0.5)
+                {
+                    _dynamicFov = Math.Max(5f.DegreeToRadian(), _dynamicFov - 0.5f.DegreeToRadian());
+                    _dynamicSmoothing = Math.Min(_dynamicSmoothing + 0.5, 10.0);
+                }
+                else if (successRate > 0.8)
+                {
+                    _dynamicFov = Math.Min(30f.DegreeToRadian(), _dynamicFov + 0.5f.DegreeToRadian());
+                    _dynamicSmoothing = Math.Max(_dynamicSmoothing - 0.5, 1.0);
+                }
+
+                _aimSuccessCount = 0;
+                _aimTotalCount = 0;
+                _lastAimEvent = DateTime.Now;
+            }
+
+            var aimPixels = Point.Empty;
+            Vector2 aimAngles;
+            var aimResult = GetAimTargetWithPrediction(out aimAngles, _dynamicFov);
+            if (aimResult)
+                if (!float.IsNaN(aimAngles.X) && !float.IsNaN(aimAngles.Y))
+                    GetAimPixels(aimAngles, out aimPixels);
+
+            aimPixels.X = Math.Max(Math.Min(aimPixels.X, 50), -50);
+            aimPixels.Y = Math.Max(Math.Min(aimPixels.Y, 50), -50);
+
+            var adapt = _aiAggressiveness;
+            if ((DateTime.Now - _lastMouseMoveTime).TotalMilliseconds < UserMouseDeltaResetMs) adapt *= 0.5;
+            aimPixels.X = (int)(aimPixels.X * adapt);
+            aimPixels.Y = (int)(aimPixels.Y * adapt);
+
+            var shouldWait = TryMouseDown();
+            if (MouseMoveMethod == MouseMoveMethod.TryMouseMoveOld)
+                shouldWait |= TryMouseMoveOld(aimPixels);
+            else
+                shouldWait |= TryMouseMoveNew(aimPixels);
+            if (shouldWait) Thread.Sleep(20);
+
+            if (aimResult) _aimSuccessCount++;
+
+            _aimTotalCount++;
         }
-
-        var aimPixels = Point.Empty;
-        Vector2 aimAngles;
-
-        if (GetAimTarget(out aimAngles))
-            if (!float.IsNaN(aimAngles.X) && !float.IsNaN(aimAngles.Y))
-                GetAimPixels(aimAngles, out aimPixels);
-
-        // Clamp pixel movement to prevent huge jumps (which cause spinning)
-        aimPixels.X = Math.Max(Math.Min(aimPixels.X, 50), -50);
-        aimPixels.Y = Math.Max(Math.Min(aimPixels.Y, 50), -50);
-
-        var shouldWait = TryMouseDown();
-
-        if (MouseMoveMethod == MouseMoveMethod.TryMouseMoveOld)
-            shouldWait |= TryMouseMoveOld(aimPixels);
-        else
-            shouldWait |= TryMouseMoveNew(aimPixels);
-
-        if (shouldWait) Thread.Sleep(20);
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AimBot ERROR] {ex.Message}\n{ex.StackTrace}");
+        }
     }
 
-
-    private bool GetAimTarget(out Vector2 aimAngles)
+    private bool GetAimTargetWithPrediction(out Vector2 aimAngles, double customFov)
     {
         var minAngleSize = float.MaxValue;
         aimAngles = new Vector2((float)Math.PI, (float)Math.PI);
         var targetFound = false;
         var aimPosition = Vector3.Zero;
+        var targetId = -1;
+        var targetVel = Vector3.Zero;
 
         if (GameData != null && GameData.Entities != null)
             foreach (var entity in GameData.Entities.Where(entity =>
@@ -151,18 +247,34 @@ public class AimBot : ThreadedServiceBase
                          entity.IsAlive() && entity.AddressBase != GameData.Player.AddressBase &&
                          entity.Team != GameData.Player.Team && entity.IsSpotted))
             {
-                aimPosition = entity.BonePos.TryGetValue(AimBonePos, out var entityBonePo)
+                var curPos = entity.BonePos.TryGetValue(AimBonePos, out var entityBonePo)
                     ? entityBonePo
                     : entity.BonePos[AimBonePos];
+                if (entity.Id != _lastTargetId)
+                {
+                    _lastTargetPos = curPos;
+                    _lastTargetVel = Vector3.Zero;
+                }
+                else
+                {
+                    var dt = (float)(DateTime.Now - _lastTargetUpdate).TotalSeconds;
+                    if (dt > 0.001f && dt < 0.5f)
+                        _lastTargetVel = (curPos - _lastTargetPos) / dt;
+                    _lastTargetPos = curPos;
+                }
 
-                GetAimAngles(aimPosition, out var angleToBoneSize, out var anglesToBone);
-
-                if (angleToBoneSize > AimFov) continue;
+                _lastTargetId = entity.Id;
+                _lastTargetUpdate = DateTime.Now;
+                targetVel = _lastTargetVel;
+                var predictedPos = curPos + targetVel * PredictionTime;
+                GetAimAngles(predictedPos, out var angleToBoneSize, out var anglesToBone);
+                if (angleToBoneSize > customFov) continue;
 
                 if (angleToBoneSize < minAngleSize)
                 {
                     minAngleSize = angleToBoneSize;
                     aimAngles = anglesToBone;
+                    aimPosition = predictedPos;
                     targetFound = true;
                 }
             }
@@ -174,16 +286,13 @@ public class AimBot : ThreadedServiceBase
             if (GameData != null && GameData.Player != null)
                 distanceToTarget = Vector3.Distance(GameData.Player.EyePosition, aimPosition);
             var smoothingAcceleration = Math.Max(1.0f, distanceToTarget / 100.0f);
-
             CurrentSmoothing *= smoothingAcceleration;
             CurrentSmoothing = Math.Min(CurrentSmoothing, 50.0f);
-
             aimAngles *= 1 / Math.Max(CurrentSmoothing, 1);
         }
 
         return targetFound;
     }
-
 
     private void GetAimAngles(Vector3 pointWorld, out float angleSize, out Vector2 aimAngles)
     {
@@ -236,20 +345,16 @@ public class AimBot : ThreadedServiceBase
     private bool TryMouseDown()
     {
         var mouseDown = false;
-
-        if (Monitor.TryEnter(_stateLock))
+        lock (_stateLock)
         {
             if (State == AimBotState.DownSuppressed)
             {
                 mouseDown = true;
                 State = AimBotState.Down;
             }
-
-            Monitor.Exit(_stateLock);
         }
 
         if (mouseDown) Utility.MouseLeftDown();
-
         return mouseDown;
     }
 
@@ -263,7 +368,6 @@ public class AimBot : ThreadedServiceBase
             CalibrationMeasureAnglePerPixel(-400),
             CalibrationMeasureAnglePerPixel(200)
         }.Average();
-        Console.WriteLine("[+] Mouse calibrate successful!");
     }
 
     private double CalibrationMeasureAnglePerPixel(int deltaPixels)

@@ -13,6 +13,8 @@ public sealed class TriggerBot : ThreadedServiceBase
     private const int EntityStride = 120;
     private const int EntityIndexMask = 0x1FF;
     private const int EntityIndexShift = 9;
+    private static Keys _triggerBotHotKey;
+    private static ConfigManager? _config;
     private readonly GameData _gameData;
 
     private readonly GameProcess _gameProcess;
@@ -21,10 +23,12 @@ public sealed class TriggerBot : ThreadedServiceBase
     {
         _gameProcess = gameProcess ?? throw new ArgumentNullException(nameof(gameProcess));
         _gameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
+        _triggerBotHotKey = Config.TriggerBotKey;
     }
 
+    private static ConfigManager Config => _config ??= ConfigManager.Load();
+
     protected override string ThreadName => nameof(TriggerBot);
-    private static Keys TriggerBotHotKey => Keys.LMenu;
 
     protected override async void FrameAction()
     {
@@ -91,7 +95,7 @@ public sealed class TriggerBot : ThreadedServiceBase
 
     public static bool IsHotKeyDown()
     {
-        return TriggerBotHotKey.IsKeyDown();
+        return _triggerBotHotKey.IsKeyDown();
     }
 
     public override void Dispose()

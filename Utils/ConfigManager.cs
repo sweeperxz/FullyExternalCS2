@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using Keys = Process.NET.Native.Types.Keys;
 
 namespace CS2Cheat.Utils;
 
@@ -12,6 +13,10 @@ public class ConfigManager
     public bool EspBox { get; set; }
     public bool SkeletonEsp { get; set; }
     public bool TriggerBot { get; set; }
+    public Keys AimBotKey { get; set; }
+    public Keys TriggerBotKey { get; set; }
+    public bool TeamCheck { get; set; }
+
 
     public static ConfigManager Load()
     {
@@ -57,12 +62,15 @@ public class ConfigManager
     {
         return new ConfigManager
         {
-            AimBot = false,
+            AimBot = true,
             BombTimer = true,
             EspAimCrosshair = false,
             EspBox = true,
-            SkeletonEsp = true,
-            TriggerBot = true
+            SkeletonEsp = false,
+            TriggerBot = true,
+            AimBotKey = Keys.LButton, // https://github.com/lolp1/Process.NET/blob/ce9ac9cceb2afb30c9288495615c6f3aa34bc1f8/src/Process.NET/Native/Types/NativeEnums.cs#L235
+            TriggerBotKey = Keys.LMenu,
+            TeamCheck = true
         };
     }
 }

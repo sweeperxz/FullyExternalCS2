@@ -1,6 +1,7 @@
 ﻿using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Entity;
 using CS2Cheat.Graphics;
+using CS2Cheat.Utils;
 using SharpDX;
 using SharpDX.Direct3D9;
 using Color = SharpDX.Color;
@@ -26,6 +27,9 @@ public static class EspBox
         ["molotov"] = "l", ["decoy"] = "m", ["incgrenade"] = "n", ["c4"] = "o"
     };
 
+    private static ConfigManager? _config;
+    private static ConfigManager Config => _config ??= ConfigManager.Load();
+
     public static void Draw(Graphics.Graphics graphics)
     {
         var player = graphics.GameData.Player;
@@ -34,6 +38,8 @@ public static class EspBox
         foreach (var entity in graphics.GameData.Entities)
         {
             if (!entity.IsAlive() || entity.AddressBase == player.AddressBase) continue;
+            if (Config.TeamCheck && entity.Team == player.Team) continue;
+
 
             var boundingBox = GetEntityBoundingBox(graphics, entity);
             if (boundingBox == null) continue;

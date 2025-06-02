@@ -8,12 +8,11 @@ namespace CS2Cheat.Data.Entity;
 public class Entity : EntityBase
 {
     private readonly ConcurrentDictionary<string, Vector3> _bonePositions;
-    private readonly int _index;
     private bool _dormant = true;
 
     public Entity(int index)
     {
-        _index = index;
+        Id = index;
         _bonePositions = new ConcurrentDictionary<string, Vector3>(Offsets.Bones.ToDictionary(
             bone => bone.Key,
             _ => Vector3.Zero
@@ -25,6 +24,7 @@ public class Entity : EntityBase
     protected internal int IsInScope { get; private set; }
     protected internal int FlashAlpha { get; private set; }
     public IReadOnlyDictionary<string, Vector3> BonePos => _bonePositions;
+    public int Id { get; }
 
     public override bool IsAlive()
     {
@@ -33,14 +33,14 @@ public class Entity : EntityBase
 
     protected override IntPtr ReadControllerBase(GameProcess gameProcess)
     {
-        var entryIndex = (_index & 0x7FFF) >> 9;
+        var entryIndex = (Id & 0x7FFF) >> 9;
 
         if (gameProcess?.Process == null) return IntPtr.Zero;
 
         var listEntry = gameProcess.Process.Read<IntPtr>(EntityList + 8 * entryIndex + 16);
 
         return listEntry != IntPtr.Zero
-            ? gameProcess.Process.Read<IntPtr>(listEntry + 120 * (_index & 0x1FF))
+            ? gameProcess.Process.Read<IntPtr>(listEntry + 120 * (Id & 0x1FF))
             : IntPtr.Zero;
     }
 

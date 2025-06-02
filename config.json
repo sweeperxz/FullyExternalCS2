@@ -1,9 +1,0 @@
-{
-  "AimBot": false,
-  "AimKey": "MouseButton1",
-  "BombTimer": true,
-  "EspAimCrosshair": false,
-  "EspBox": true,
-  "SkeletonEsp": true,
-  "TriggerBot": true
-}
