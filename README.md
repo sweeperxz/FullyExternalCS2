@@ -43,7 +43,7 @@ It was created for the _purpose_ of _improving_ Windows API skills.
 - [BunnyHop](https://streamable.com/3r09m1) ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/151355b47373acdc3ccaa6f526e94388c4e71f2b/Data/Entity/Player.cs#L64) )
 - OBS Bypass
 - Hitsound (**_in the same folder with the cheat there should be a file called "hit.wav"_**)
-- Basic Config
+- Basic Config with hotkeys. (if you want to change the default keys watch link and replace keycode whatever u want [Read this](https://github.com/lolp1/Process.NET/blob/ce9ac9cceb2afb30c9288495615c6f3aa34bc1f8/src/Process.NET/Native/Types/NativeEnums.cs#L235))
 
 #### System
 
