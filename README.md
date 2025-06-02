@@ -27,6 +27,7 @@ It was created for the _purpose_ of _improving_ Windows API skills.
 - Name
 - Enemy weapon icon (_**for correct work of icons it is necessary to install the font you download in Releases**_)
 - Enemy flags (Scoped, Flashed, Shifting, Shifting in scope)
+- Team Check (if you want to see only enemies or teammates, you can change it in the config file)
 
 #### Other Visuals
 
