@@ -3,12 +3,11 @@
 ### Description
 
 FullyExternalCS2 is an external cheat for Counter-Strike 2 **that does not write to the game memory**. \
-It was created for the _purpose_ of _improving_ Windows API skills. 
+It was created for the _purpose_ of _improving_ Windows API skills.
 
-[Please note that.](https://github.com/sweeperxz/FullyExternalCS2/issues/6#issuecomment-1919053959) 
+[Please note that.](https://github.com/sweeperxz/FullyExternalCS2/issues/6#issuecomment-1919053959)
 
 **❗❗❗IF YOU GOT VAC BAN THEN CREATE AN ISSUE WITH THE ASSOCIATED TEMPLATE❗❗❗**
-
 
 ![SS](assets/photo.png)
 
@@ -44,7 +43,8 @@ It was created for the _purpose_ of _improving_ Windows API skills.
 - [BunnyHop](https://streamable.com/3r09m1) ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/151355b47373acdc3ccaa6f526e94388c4e71f2b/Data/Entity/Player.cs#L64) )
 - OBS Bypass
 - Hitsound (**_in the same folder with the cheat there should be a file called "hit.wav"_**)
-- Basic Config with hotkeys. (if you want to change the default keys watch link and replace keycode whatever u want [Read this](https://github.com/lolp1/Process.NET/blob/ce9ac9cceb2afb30c9288495615c6f3aa34bc1f8/src/Process.NET/Native/Types/NativeEnums.cs#L235))
+- Basic Config with hotkeys. (if you want to change the default keys watch link and replace keycode whatever u
+  want [Read this](https://github.com/lolp1/Process.NET/blob/ce9ac9cceb2afb30c9288495615c6f3aa34bc1f8/src/Process.NET/Native/Types/NativeEnums.cs#L235))
 
 #### System
 
@@ -80,7 +80,7 @@ dotnet run
 
 ### Help
 
-If you have issues or have questions, check out the Issues section of the GitHub project page. 
+If you have issues or have questions, check out the Issues section of the GitHub project page.
 
 ### Authors
 

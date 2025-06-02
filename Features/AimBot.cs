@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using CS2Cheat.Core;
 using CS2Cheat.Core.Data;
@@ -16,7 +15,6 @@ namespace CS2Cheat.Features;
 public class AimBot : ThreadedServiceBase
 {
     private const float AimBotSmoothing = 1f;
-    private const float PredictionTime = 0.12f;
     private const double HumanReactThreshold = 30.0;
     private const int SuppressMs = 200;
     private const int UserMouseDeltaResetMs = 50;
@@ -25,6 +23,8 @@ public class AimBot : ThreadedServiceBase
     private static double _anglePerPixel;
 
     private static ConfigManager? _config;
+
+    private static readonly string[] AimBonePriority = { "head", "neck", "chest", "pelvis" };
 
     private readonly object _stateLock = new();
 
@@ -72,7 +72,6 @@ public class AimBot : ThreadedServiceBase
     private static MouseMoveMethod MouseMoveMethod =>
         MouseMoveMethod.TryMouseMoveNew;
 
-    private static string AimBonePos => "head";
 
     private bool IsCalibrated { get; set; }
 
@@ -232,13 +231,13 @@ public class AimBot : ThreadedServiceBase
         }
     }
 
+
     private bool GetAimTargetWithPrediction(out Vector2 aimAngles, double customFov)
     {
         var minAngleSize = float.MaxValue;
         aimAngles = new Vector2((float)Math.PI, (float)Math.PI);
         var targetFound = false;
         var aimPosition = Vector3.Zero;
-        var targetId = -1;
         var targetVel = Vector3.Zero;
 
         if (GameData != null && GameData.Entities != null)
@@ -247,34 +246,51 @@ public class AimBot : ThreadedServiceBase
                          entity.IsAlive() && entity.AddressBase != GameData.Player.AddressBase &&
                          entity.Team != GameData.Player.Team && entity.IsSpotted))
             {
-                var curPos = entity.BonePos.TryGetValue(AimBonePos, out var entityBonePo)
-                    ? entityBonePo
-                    : entity.BonePos[AimBonePos];
-                if (entity.Id != _lastTargetId)
+                Vector3? bestBonePos = null;
+                var bestAngles = Vector2.Zero;
+                var bestAngleSize = float.MaxValue;
+
+                foreach (var bone in AimBonePriority)
                 {
-                    _lastTargetPos = curPos;
-                    _lastTargetVel = Vector3.Zero;
-                }
-                else
-                {
+                    if (!entity.BonePos.TryGetValue(bone, out var bonePos)) continue;
+
                     var dt = (float)(DateTime.Now - _lastTargetUpdate).TotalSeconds;
-                    if (dt > 0.001f && dt < 0.5f)
-                        _lastTargetVel = (curPos - _lastTargetPos) / dt;
-                    _lastTargetPos = curPos;
+
+                    if (entity.Id != _lastTargetId)
+                    {
+                        _lastTargetPos = bonePos;
+                        _lastTargetVel = Vector3.Zero;
+                    }
+                    else if (dt > 0.001f && dt < 0.5f)
+                    {
+                        _lastTargetVel = (bonePos - _lastTargetPos) / dt;
+                        _lastTargetPos = bonePos;
+                    }
+
+                    _lastTargetId = entity.Id;
+                    _lastTargetUpdate = DateTime.Now;
+                    targetVel = _lastTargetVel;
+
+                    var distanceToTarget = Vector3.Distance(GameData.Player.EyePosition, bonePos);
+                    var dynamicPredictionTime = 0.05f + Math.Min(distanceToTarget / 1000f, 1f) * 0.15f;
+                    var predictedPos = bonePos + targetVel * dynamicPredictionTime;
+
+                    GetAimAngles(predictedPos, out var angleToBoneSize, out var anglesToBone);
+                    if (angleToBoneSize > customFov) continue;
+
+                    if (angleToBoneSize < bestAngleSize)
+                    {
+                        bestAngleSize = angleToBoneSize;
+                        bestAngles = anglesToBone;
+                        bestBonePos = predictedPos;
+                    }
                 }
 
-                _lastTargetId = entity.Id;
-                _lastTargetUpdate = DateTime.Now;
-                targetVel = _lastTargetVel;
-                var predictedPos = curPos + targetVel * PredictionTime;
-                GetAimAngles(predictedPos, out var angleToBoneSize, out var anglesToBone);
-                if (angleToBoneSize > customFov) continue;
-
-                if (angleToBoneSize < minAngleSize)
+                if (bestBonePos != null && bestAngleSize < minAngleSize)
                 {
-                    minAngleSize = angleToBoneSize;
-                    aimAngles = anglesToBone;
-                    aimPosition = predictedPos;
+                    minAngleSize = bestAngleSize;
+                    aimAngles = bestAngles;
+                    aimPosition = bestBonePos.Value;
                     targetFound = true;
                 }
             }
@@ -282,9 +298,7 @@ public class AimBot : ThreadedServiceBase
         CurrentSmoothing = AimBotSmoothing;
         if (targetFound)
         {
-            var distanceToTarget = 0.0f;
-            if (GameData != null && GameData.Player != null)
-                distanceToTarget = Vector3.Distance(GameData.Player.EyePosition, aimPosition);
+            var distanceToTarget = Vector3.Distance(GameData.Player.EyePosition, aimPosition);
             var smoothingAcceleration = Math.Max(1.0f, distanceToTarget / 100.0f);
             CurrentSmoothing *= smoothingAcceleration;
             CurrentSmoothing = Math.Min(CurrentSmoothing, 50.0f);
@@ -293,6 +307,7 @@ public class AimBot : ThreadedServiceBase
 
         return targetFound;
     }
+
 
     private void GetAimAngles(Vector3 pointWorld, out float angleSize, out Vector2 aimAngles)
     {
