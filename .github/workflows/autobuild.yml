@@ -7,24 +7,34 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    outputs:
-      commit_message: ${{ steps.last_commit.outputs.commit_message }}
 
     env:
       Project_Path: CS2Cheat.csproj
       Output_Dir: publish
+
+    outputs:
+      commit_message: ${{ steps.get_commit.outputs.commit_message }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Get last commit message
-      id: last_commit
-      run: |
-        echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+      id: get_commit
+      run: echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
 
     - name: Build and publish project
-      run: dotnet publish $env:Project_Path -c Release -o $env:Output_Dir -r win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:DeleteExistingFiles=true --self-contained false
+      run: dotnet publish $env:Project_Path -c Release -o $env:Output_Dir -r win-x64 `
+        /p:PublishSingleFile=true `
+        /p:IncludeNativeLibrariesForSelfExtract=true `
+        /p:IncludeAllContentForSelfExtract=true `
+        /p:DeleteExistingFiles=true `
+        --self-contained false
       env:
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
@@ -42,6 +52,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Get latest git tag
+      id: get_tag
+      run: |
+        tag=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+        echo "tag_name=${tag}-autobuild" >> $GITHUB_OUTPUT
+
     - name: Download build artifact
       uses: actions/download-artifact@v4
       with:
@@ -52,7 +68,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.run_number }}-autobuild
-        name: Release ${{ github.run_number }}-autobuild
-        body: ${{ needs.build.outputs.commit_message }}
+        tag_name: ${{ steps.get_tag.outputs.tag_name }}
+        name: Release ${{ steps.get_tag.outputs.tag_name }}
+        body: |
+          ${{ needs.build.outputs.commit_message }}
         files: "*.exe"
