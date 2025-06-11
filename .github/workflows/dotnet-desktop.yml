@@ -3,7 +3,7 @@ name: Build and Release Single EXE
 on:
   push:
     tags:
-      - 'v1.7.6 autobuild'  
+      - 'v*'  
 
 jobs:
   build:
