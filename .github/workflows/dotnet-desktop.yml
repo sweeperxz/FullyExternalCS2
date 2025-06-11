@@ -29,7 +29,6 @@ jobs:
           /p:IncludeAllContentForSelfExtract=true 
           /p:DeleteExistingFiles=true 
           --self-contained false 
-          -o publish 
       env:
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
