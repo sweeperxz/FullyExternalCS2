@@ -69,10 +69,16 @@ jobs:
       id: new_tag
       run: |
         latest=${{ steps.get_latest_tag.outputs.tag }}
-        base_version=$(echo $latest | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+
+        base_version=$(echo "$latest" | sed -E 's/^v([0-9]+)\.([0-9]+)\.([0-9]+).*/\1.\2.\3/')
+        if [[ -z "$base_version" ]]; then
+          base_version="0.0.0"
+        fi
+
         IFS='.' read -r major minor patch <<< "$base_version"
         patch=$((patch + 1))
         new_tag="v${major}.${minor}.${patch}-autobuild"
+
         echo "New tag: $new_tag"
         echo "::set-output name=tag::$new_tag"
       shell: bash
