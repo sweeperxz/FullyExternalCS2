@@ -1,11 +1,11 @@
-name: .NET Build & Release
+name: Build and Release .NET Single EXE
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build-and-release:
+  build:
     runs-on: windows-latest
 
     env:
@@ -15,45 +15,59 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    - name: Check if source code changed
+      id: check_changes
+      uses: dorny/paths-filter@v2
       with:
-        dotnet-version: 8.0.x
+        filters: |
+          code:
+            - '**/*.cs'
+            - '**/*.csproj'
 
-    - name: Calculate next tag
-      id: tag
-      shell: bash
+    - name: Get last commit message
+      id: last_commit
       run: |
-        last_tag=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
-        echo "Last tag: $last_tag"
-        if [[ -z "$last_tag" ]]; then
-          new_tag="0.0.1"
-        else
-          IFS='.' read -r major minor patch <<< "$last_tag"
-          patch=$((patch + 1))
-          new_tag="$major.$minor.$patch"
-        fi
-        echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+        echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
-    - name: Build project
-      run: dotnet publish $env:Project_Path -c Release -o $env:Output_Dir -r win-x64 `
-        /p:PublishSingleFile=true `
-        /p:IncludeNativeLibrariesForSelfExtract=true `
-        /p:IncludeAllContentForSelfExtract=true `
-        /p:DeleteExistingFiles=true `
-        --self-contained false
+    - name: Build and publish project
+      if: steps.check_changes.outputs.code == 'true'
+      run: dotnet publish $env:Project_Path -c Release -o $env:Output_Dir -r win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:DeleteExistingFiles=true --self-contained false
       env:
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
+    - name: Upload executable artifact
+      if: steps.check_changes.outputs.code == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: Built-Executable
+        path: ${{ env.Output_Dir }}/*.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: needs.build.outputs.code == 'true'  
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download build artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: Built-Executable
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ steps.tag.outputs.new_tag }}-autobuild
-        name: Release ${{ steps.tag.outputs.new_tag }}-autobuild
-        body: "Автоматическая сборка с ветки main"
-        files: ${{ env.Output_Dir }}/*.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}-autobuild
+        name: Release v${{ github.run_number }}-autobuild
+        body: |
+          Автоматический билд и релиз.
+          Последний коммит:
+          ```
+          ${{ needs.build.steps.last_commit.outputs.commit_message }}
+          ```
+        files: "*.exe"
