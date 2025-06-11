@@ -53,7 +53,8 @@ jobs:
       with:
         tag_name: ${{ steps.tag.outputs.new_tag }}-autobuild
         name: Release ${{ steps.tag.outputs.new_tag }}-autobuild
-        body: "Автоматическая сборка с ветки main"
+        body: |
+          ${{ needs.build.steps.last_commit.outputs.commit_message }}
         files: ${{ env.Output_Dir }}/*.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
