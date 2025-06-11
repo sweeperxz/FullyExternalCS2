@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-release:
     runs-on: windows-latest
 
     env:
@@ -13,76 +13,72 @@ jobs:
       Output_Dir: publish
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Build and publish project
-      run: |
-        dotnet publish $env:Project_Path -c Release -r win-x64 `
-          --self-contained false `
-          -o $env:Output_Dir `
-          /p:PublishSingleFile=true `
-          /p:IncludeNativeLibrariesForSelfExtract=true `
-          /p:IncludeAllContentForSelfExtract=true `
-          /p:DeleteExistingFiles=true
-      env:
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      - name: Restore dependencies
+        run: dotnet restore $env:Project_Path
 
-    - name: Upload only .exe file
-      uses: actions/upload-artifact@v4
-      with:
-        name: Built-Executable
-        path: ${{ env.Output_Dir }}/*.exe
+      - name: Build and publish project
+        run: |
+          dotnet publish $env:Project_Path -c Release -r win-x64 `
+            /p:PublishSingleFile=true `
+            /p:IncludeNativeLibrariesForSelfExtract=true `
+            /p:IncludeAllContentForSelfExtract=true `
+            /p:DeleteExistingFiles=true `
+            --self-contained false `
+            -o $env:Output_Dir
+        env:
+          DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
-    - name: Get latest tag
-      id: get_latest_tag
-      shell: bash
-      run: |
-        tag=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | tail -n 1)
-        echo "Latest tag: $tag"
-        echo "tag=$tag" >> $GITHUB_OUTPUT
+      - name: Get latest tag
+        id: get_latest_tag
+        shell: bash
+        run: |
+          tag=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | tail -n 1 || echo "")
+          echo "Latest tag: $tag"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
 
-    - name: Calculate new tag
-      id: calculate_tag
-      shell: bash
-      run: |
-        latest="${{ steps.get_latest_tag.outputs.tag }}"
-        base_version=${latest:-"0.0.0"}
-        IFS='.' read -r major minor patch <<< "$base_version"
-        patch=$((patch + 1))
-        new_tag="${major}.${minor}.${patch}-autobuild"
-        echo "New tag: $new_tag"
-        echo "tag=$new_tag" >> $GITHUB_OUTPUT
+      - name: Calculate new tag
+        id: calculate_tag
+        shell: bash
+        run: |
+          latest="${{ steps.get_latest_tag.outputs.tag }}"
+          if [[ -z "$latest" ]]; then
+            major=1; minor=0; patch=0
+          else
+            IFS='.' read -r major minor patch <<< "$latest"
+            patch=$((patch + 1))
+          fi
+          new_tag="${major}.${minor}.${patch}-autobuild"
+          echo "New tag: $new_tag"
+          echo "tag=$new_tag" >> $GITHUB_OUTPUT
 
-    - name: Create Git tag
-      shell: bash
-      run: |
-        git config user.name "github-actions"
-        git config user.email "github-actions@github.com"
-        git tag ${{ steps.calculate_tag.outputs.tag }}
-        git push origin ${{ steps.calculate_tag.outputs.tag }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Git tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag ${{ steps.calculate_tag.outputs.tag }}
+          git push origin ${{ steps.calculate_tag.outputs.tag }}
 
-    - name: Download executable
-      uses: actions/download-artifact@v4
-      with:
-        name: Built-Executable
-        path: .
+      - name: Upload only .exe file
+        uses: actions/upload-artifact@v4
+        with:
+          name: Built-Executable
+          path: ${{ env.Output_Dir }}/*.exe
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ steps.calculate_tag.outputs.tag }}
-        name: Release ${{ steps.calculate_tag.outputs.tag }}
-        body: "Автоматическая сборка и релиз"
-        files: ./*.exe
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.calculate_tag.outputs.tag }}
+          name: Release ${{ steps.calculate_tag.outputs.tag }}
+          files: ${{ env.Output_Dir }}/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
