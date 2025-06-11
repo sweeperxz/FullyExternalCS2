@@ -23,7 +23,12 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Calculate next tag
+    - name: Get last commit message
+      id: last_commit
+      run: |
+        echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+    - name: Calculate next tag version
       id: tag
       shell: bash
       run: |
@@ -37,6 +42,8 @@ jobs:
           new_tag="$major.$minor.$patch"
         fi
         echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+        git tag "$new_tag"
+        git push origin "$new_tag"
 
     - name: Build project
       run: dotnet publish $env:Project_Path -c Release -o $env:Output_Dir -r win-x64 `
@@ -51,10 +58,10 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ steps.tag.outputs.new_tag }}-autobuild
-        name: Release ${{ steps.tag.outputs.new_tag }}-autobuild
+        tag_name: ${{ steps.tag.outputs.new_tag }}
+        name: Release ${{ steps.tag.outputs.new_tag }}
         body: |
-          ${{ needs.build.steps.last_commit.outputs.commit_message }}
+          ${{ steps.last_commit.outputs.commit_message }}
         files: ${{ env.Output_Dir }}/*.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
