@@ -8,14 +8,11 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-
     runs-on: windows-latest
 
     env:
-      Solution_Name: FullyExternalCS2.sln
+      Project_Path: CS2Cheat.csproj     # Укажи имя .csproj-файла
+      Output_Dir: publish
 
     steps:
     - name: Checkout code
@@ -26,19 +23,13 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Restore NuGet packages
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+    - name: Build and publish project
+      run: dotnet publish $env:Project_Path -c Release -o $env:Output_Dir -r win-x64 --self-contained false
       env:
-        Configuration: ${{ matrix.configuration }}
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
-    - name: Build the solution
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
-
-    - name: Publish (optional, for Release only)
-      if: matrix.configuration == 'Release'
-      run: dotnet publish $env:Solution_Name -c Release -o publish
+    - name: Upload only .exe file
+      uses: actions/upload-artifact@v4
+      with:
+        name: Built-Executable
+        path: ${{ env.Output_Dir }}/*.exe
