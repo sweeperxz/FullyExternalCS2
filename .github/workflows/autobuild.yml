@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    outputs:
+      code_changed: ${{ steps.check_changes.outputs.code }}
+      commit_message: ${{ steps.last_commit.outputs.commit_message }}
 
     env:
       Project_Path: CS2Cheat.csproj
@@ -46,7 +49,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: needs.build.outputs.code == 'true'  
+    if: needs.build.outputs.code_changed == 'true' 
 
     steps:
     - name: Checkout code
@@ -68,6 +71,6 @@ jobs:
           Автоматический билд и релиз.
           Последний коммит:
           ```
-          ${{ needs.build.steps.last_commit.outputs.commit_message }}
+          ${{ needs.build.outputs.commit_message }}
           ```
         files: "*.exe"
