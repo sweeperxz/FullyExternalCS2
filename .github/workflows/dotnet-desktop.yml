@@ -1,13 +1,18 @@
-name: Build and Release Single EXE
+name: .NET Build
 
 on:
   push:
-    tags:
-      - 'v*'  
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: windows-latest
+
+    env:
+      Project_Path: CS2Cheat.csproj 
+      Output_Dir: publish
 
     steps:
     - name: Checkout code
@@ -18,31 +23,18 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Build and publish project
+      run: dotnet publish $env:Project_Path -c Release -o $env:Output_Dir -r win-x64 /p:PublishSingleFile=true 
+          /p:IncludeNativeLibrariesForSelfExtract=true 
+          /p:IncludeAllContentForSelfExtract=true 
+          /p:DeleteExistingFiles=true 
+          --self-contained false 
+          -o publish 
+      env:
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
-    - name: Publish Single EXE
-      run: |
-        dotnet publish CS2Cheat.csproj `
-          -c Release `
-          -r win-x64 `
-          --framework net8.0-windows `
-          /p:PublishSingleFile=true `
-          /p:IncludeNativeLibrariesForSelfExtract=true `
-          /p:IncludeAllContentForSelfExtract=true `
-          /p:DeleteExistingFiles=true `
-          --self-contained false `
-          -o publish
-
-    - name: Upload artifact
+    - name: Upload only .exe file
       uses: actions/upload-artifact@v4
       with:
-        name: CS2Cheat-exe
-        path: publish/*.exe
-
-    - name: Upload to GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: publish/*.exe
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: Built-Executable
+        path: ${{ env.Output_Dir }}/*.exe
