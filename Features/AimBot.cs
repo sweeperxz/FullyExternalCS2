@@ -14,7 +14,7 @@ namespace CS2Cheat.Features;
 
 public class AimBot : ThreadedServiceBase
 {
-    private const float AimBotSmoothing = 5f;
+    private const float AimBotSmoothing = 3f;
     private const double HumanReactThreshold = 30.0;
     private const int SuppressMs = 200;
     private const int UserMouseDeltaResetMs = 50;
