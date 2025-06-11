@@ -1,22 +1,22 @@
-name: .NET Build and Autobuild Release
+name: .NET Autobuild and Release
 
 on:
   push:
     branches: [ "main" ]
 
-env:
-  Project_Path: CS2Cheat.csproj
-  Output_Dir: publish
-
 jobs:
-  build:
+  build-and-release:
     runs-on: windows-latest
 
+    env:
+      Project_Path: CS2Cheat.csproj
+      Output_Dir: publish
+
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup .NET
+    - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
@@ -32,71 +32,39 @@ jobs:
       env:
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
-    - name: Upload exe artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Built-Executable
-        path: ${{ env.Output_Dir }}/*.exe
-
-  release:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: write
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Download build artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: Built-Executable
-        path: ./publish
-
     - name: Get latest tag
       id: get_latest_tag
       run: |
-        git fetch --tags
-        latest_tag=$(git tag --list "v*" --sort=-v:refname | head -n 1)
-        echo "Latest tag: $latest_tag"
-        if [[ -z "$latest_tag" ]]; then
-          latest_tag="v0.0.0"
-        fi
-        echo "::set-output name=tag::$latest_tag"
-      shell: bash
+        tag=$(git tag --sort=-v:refname | head -n 1)
+        echo "Latest tag: $tag"
+        echo "tag=$tag" >> $GITHUB_OUTPUT
 
     - name: Calculate new tag
-      id: new_tag
+      id: calculate_tag
       run: |
-        latest=${{ steps.get_latest_tag.outputs.tag }}
-
-        base_version=$(echo "$latest" | sed -E 's/^v([0-9]+)\.([0-9]+)\.([0-9]+).*/\1.\2.\3/')
+        latest="${{ steps.get_latest_tag.outputs.tag }}"
+        base_version=$(echo "$latest" | grep -oP '\d+\.\d+\.\d+' | head -1)
         if [[ -z "$base_version" ]]; then
           base_version="0.0.0"
         fi
-
         IFS='.' read -r major minor patch <<< "$base_version"
         patch=$((patch + 1))
-        new_tag="v${major}.${minor}.${patch}-autobuild"
-
+        new_tag="${major}.${minor}.${patch}-autobuild"
         echo "New tag: $new_tag"
-        echo "::set-output name=tag::$new_tag"
-      shell: bash
+        echo "tag=$new_tag" >> $GITHUB_OUTPUT
 
-    - name: Create and push new tag
+    - name: Create Git tag
       run: |
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
-        git tag ${{ steps.new_tag.outputs.tag }}
-        git push origin ${{ steps.new_tag.outputs.tag }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        git tag ${{ steps.calculate_tag.outputs.tag }}
+        git push origin ${{ steps.calculate_tag.outputs.tag }}
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ steps.new_tag.outputs.tag }}
-        name: Release ${{ steps.new_tag.outputs.tag }}
-        files: ./publish/*.exe
+        tag_name: ${{ steps.calculate_tag.outputs.tag }}
+        name: Release ${{ steps.calculate_tag.outputs.tag }}
+        files: ${{ env.Output_Dir }}/*.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
