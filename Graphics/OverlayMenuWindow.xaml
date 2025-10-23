@@ -1,0 +1,54 @@
+<Window x:Class="CS2Cheat.Graphics.OverlayMenuWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CS2 Cheat"
+        Width="230"
+        Height="280"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize">
+    <Border CornerRadius="10"
+            Background="#DD1E1E1E"
+            BorderBrush="#55FFFFFF"
+            BorderThickness="1"
+            Padding="14">
+        <StackPanel>
+            <TextBlock Text="Feature Toggle"
+                       FontSize="16"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       Margin="0,0,0,12"/>
+            <CheckBox Content="AimBot"
+                      IsChecked="{Binding AimBot, Mode=TwoWay}"
+                      Margin="0,0,0,6"
+                      Foreground="White"/>
+            <CheckBox Content="Trigger Bot"
+                      IsChecked="{Binding TriggerBot, Mode=TwoWay}"
+                      Margin="0,0,0,6"
+                      Foreground="White"/>
+            <CheckBox Content="Bomb Timer"
+                      IsChecked="{Binding BombTimer, Mode=TwoWay}"
+                      Margin="0,0,0,6"
+                      Foreground="White"/>
+            <CheckBox Content="ESP Box"
+                      IsChecked="{Binding EspBox, Mode=TwoWay}"
+                      Margin="0,0,0,6"
+                      Foreground="White"/>
+            <CheckBox Content="ESP Aim Crosshair"
+                      IsChecked="{Binding EspAimCrosshair, Mode=TwoWay}"
+                      Margin="0,0,0,6"
+                      Foreground="White"/>
+            <CheckBox Content="Skeleton ESP"
+                      IsChecked="{Binding SkeletonEsp, Mode=TwoWay}"
+                      Margin="0,0,0,6"
+                      Foreground="White"/>
+            <Separator Margin="0,8,0,8"/>
+            <CheckBox Content="Team Check"
+                      IsChecked="{Binding TeamCheck, Mode=TwoWay}"
+                      Foreground="White"/>
+        </StackPanel>
+    </Border>
+</Window>

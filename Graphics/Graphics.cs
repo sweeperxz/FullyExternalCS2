@@ -1,4 +1,6 @@
-﻿using System.Windows.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Threading;
 using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Features;
@@ -24,16 +26,19 @@ public class Graphics : ThreadedServiceBase
     private readonly object _deviceLock = new();
 
     private readonly List<Vertex> _vertices = [];
+    private readonly ConfigurationService _configurationService;
 
     private Vector2 _currentResolution;
     private Device? _device;
     private bool _isDisposed;
 
-    public Graphics(GameProcess gameProcess, GameData gameData, WindowOverlay windowOverlay)
+    public Graphics(GameProcess gameProcess, GameData gameData, WindowOverlay windowOverlay,
+        ConfigurationService configurationService)
     {
         WindowOverlay = windowOverlay ?? throw new ArgumentNullException(nameof(windowOverlay));
         GameProcess = gameProcess ?? throw new ArgumentNullException(nameof(gameProcess));
         GameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
+        _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
 
         _currentResolution = new Vector2(WindowOverlay.Window.Width, WindowOverlay.Window.Height);
         InitializeDevice();
@@ -177,9 +182,9 @@ public class Graphics : ThreadedServiceBase
     private void DrawFeatures()
     {
         WindowOverlay.Draw(GameProcess, this);
-        var features = ConfigManager.Load();
+        var features = _configurationService.Current;
         if (features.EspAimCrosshair) EspAimCrosshair.Draw(this);
-        if (features.EspBox) EspBox.Draw(this);
+        if (features.EspBox) EspBox.Draw(this, features);
         if (features.SkeletonEsp) SkeletonEsp.Draw(this);
         if (features.BombTimer) BombTimer.Draw(this);
     }

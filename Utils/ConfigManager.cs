@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text.Json;
 using Keys = Process.NET.Native.Types.Keys;
@@ -6,7 +7,7 @@ namespace CS2Cheat.Utils;
 
 public class ConfigManager
 {
-    private const string ConfigFile = "config.json";
+    public const string ConfigFileName = "config.json";
     public bool AimBot { get; set; }
     public bool BombTimer { get; set; }
     public bool EspAimCrosshair { get; set; }
@@ -20,16 +21,18 @@ public class ConfigManager
 
     public static ConfigManager Load()
     {
+        var path = GetConfigPath();
+
         try
         {
-            if (!File.Exists(ConfigFile))
+            if (!File.Exists(path))
             {
                 var defaultOptions = Default();
                 Save(defaultOptions);
                 return defaultOptions;
             }
 
-            var json = File.ReadAllText(ConfigFile);
+            var json = File.ReadAllText(path);
             var options = JsonSerializer.Deserialize<ConfigManager>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -50,12 +53,17 @@ public class ConfigManager
             {
                 WriteIndented = true
             });
-            File.WriteAllText(ConfigFile, json);
+            File.WriteAllText(GetConfigPath(), json);
         }
         catch (JsonException)
         {
             // Handle serialization errors
         }
+    }
+
+    private static string GetConfigPath()
+    {
+        return Path.Combine(AppContext.BaseDirectory, ConfigFileName);
     }
 
     public static ConfigManager Default()
@@ -71,6 +79,22 @@ public class ConfigManager
             AimBotKey = Keys.LButton, // https://github.com/lolp1/Process.NET/blob/ce9ac9cceb2afb30c9288495615c6f3aa34bc1f8/src/Process.NET/Native/Types/NativeEnums.cs#L235
             TriggerBotKey = Keys.LMenu,
             TeamCheck = true
+        };
+    }
+
+    public ConfigManager Clone()
+    {
+        return new ConfigManager
+        {
+            AimBot = AimBot,
+            BombTimer = BombTimer,
+            EspAimCrosshair = EspAimCrosshair,
+            EspBox = EspBox,
+            SkeletonEsp = SkeletonEsp,
+            TriggerBot = TriggerBot,
+            AimBotKey = AimBotKey,
+            TriggerBotKey = TriggerBotKey,
+            TeamCheck = TeamCheck
         };
     }
 }

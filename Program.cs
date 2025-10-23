@@ -18,6 +18,10 @@ public class Program :
         Exit += (_, _) => Dispose();
     }
 
+    private ConfigurationService ConfigurationService { get; set; } = null!;
+
+    private ServiceRegistry ServiceRegistry { get; set; } = null!;
+
     private GameProcess GameProcess { get; set; } = null!;
 
     private GameData GameData { get; set; } = null!;
@@ -26,34 +30,26 @@ public class Program :
 
     private Graphics.Graphics Graphics { get; set; } = null!;
 
-    private TriggerBot Trigger { get; set; } = null!;
-
-    private AimBot AimBot { get; set; } = null!;
-
-    private BombTimer BombTimer { get; set; } = null!;
+    private OverlayMenuWindow? MenuWindow { get; set; }
 
     public void Dispose()
     {
-        GameProcess.Dispose();
+        if (MenuWindow != null)
+        {
+            MenuWindow.Dispatcher.Invoke(() => MenuWindow.Close());
+            MenuWindow = null;
+        }
+
+        if (ConfigurationService != null)
+            ConfigurationService.ConfigurationChanged -= OnConfigurationChanged;
+
+        ServiceRegistry?.Dispose();
+        ConfigurationService?.Dispose();
+
         GameProcess = default!;
-
-        GameData.Dispose();
         GameData = default!;
-
-        WindowOverlay.Dispose();
         WindowOverlay = default!;
-
-        Graphics.Dispose();
         Graphics = default!;
-
-        Trigger.Dispose();
-        Trigger = default!;
-
-        AimBot.Dispose();
-        AimBot = default!;
-
-        BombTimer.Dispose();
-        BombTimer = default!;
     }
 
     public static void Main()
@@ -63,29 +59,38 @@ public class Program :
 
     private void InitializeComponent()
     {
-        var features = ConfigManager.Load();
+        ConfigurationService = new ConfigurationService();
+        ConfigurationService.ConfigurationChanged += OnConfigurationChanged;
+
+        ServiceRegistry = new ServiceRegistry();
+
         GameProcess = new GameProcess();
-        GameProcess.Start();
-
         GameData = new GameData(GameProcess);
-        GameData.Start();
-
         WindowOverlay = new WindowOverlay(GameProcess);
-        WindowOverlay.Start();
+        Graphics = new Graphics.Graphics(GameProcess, GameData, WindowOverlay, ConfigurationService);
 
-        Graphics = new Graphics.Graphics(GameProcess, GameData, WindowOverlay);
-        Graphics.Start();
+        MenuWindow = new OverlayMenuWindow(ConfigurationService)
+        {
+            Left = -32000,
+            Top = -32000
+        };
+        MenuWindow.Show();
+        WindowOverlay.AttachMenuWindow(MenuWindow);
 
-        Trigger = new TriggerBot(GameProcess, GameData);
-        if (features.TriggerBot) Trigger.Start();
+        ServiceRegistry.Register(nameof(GameProcess), GameProcess, _ => true);
+        ServiceRegistry.Register(nameof(GameData), GameData, _ => true);
+        ServiceRegistry.Register(nameof(WindowOverlay), WindowOverlay, _ => true);
+        ServiceRegistry.Register(nameof(Graphics), Graphics, _ => true);
 
+        FeatureRegistry.Register(ServiceRegistry, GameProcess, GameData, Graphics);
 
-        AimBot = new AimBot(GameProcess, GameData);
-        if (features.AimBot) AimBot.Start();
-
-        BombTimer = new BombTimer(Graphics);
-        if (features.BombTimer) BombTimer.Start();
+        ServiceRegistry.ApplyConfiguration(ConfigurationService.Current);
 
         SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
+    }
+
+    private void OnConfigurationChanged(object? sender, ConfigManager config)
+    {
+        ServiceRegistry.ApplyConfiguration(config);
     }
 }

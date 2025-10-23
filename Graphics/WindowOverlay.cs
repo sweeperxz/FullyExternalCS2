@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Threading;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
@@ -38,6 +39,8 @@ public class WindowOverlay : ThreadedServiceBase
 
     private static FpsCounter? FpsCounter { get; set; }
 
+    private Window? MenuWindow { get; set; }
+
 
     public override void Dispose()
     {
@@ -48,6 +51,17 @@ public class WindowOverlay : ThreadedServiceBase
 
         FpsCounter = default;
         GameProcess = default;
+
+        if (MenuWindow != null)
+        {
+            Current.Dispatcher.Invoke(() => MenuWindow.Hide(), DispatcherPriority.Normal);
+            MenuWindow = null;
+        }
+    }
+
+    public void AttachMenuWindow(Window menuWindow)
+    {
+        MenuWindow = menuWindow;
     }
 
     protected override void FrameAction()
@@ -69,6 +83,14 @@ public class WindowOverlay : ThreadedServiceBase
                     Window.Y = windowRectangle.Location.Y;
                     Window.Width = windowRectangle.Size.Width;
                     Window.Height = windowRectangle.Size.Height;
+
+                    if (MenuWindow != null)
+                    {
+                        MenuWindow.Left = windowRectangle.Left + 20;
+                        MenuWindow.Top = windowRectangle.Top + 20;
+                        if (MenuWindow.Visibility != Visibility.Visible)
+                            MenuWindow.Visibility = Visibility.Visible;
+                    }
                 }
                 else
                 {
@@ -76,6 +98,9 @@ public class WindowOverlay : ThreadedServiceBase
                     Window.Y = -32000;
                     Window.Width = 16;
                     Window.Height = 16;
+
+                    if (MenuWindow != null && MenuWindow.Visibility != Visibility.Hidden)
+                        MenuWindow.Visibility = Visibility.Hidden;
                 }
             }
         }, DispatcherPriority.Normal);

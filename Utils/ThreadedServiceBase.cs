@@ -1,9 +1,12 @@
-﻿namespace CS2Cheat.Utils;
+using System.Threading;
 
-public abstract class ThreadedServiceBase :
-    IDisposable
+namespace CS2Cheat.Utils;
+
+public abstract class ThreadedServiceBase : IService
 {
-    #region
+    private readonly object _threadLock = new();
+    private CancellationTokenSource? _cancellationTokenSource;
+    private Thread? _thread;
 
     protected virtual string ThreadName => nameof(ThreadedServiceBase);
 
@@ -11,53 +14,94 @@ public abstract class ThreadedServiceBase :
 
     protected virtual TimeSpan ThreadFrameSleep { get; set; } = new(0, 0, 0, 0, 1);
 
-    private Thread Thread { get; set; }
-
-    #endregion
-
-    #region
-
-    protected ThreadedServiceBase()
+    public bool IsRunning
     {
-        Thread = new Thread(ThreadStart)
+        get
         {
-            Name = ThreadName
-        };
+            lock (_threadLock)
+            {
+                return _thread != null && _thread.IsAlive;
+            }
+        }
     }
 
     public virtual void Dispose()
     {
-        Thread.Interrupt();
-        if (!Thread.Join(ThreadTimeout)) Thread.Abort();
-
-        Thread = default;
+        Stop();
+        GC.SuppressFinalize(this);
     }
-
-    #endregion
-
-    #region
 
     public void Start()
     {
-        Thread.Start();
+        lock (_threadLock)
+        {
+            if (IsRunning) return;
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            _thread = new Thread(() => ThreadStart(_cancellationTokenSource.Token))
+            {
+                Name = ThreadName,
+                IsBackground = true
+            };
+            _thread.Start();
+        }
     }
 
-    private void ThreadStart()
+    public void Stop()
+    {
+        Thread? thread;
+        CancellationTokenSource? tokenSource;
+
+        lock (_threadLock)
+        {
+            thread = _thread;
+            tokenSource = _cancellationTokenSource;
+            _thread = null;
+            _cancellationTokenSource = null;
+        }
+
+        if (thread == null) return;
+
+        try
+        {
+            tokenSource?.Cancel();
+            if (!thread.Join(ThreadTimeout))
+            {
+                thread.Interrupt();
+                thread.Join();
+            }
+        }
+        catch (ThreadInterruptedException)
+        {
+        }
+        finally
+        {
+            tokenSource?.Dispose();
+        }
+    }
+
+    private void ThreadStart(CancellationToken cancellationToken)
     {
         try
         {
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                FrameAction();
-                Thread.Sleep(ThreadFrameSleep);
+                try
+                {
+                    FrameAction();
+                }
+                catch (NullReferenceException)
+                {
+                }
+
+                if (cancellationToken.WaitHandle.WaitOne(ThreadFrameSleep))
+                    break;
             }
         }
-        catch (NullReferenceException)
+        catch (ThreadInterruptedException)
         {
         }
     }
 
     protected abstract void FrameAction();
-
-    #endregion
 }

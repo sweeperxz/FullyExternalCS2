@@ -27,10 +27,7 @@ public static class EspBox
         ["molotov"] = "l", ["decoy"] = "m", ["incgrenade"] = "n", ["c4"] = "o"
     };
 
-    private static ConfigManager? _config;
-    private static ConfigManager Config => _config ??= ConfigManager.Load();
-
-    public static void Draw(Graphics.Graphics graphics)
+    public static void Draw(Graphics.Graphics graphics, ConfigManager config)
     {
         var player = graphics.GameData.Player;
         if (player == null || graphics.GameData.Entities == null) return;
@@ -38,7 +35,7 @@ public static class EspBox
         foreach (var entity in graphics.GameData.Entities)
         {
             if (!entity.IsAlive() || entity.AddressBase == player.AddressBase) continue;
-            if (Config.TeamCheck && entity.Team == player.Team) continue;
+            if (config.TeamCheck && entity.Team == player.Team) continue;
 
 
             var boundingBox = GetEntityBoundingBox(graphics, entity);

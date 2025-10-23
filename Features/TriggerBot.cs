@@ -4,7 +4,7 @@ using Keys = Process.NET.Native.Types.Keys;
 
 namespace CS2Cheat.Features;
 
-public sealed class TriggerBot : ThreadedServiceBase
+public sealed class TriggerBot : ThreadedServiceBase, IConfigurableService
 {
     private const float MaxVelocityThreshold = 18f;
     private const int TriggerDelayMs = 5;
@@ -13,8 +13,8 @@ public sealed class TriggerBot : ThreadedServiceBase
     private const int EntityStride = 112;
     private const int EntityIndexMask = 0x1FF;
     private const int EntityIndexShift = 9;
-    private static Keys _triggerBotHotKey;
-    private static ConfigManager? _config;
+    private static Keys _triggerBotHotKey = ConfigManager.Default().TriggerBotKey;
+    private static bool _teamCheck = ConfigManager.Default().TeamCheck;
     private readonly GameData _gameData;
 
     private readonly GameProcess _gameProcess;
@@ -23,10 +23,7 @@ public sealed class TriggerBot : ThreadedServiceBase
     {
         _gameProcess = gameProcess ?? throw new ArgumentNullException(nameof(gameProcess));
         _gameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
-        _triggerBotHotKey = Config.TriggerBotKey;
     }
-
-    private static ConfigManager Config => _config ??= ConfigManager.Load();
 
     protected override string ThreadName => nameof(TriggerBot);
 
@@ -83,7 +80,9 @@ public sealed class TriggerBot : ThreadedServiceBase
         var isSpecialCondition = _gameData.Player.FFlags == 65664;
         var isWithinVelocityLimit = Math.Abs(_gameData.Player.Velocity.Z) <= MaxVelocityThreshold;
 
-        return (isDifferentTeam || isSpecialCondition) && isWithinVelocityLimit;
+        var passesTeamCheck = !_teamCheck || isDifferentTeam || isSpecialCondition;
+
+        return passesTeamCheck && isWithinVelocityLimit;
     }
 
     private static async Task ExecuteTrigger()
@@ -96,6 +95,12 @@ public sealed class TriggerBot : ThreadedServiceBase
     public static bool IsHotKeyDown()
     {
         return _triggerBotHotKey.IsKeyDown();
+    }
+
+    public void ApplyConfiguration(ConfigManager config)
+    {
+        _triggerBotHotKey = config.TriggerBotKey;
+        _teamCheck = config.TeamCheck;
     }
 
     public override void Dispose()

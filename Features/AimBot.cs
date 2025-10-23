@@ -7,7 +7,6 @@ using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
 using Process.NET.Native.Types;
 using SharpDX;
-using Keys = Process.NET.Native.Types.Keys;
 using Point = System.Drawing.Point;
 
 namespace CS2Cheat.Features;
@@ -22,13 +21,10 @@ public class AimBot : ThreadedServiceBase
     private const int AimEventWindowMs = 1000;
     private static double _anglePerPixel;
 
-    private static ConfigManager? _config;
-
     private static readonly string[] AimBonePriority = { "head", "neck", "chest", "pelvis" };
 
     private readonly object _stateLock = new();
 
-    private readonly Keys AimBotHotKey;
     private double _aiAggressiveness = 2;
 
     private int _aimSuccessCount;
@@ -64,10 +60,7 @@ public class AimBot : ThreadedServiceBase
         GameProcess = gameProcess;
         GameData = gameData;
         MouseHook = new GlobalHook(HookType.WH_MOUSE_LL, MouseHookCallback);
-        AimBotHotKey = Config.AimBotKey;
     }
-
-    private static ConfigManager Config => _config ??= ConfigManager.Load();
 
     private static MouseMoveMethod MouseMoveMethod =>
         MouseMoveMethod.TryMouseMoveNew;
