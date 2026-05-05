@@ -1,5 +1,7 @@
 # FullyExternalCS2 v2.0
 
+![menu](assets/photo.png)
+
 FullyExternalCS2 v2.0 is a refreshed external CS2 project with a new ImGui overlay, built-in menu, live configuration, updated visuals, RCS improvements, Bomb Timer, Vote Teller, and cleaner feature control directly from the overlay.
 
 The main focus of this version is the new in-game menu: most features no longer need to be edited manually in `config.json`; they can be enabled, disabled, tuned, saved, reloaded, and reset from the overlay.
