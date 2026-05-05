@@ -1,3 +1,4 @@
+using CS2Cheat.Core;
 using Process.NET.Native;
 using Process.NET.Native.Types;
 using User32 = CS2Cheat.Core.User32;
@@ -47,7 +48,7 @@ public class GlobalHook :
         if (curModule is null) throw new ArgumentNullException(nameof(curModule));
 
         var hHook = User32.SetWindowsHookEx((int)hookType, hookProc,
-            Kernel32.GetModuleHandle(curModule.ModuleName), 0);
+            Core.Kernel32.GetModuleHandle(curModule.ModuleName), 0);
         if (hHook == IntPtr.Zero) throw new ArgumentException("Hook failed.");
 
         return hHook;

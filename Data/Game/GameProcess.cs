@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using CS2Cheat.Core;
 using CS2Cheat.Utils;
 
@@ -26,13 +26,18 @@ public class GameProcess : ThreadedServiceBase
 
     public Module? ModuleClient { get; private set; }
 
-    private IntPtr WindowHwnd { get; set; }
+    public IntPtr WindowHwnd { get; private set; }
 
     public Rectangle WindowRectangleClient { get; private set; }
 
     private bool WindowActive { get; set; }
 
-    public bool IsValid => WindowActive;
+    public bool IsValid => WindowHwnd != IntPtr.Zero &&
+                           Process != null &&
+                           ModuleClient != null &&
+                           WindowRectangleClient.Width > 0;
+
+    public bool IsGameForeground => WindowActive;
 
     #endregion
 
@@ -50,7 +55,7 @@ public class GameProcess : ThreadedServiceBase
     {
         if (!EnsureProcessAndModules()) InvalidateModules();
 
-        if (!EnsureWindow()) InvalidateWindow();
+        EnsureWindow();
 
         await Task.Delay(ThreadFrameSleep);
     }
@@ -83,24 +88,30 @@ public class GameProcess : ThreadedServiceBase
                 .OfType<ProcessModule>()
                 .FirstOrDefault(m => m.ModuleName.Equals(NameModule, StringComparison.OrdinalIgnoreCase));
             if (processModule != null)
-                ModuleClient = new Module(Process, processModule); // Pass both Process and ProcessModule as required
+                ModuleClient = new Module(Process, processModule);
         }
 
         return ModuleClient != null;
     }
 
 
-    private bool EnsureWindow()
+    private void EnsureWindow()
     {
-        WindowHwnd = User32.FindWindow(null!, NameWindow);
-        if (WindowHwnd == IntPtr.Zero) return false;
+        var hwnd = User32.FindWindow(null!, NameWindow);
+        if (hwnd == IntPtr.Zero)
+        {
+            InvalidateWindow();
+            return;
+        }
 
-        WindowRectangleClient = Utility.GetClientRectangle(WindowHwnd);
-        if (WindowRectangleClient.Width <= 0 || WindowRectangleClient.Height <= 0) return false;
+        WindowHwnd = hwnd;
+        var rect = Utility.GetClientRectangle(hwnd);
+        if (rect.Width > 0 && rect.Height > 0)
+        {
+            WindowRectangleClient = rect;
+        }
 
-        WindowActive = WindowHwnd == User32.GetForegroundWindow();
-
-        return WindowActive;
+        WindowActive = hwnd == User32.GetForegroundWindow();
     }
 
     #endregion

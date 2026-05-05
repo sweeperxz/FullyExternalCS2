@@ -1,92 +1,175 @@
-## FullyExternalCS2
+# FullyExternalCS2 v2.0
 
-### Description
+FullyExternalCS2 v2.0 is a refreshed external CS2 project with a new ImGui overlay, built-in menu, live configuration, updated visuals, RCS improvements, Bomb Timer, Vote Teller, and cleaner feature control directly from the overlay.
 
-FullyExternalCS2 is an external cheat for Counter-Strike 2 **that does not write to the game memory**. \
-It was created for the _purpose_ of _improving_ Windows API skills.
+The main focus of this version is the new in-game menu: most features no longer need to be edited manually in `config.json`; they can be enabled, disabled, tuned, saved, reloaded, and reset from the overlay.
 
-[Please note that.](https://github.com/sweeperxz/FullyExternalCS2/issues/6#issuecomment-1919053959)
+## What's new in v2.0
 
-**❗❗❗IF YOU GOT VAC BAN THEN CREATE AN ISSUE WITH THE ASSOCIATED TEMPLATE❗❗❗**
+- New ImGui-based overlay menu
+- Tabbed interface for Aimbot, Visuals, Misc, and Config
+- Built-in keybind editor
+- Config save, reload, and reset buttons
+- Live feature toggles from the menu
+- Updated ESP settings
+- Weapon text display for enemies
+- ESP flags moved into the menu
+- Improved RCS behavior
+- Aim FOV circle and smoothing control
+- Selectable aimbot target bone
+- Bomb Timer update
+- New Vote Teller feature
+- Auto-loaded offsets from cs2-dumper
 
-![SS](assets/photo.png)
+## Menu
 
-### Features
+The cheat now includes a full overlay menu.
 
-#### AimBot
+Default menu key: `Insert`
 
-- Key activation with RCS (default = LBUTTON)
-- Visibility check
+### Aimbot tab
 
-#### Esp
+- Enable or disable Aimbot
+- Show or hide FOV Circle
+- Change Aim FOV
+- Change Aim Smoothing
+- Select Target Bone: Head, Neck, Chest, Pelvis
+- Enable or disable RCS
+- Change RCS Strength
+- Change Aim Key
 
-- Skeleton (Color team)
-- Box with health bar
-- Health numbers
-- Name
-- Enemy weapon icon (_**for correct work of icons it is necessary to install the font you download in Releases**_)
-- Enemy flags (Scoped, Flashed, Shifting, Shifting in scope)
-- Team Check (if you want to see only enemies or teammates, you can change it in the config file)
+### Visuals tab
 
-#### Other Visuals
-
+- ESP Box
+- ESP Name
+- ESP Weapon text
+- ESP Flags
+- Box color picker
+- Skeleton ESP
 - Aim Crosshair
-- [Bomb timer](https://streamable.com/ylouzc)
+- Bomb Timer
+- Vote Teller
 
-#### Trigger Bot
+### Misc tab
 
-- Key activation (default = LAlt)
-- [No Spread](https://streamable.com/9ltv4n)
+- TriggerBot
+- TriggerBot keybind
+- Team Check
+- Menu keybind
 
-#### Miscellaneous
+### Config tab
 
-- [BunnyHop](https://streamable.com/3r09m1) ( [Read this](https://github.com/sweeperxz/FullyExternalCS2/blob/151355b47373acdc3ccaa6f526e94388c4e71f2b/Data/Entity/Player.cs#L64) )
-- OBS Bypass
-- Hitsound (**_in the same folder with the cheat there should be a file called "hit.wav"_**)
-- Basic Config with hotkeys. (if you want to change the default keys watch link and replace keycode whatever u
-  want [Read this](https://github.com/lolp1/Process.NET/blob/ce9ac9cceb2afb30c9288495615c6f3aa34bc1f8/src/Process.NET/Native/Types/NativeEnums.cs#L235))
+- Save Config
+- Reload Config
+- Reset Defaults
+- Game status information
+- Overlay FPS and resolution information
 
-#### System
+## Features
+
+### Aimbot
+
+- Key activation
+- Visibility check
+- Adjustable FOV
+- Adjustable smoothing
+- Target bone selection
+- FOV circle
+- Recoil Control System
+- RCS strength slider
+
+Default aim key: `LButton`
+
+### ESP
+
+- Box ESP
+- Health bar
+- Health numbers
+- Player name
+- Current weapon text
+- Enemy flags:
+  - Scoped
+  - Flashed
+  - Shifting
+  - Shifting in scope
+- Skeleton ESP
+- Team Check
+- Custom box color
+
+### World visuals
+
+- Bomb Timer
+- Vote Teller
+- Aim Crosshair
+
+### TriggerBot
+
+- Key activation
+- Configurable keybind
+
+Default trigger key: `LAlt`
+
+### Config system
+
+- `config.json` is created automatically
+- Settings can be changed from the menu
+- Config can be saved from the menu
+- Config can be reloaded while the program is running
+- Defaults can be restored from the menu
+- Keybinds are stored in config
+
+### System
 
 - Auto update offsets
+- External overlay
+- Does not write to game memory
+- Built on .NET 8
+- Uses ClickableTransparentOverlay and ImGuiNET
 
-### Getting started
+## Default keys
 
-**Dependencies**
+| Action | Default key |
+| --- | --- |
+| Open menu | Insert |
+| Aimbot | LButton |
+| TriggerBot | LAlt |
 
-```cs
-    <ItemGroup>
-        <PackageReference Include="GameOverlay.Net" Version="4.3.1"/>
-        <PackageReference Include="Overlay.NET" Version="1.0.2"/>
-        <PackageReference Include="PresentationFramework" Version="4.6.0"/>
-        <PackageReference Include="SharpDX.Direct3D9" Version="4.2.0"/>
-        <PackageReference Include="SharpDX.DXGI" Version="4.2.0"/>
-    </ItemGroup>
+## Requirements
+
+- Windows
+- .NET 8 SDK
+- Counter-Strike 2
+
+## Dependencies
+
+```xml
+<ItemGroup>
+    <PackageReference Include="ClickableTransparentOverlay" Version="11.1.0"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    <PackageReference Include="Process.NET" Version="1.0.2"/>
+</ItemGroup>
 ```
 
-**Installation**
+## Installation
 
 ```bash
 git clone https://github.com/sweeperxz/FullyExternalCS2.git
 cd FullyExternalCS2
 ```
 
-### Starting the program
+## Starting the program
 
 ```bash
 dotnet build
 dotnet run
 ```
 
-### Help
+## Notes
 
-If you have issues or have questions, check out the Issues section of the GitHub project page.
+FullyExternalCS2 was created for learning and improving Windows API, overlay, and external memory-reading skills.
 
-### Authors
+Use at your own risk.
+
+## Authors
 
 - sweeperxz - Developer/Engineer
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=sweeperxz/FullyExternalCS2&type=Date)](https://star-history.com/#sweeperxz/FullyExternalCS2&Date)
-

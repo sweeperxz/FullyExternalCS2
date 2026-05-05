@@ -1,91 +1,49 @@
 using CS2Cheat.Data.Game;
-using CS2Cheat.Features;
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
-using static CS2Cheat.Core.User32;
-using Application = System.Windows.Application;
 
 namespace CS2Cheat;
 
-public class Program :
-    Application,
-    IDisposable
+public class Program
 {
-    private Program()
+    public static async Task Main()
     {
-        Offsets.UpdateOffsets();
-        Startup += (_, _) => InitializeComponent();
-        Exit += (_, _) => Dispose();
-    }
+        Console.WriteLine("[INFO] FullyExternalCS2 v2.0 (ImGui Edition)");
+        Console.WriteLine("[INFO] Updating offsets...");
 
-    private GameProcess GameProcess { get; set; } = null!;
+        await Offsets.UpdateOffsets();
+        Console.WriteLine("[INFO] Offsets updated successfully.");
 
-    private GameData GameData { get; set; } = null!;
+        Console.WriteLine("[INFO] Waiting for CS2 process...");
+        var gameProcess = new GameProcess();
+        gameProcess.Start();
 
-    private WindowOverlay WindowOverlay { get; set; } = null!;
+        while (!gameProcess.IsValid || gameProcess.WindowRectangleClient.Width <= 0)
+        {
+            Thread.Sleep(500);
+            Console.Write(".");
+        }
 
-    private Graphics.Graphics Graphics { get; set; } = null!;
+        Console.WriteLine();
+        Console.WriteLine($"[INFO] CS2 found. Window: {gameProcess.WindowRectangleClient.Width}x{gameProcess.WindowRectangleClient.Height}");
 
-    private TriggerBot Trigger { get; set; } = null!;
+        var gameData = new GameData(gameProcess);
+        gameData.Start();
 
-    private AimBot AimBot { get; set; } = null!;
+        Thread.Sleep(2000);
 
-    private BombTimer BombTimer { get; set; } = null!;
+        Console.WriteLine("[INFO] Starting overlay...");
 
-    public void Dispose()
-    {
-        GameProcess.Dispose();
-        GameProcess = default!;
+        var overlay = new OverlayRenderer(gameProcess, gameData);
+        overlay.StartFeatures();
 
-        GameData.Dispose();
-        GameData = default!;
+        Console.WriteLine("[INFO] Overlay started. Press INSERT to toggle menu.");
+        Console.WriteLine("[INFO] Close this console window to exit.");
 
-        WindowOverlay.Dispose();
-        WindowOverlay = default!;
+        await overlay.Run();
 
-        Graphics.Dispose();
-        Graphics = default!;
-
-        Trigger.Dispose();
-        Trigger = default!;
-
-        AimBot.Dispose();
-        AimBot = default!;
-
-        BombTimer.Dispose();
-        BombTimer = default!;
-    }
-
-    public static void Main()
-    {
-        new Program().Run();
-    }
-
-    private void InitializeComponent()
-    {
-        var features = ConfigManager.Load();
-        GameProcess = new GameProcess();
-        GameProcess.Start();
-
-        GameData = new GameData(GameProcess);
-        GameData.Start();
-
-        WindowOverlay = new WindowOverlay(GameProcess);
-        WindowOverlay.Start();
-
-        Graphics = new Graphics.Graphics(GameProcess, GameData, WindowOverlay);
-        Graphics.Start();
-
-        Trigger = new TriggerBot(GameProcess, GameData);
-        if (features.TriggerBot) Trigger.Start();
-
-
-        AimBot = new AimBot(GameProcess, GameData);
-        if (features.AimBot) AimBot.Start();
-
-        BombTimer = new BombTimer(Graphics);
-        if (features.BombTimer) BombTimer.Start();
-
-        SetWindowDisplayAffinity(WindowOverlay!.Window.Handle, 0x00000011); //obs bypass
+        overlay.StopFeatures();
+        gameData.Dispose();
+        gameProcess.Dispose();
     }
 }

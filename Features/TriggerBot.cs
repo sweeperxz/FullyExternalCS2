@@ -13,8 +13,7 @@ public sealed class TriggerBot : ThreadedServiceBase
     private const int EntityStride = 112;
     private const int EntityIndexMask = 0x1FF;
     private const int EntityIndexShift = 9;
-    private static Keys _triggerBotHotKey;
-    private static ConfigManager? _config;
+
     private readonly GameData _gameData;
 
     private readonly GameProcess _gameProcess;
@@ -23,15 +22,18 @@ public sealed class TriggerBot : ThreadedServiceBase
     {
         _gameProcess = gameProcess ?? throw new ArgumentNullException(nameof(gameProcess));
         _gameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
-        _triggerBotHotKey = Config.TriggerBotKey;
     }
 
-    private static ConfigManager Config => _config ??= ConfigManager.Load();
+
+
+    private DateTime _lastTriggerTime = DateTime.MinValue;
 
     protected override string ThreadName => nameof(TriggerBot);
 
-    protected override async void FrameAction()
+    protected override void FrameAction()
     {
+        if (!ConfigManager.Load().TriggerBot) return;
+        
         if (!ShouldExecuteTriggerBot())
             return;
 
@@ -45,7 +47,11 @@ public sealed class TriggerBot : ThreadedServiceBase
         if (!ShouldTriggerOnEntity(entityTeam))
             return;
 
-        await ExecuteTrigger();
+        if ((DateTime.Now - _lastTriggerTime).TotalMilliseconds < 50)
+            return;
+
+        ExecuteTrigger();
+        _lastTriggerTime = DateTime.Now;
     }
 
     private bool ShouldExecuteTriggerBot()
@@ -86,16 +92,17 @@ public sealed class TriggerBot : ThreadedServiceBase
         return (isDifferentTeam || isSpecialCondition) && isWithinVelocityLimit;
     }
 
-    private static async Task ExecuteTrigger()
+    private static void ExecuteTrigger()
     {
-        await Task.Delay(TriggerDelayMs);
+        Thread.Sleep(TriggerDelayMs);
         Utility.MouseLeftDown();
+        Thread.Sleep(10);
         Utility.MouseLeftUp();
     }
 
     public static bool IsHotKeyDown()
     {
-        return _triggerBotHotKey.IsKeyDown();
+        return ConfigManager.Load().TriggerBotKey.IsKeyDown();
     }
 
     public override void Dispose()

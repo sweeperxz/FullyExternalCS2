@@ -1,4 +1,4 @@
-﻿using CS2Cheat.Data.Entity;
+using CS2Cheat.Data.Entity;
 using CS2Cheat.Utils;
 
 namespace CS2Cheat.Data.Game;
@@ -19,7 +19,6 @@ public class GameData : ThreadedServiceBase
 
     #region methods
 
-    /// <inheritdoc />
     public GameData(GameProcess gameProcess)
     {
         GameProcess = gameProcess;

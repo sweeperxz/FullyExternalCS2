@@ -3,3 +3,5 @@
 /.vs/CS2Cheat/v17
 /bin/Debug/net8.0-windows
 /.vs/CS2Cheat/DesignTimeBuild
+/bin
+.claude

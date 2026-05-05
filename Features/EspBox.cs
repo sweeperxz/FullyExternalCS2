@@ -1,17 +1,15 @@
-﻿using CS2Cheat.Core.Data;
+using System.Numerics;
+using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Entity;
+using CS2Cheat.Data.Game;
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
-using SharpDX;
-using SharpDX.Direct3D9;
-using Color = SharpDX.Color;
+using ImGuiNET;
 
 namespace CS2Cheat.Features;
 
 public static class EspBox
 {
-    private const int OutlineThickness = 2;
-
     private static readonly Dictionary<string, string> GunIcons = new()
     {
         ["knife_ct"] = "]", ["knife_t"] = "[", ["deagle"] = "A", ["elite"] = "B",
@@ -30,26 +28,26 @@ public static class EspBox
     private static ConfigManager? _config;
     private static ConfigManager Config => _config ??= ConfigManager.Load();
 
-    public static void Draw(Graphics.Graphics graphics)
+    public static void Draw(ImDrawListPtr drawList, GameData gameData)
     {
-        var player = graphics.GameData.Player;
-        if (player == null || graphics.GameData.Entities == null) return;
+        var player = gameData.Player;
+        if (player == null || gameData.Entities == null) return;
 
-        foreach (var entity in graphics.GameData.Entities)
+        foreach (var entity in gameData.Entities)
         {
             if (!entity.IsAlive() || entity.AddressBase == player.AddressBase) continue;
             if (Config.TeamCheck && entity.Team == player.Team) continue;
 
-
-            var boundingBox = GetEntityBoundingBox(graphics, entity);
+            var boundingBox = GetEntityBoundingBox(player, entity);
             if (boundingBox == null) continue;
 
-            var colorBox = entity.Team == Team.Terrorists ? Color.DarkRed : Color.DarkBlue;
-            DrawEntityInfo(graphics, entity, colorBox, boundingBox.Value);
+            var c = Config.EspBoxColor;
+            var colorBox = OverlayRenderer.ToColor(new Vector4(c[0], c[1], c[2], c[3]));
+            DrawEntityInfo(drawList, player, entity, colorBox, boundingBox.Value);
         }
     }
 
-    private static void DrawEntityInfo(Graphics.Graphics graphics, Entity entity, Color color,
+    private static void DrawEntityInfo(ImDrawListPtr drawList, Player player, Entity entity, uint color,
         (Vector2, Vector2) boundingBox)
     {
         var (topLeft, bottomRight) = boundingBox;
@@ -57,69 +55,77 @@ public static class EspBox
 
         var healthPercentage = Math.Clamp(entity.Health / 100f, 0f, 1f);
 
-        graphics.DrawRectangle(color, topLeft, bottomRight);
+        drawList.AddRect(topLeft, bottomRight, color, 0, ImDrawFlags.None, 1.5f);
 
-        // Health bar
-        var healthBarLeft = topLeft.X - 10f - OutlineThickness;
+        var healthBarLeft = topLeft.X - 10f;
         var healthBarTopLeft = new Vector2(healthBarLeft, topLeft.Y);
         var healthBarBottomRight = new Vector2(healthBarLeft + 6f, bottomRight.Y);
-        DrawHealthBar(graphics, healthBarTopLeft, healthBarBottomRight, healthPercentage);
+        DrawHealthBar(drawList, healthBarTopLeft, healthBarBottomRight, healthPercentage);
 
-        // Health number
         var healthText = entity.Health.ToString();
-        var healthX = (int)(bottomRight.X + 2);
-        var healthY = (int)(topLeft.Y + (bottomRight.Y - topLeft.Y -
-                                         graphics.FontConsolas32.MeasureText(null, healthText, FontDrawFlags.Center)
-                                             .Bottom) / 2);
-        graphics.FontConsolas32.DrawText(default, healthText, healthX, healthY, Color.White);
+        var healthX = bottomRight.X + 4;
+        var healthY = topLeft.Y + (bottomRight.Y - topLeft.Y) / 2 - 6;
+        drawList.AddText(new Vector2(healthX, healthY), OverlayRenderer.Colors.White, healthText);
 
-        // Weapon
-        var weaponIcon = GetWeaponIcon(entity.CurrentWeaponName);
-        if (!string.IsNullOrEmpty(weaponIcon))
+        if (Config.EspWeapon)
         {
-            var textSize = graphics.Undefeated.MeasureText(null, weaponIcon, FontDrawFlags.Center);
-            var weaponX = (int)((topLeft.X + bottomRight.X - textSize.Right) / 2);
-            var weaponY = (int)(bottomRight.Y + 2.5f);
-            graphics.Undefeated.DrawText(null, weaponIcon, weaponX, weaponY, Color.White);
+            var weaponName = FormatWeaponName(entity);
+            if (!string.IsNullOrEmpty(weaponName))
+            {
+                var weaponX = (topLeft.X + bottomRight.X) / 2 - weaponName.Length * 3.5f;
+                var weaponY = bottomRight.Y + 4;
+                DrawOutlinedText(drawList, new Vector2(weaponX, weaponY), OverlayRenderer.Colors.White, weaponName);
+            }
         }
 
-        // Enemy name
-        if (graphics.GameData.Player.Team != entity.Team)
+        if (Config.EspName && player.Team != entity.Team)
         {
             var name = entity.Name ?? "UNKNOWN";
-            var textWidth = graphics.FontConsolas32.MeasureText(null, name, FontDrawFlags.Center).Right + 10f;
-            var nameX = (int)((topLeft.X + bottomRight.X) / 2 - textWidth / 2);
-            var nameY = (int)(topLeft.Y - 15f);
-            graphics.FontConsolas32.DrawText(default, name, nameX, nameY, Color.White);
+            var nameX = (topLeft.X + bottomRight.X) / 2 - name.Length * 3;
+            var nameY = topLeft.Y - 15f;
+            DrawOutlinedText(drawList, new Vector2(nameX, nameY), OverlayRenderer.Colors.White, name);
         }
 
-        // Status flags
-        var flagX = (int)(bottomRight.X + 5f);
-        var flagY = (int)topLeft.Y;
-        var spacing = 15;
+        if (Config.EspFlags)
+        {
+            var flagX = bottomRight.X + 5f;
+            var flagY = topLeft.Y;
+            var spacing = 15;
 
-        if (entity.IsInScope == 1)
-            graphics.FontConsolas32.DrawText(default, "Scoped", flagX, flagY, Color.White);
+            if (entity.IsInScope == 1)
+                DrawOutlinedText(drawList, new Vector2(flagX, flagY), OverlayRenderer.Colors.White, "Scoped");
 
-        if (entity.FlashAlpha > 7)
-            graphics.FontConsolas32.DrawText(default, "Flashed", flagX, flagY + spacing, Color.White);
+            if (entity.FlashAlpha > 7)
+                DrawOutlinedText(drawList, new Vector2(flagX, flagY + spacing), OverlayRenderer.Colors.White, "Flashed");
 
-        if (entity.IsInScope == 256)
-            graphics.FontConsolas32.DrawText(default, "Shifting", flagX, flagY + spacing * 2, Color.White);
-        else if (entity.IsInScope == 257)
-            graphics.FontConsolas32.DrawText(default, "Shifting in scope", flagX, flagY + spacing * 3, Color.White);
+            if (entity.IsInScope == 256)
+                DrawOutlinedText(drawList, new Vector2(flagX, flagY + spacing * 2), OverlayRenderer.Colors.White, "Shifting");
+            else if (entity.IsInScope == 257)
+                DrawOutlinedText(drawList, new Vector2(flagX, flagY + spacing * 3), OverlayRenderer.Colors.White,
+                    "Shifting in scope");
+        }
     }
 
-    private static void DrawHealthBar(Graphics.Graphics graphics, Vector2 topLeft, Vector2 bottomRight,
+    private static void DrawHealthBar(ImDrawListPtr drawList, Vector2 topLeft, Vector2 bottomRight,
         float healthPercentage)
     {
-        var filledHeight = (bottomRight.Y - topLeft.Y) * healthPercentage;
+        var totalHeight = bottomRight.Y - topLeft.Y;
+        var filledHeight = totalHeight * healthPercentage;
         var filledTop = new Vector2(topLeft.X, Math.Max(bottomRight.Y - filledHeight, topLeft.Y));
 
-        graphics.DrawRectangle(Color.Green, filledTop, bottomRight);
-        graphics.DrawRectangle(Color.Black,
-            new Vector2(topLeft.X - OutlineThickness, filledTop.Y - OutlineThickness),
-            new Vector2(bottomRight.X + OutlineThickness, bottomRight.Y + OutlineThickness));
+        drawList.AddRectFilled(topLeft, bottomRight, OverlayRenderer.Colors.Black);
+
+        var healthColor = GetHealthColor(healthPercentage);
+        drawList.AddRectFilled(filledTop, bottomRight, healthColor);
+
+        drawList.AddRect(topLeft, bottomRight, OverlayRenderer.Colors.DarkGray);
+    }
+
+    private static uint GetHealthColor(float percentage)
+    {
+        var r = (byte)(percentage < 0.5f ? 255 : (int)(255 * (1 - percentage) * 2));
+        var g = (byte)(percentage > 0.5f ? 255 : (int)(255 * percentage * 2));
+        return OverlayRenderer.ToColor(r, g, 0);
     }
 
     private static string GetWeaponIcon(string weapon)
@@ -127,19 +133,33 @@ public static class EspBox
         return GunIcons.TryGetValue(weapon?.ToLower() ?? string.Empty, out var icon) ? icon : string.Empty;
     }
 
-    private static (Vector2, Vector2)? GetEntityBoundingBox(Graphics.Graphics graphics, Entity entity)
+    private static string FormatWeaponName(Entity entity)
+    {
+        var weapon = entity.CurrentWeaponName;
+        if (string.IsNullOrWhiteSpace(weapon)) return string.Empty;
+
+        return weapon.Replace("Silencer", "-S", StringComparison.OrdinalIgnoreCase).ToUpperInvariant();
+    }
+
+    private static void DrawOutlinedText(ImDrawListPtr drawList, Vector2 position, uint color, string text)
+    {
+        drawList.AddText(position + new Vector2(1, 1), OverlayRenderer.Colors.Black, text);
+        drawList.AddText(position, color, text);
+    }
+
+    private static (Vector2, Vector2)? GetEntityBoundingBox(Player player, Entity entity)
     {
         const float padding = 5.0f;
         var minPos = new Vector2(float.MaxValue, float.MaxValue);
         var maxPos = new Vector2(float.MinValue, float.MinValue);
 
-        var matrix = graphics.GameData.Player?.MatrixViewProjectionViewport;
-        if (matrix == null || entity.BonePos == null || entity.BonePos.Count == 0) return null;
+        var matrix = player.MatrixViewProjectionViewport;
+        if (entity.BonePos == null || entity.BonePos.Count == 0) return null;
 
         var anyValid = false;
         foreach (var bone in entity.BonePos.Values)
         {
-            var transformed = matrix.Value.Transform(bone);
+            var transformed = matrix.Transform(bone);
             if (transformed.Z >= 1 || transformed.X < 0 || transformed.Y < 0) continue;
 
             anyValid = true;
@@ -149,11 +169,9 @@ public static class EspBox
             maxPos.Y = Math.Max(maxPos.Y, transformed.Y);
         }
 
-
         if (!anyValid) return null;
 
-        var sizeMultiplier = 2f - entity.Health / 100f;
-        var paddingVector = new Vector2(padding * sizeMultiplier);
+        var paddingVector = new Vector2(padding);
         return (minPos - paddingVector, maxPos + paddingVector);
     }
 }

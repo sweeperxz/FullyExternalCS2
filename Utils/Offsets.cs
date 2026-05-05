@@ -1,4 +1,4 @@
-﻿using System.Dynamic;
+using System.Dynamic;
 using System.Net.Http;
 using CS2Cheat.DTO.ClientDllDTO;
 using CS2Cheat.Utils.DTO;
@@ -15,6 +15,7 @@ public abstract class Offsets
     public static int m_vOldOrigin;
     public static int m_vecViewOffset;
     public static int m_AimPunchAngle;
+    public static int m_AimPunchCache;
     public static int m_modelState;
     public static int m_pGameSceneNode;
     public static int m_fFlags;
@@ -79,7 +80,6 @@ public abstract class Offsets
 
             dynamic destData = new ExpandoObject();
 
-            // Offsets
             destData.dwBuildNumber = sourceDataDw.engine2dll.dwBuildNumber;
             destData.dwLocalPlayerController = sourceDataDw.clientdll.dwLocalPlayerController;
             destData.dwEntityList = sourceDataDw.clientdll.dwEntityList;
@@ -90,12 +90,12 @@ public abstract class Offsets
             destData.dwPlantedC4 = sourceDataDw.clientdll.dwPlantedC4;
             destData.dwGlobalVars = sourceDataDw.clientdll.dwGlobalVars;
 
-            // client.dll
             destData.m_fFlags = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_fFlags;
             destData.m_vOldOrigin = sourceDataClient.clientdll.classes.C_BasePlayerPawn.fields.m_vOldOrigin;
             destData.m_vecViewOffset =
                 sourceDataClient.clientdll.classes.C_BaseModelEntity.fields.m_vecViewOffset;
             destData.m_aimPunchAngle = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_aimPunchAngle;
+            destData.m_aimPunchCache = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_aimPunchCache;
             destData.m_modelState = sourceDataClient.clientdll.classes.CSkeletonInstance.fields.m_modelState;
             destData.m_pGameSceneNode = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_pGameSceneNode;
             destData.m_iIDEntIndex = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_iIDEntIndex;
@@ -139,10 +139,11 @@ public abstract class Offsets
         }
     }
 
+    private static readonly HttpClient HttpClientInstance = new();
+
     private static async Task<string> FetchJson(string url)
     {
-        using var client = new HttpClient();
-        return await client.GetStringAsync(url);
+        return await HttpClientInstance.GetStringAsync(url);
     }
 
     private static void UpdateStaticFields(dynamic data)
@@ -151,6 +152,7 @@ public abstract class Offsets
         m_vOldOrigin = data.m_vOldOrigin;
         m_vecViewOffset = data.m_vecViewOffset;
         m_AimPunchAngle = data.m_aimPunchAngle;
+        m_AimPunchCache = data.m_aimPunchCache;
         m_modelState = data.m_modelState;
         m_pGameSceneNode = data.m_pGameSceneNode;
         m_iIDEntIndex = data.m_iIDEntIndex;

@@ -1,9 +1,9 @@
-﻿namespace CS2Cheat.Utils;
+namespace CS2Cheat.Utils;
 
 public abstract class ThreadedServiceBase :
     IDisposable
 {
-    #region
+    #region Properties
 
     protected virtual string ThreadName => nameof(ThreadedServiceBase);
 
@@ -11,50 +11,73 @@ public abstract class ThreadedServiceBase :
 
     protected virtual TimeSpan ThreadFrameSleep { get; set; } = new(0, 0, 0, 0, 1);
 
-    private Thread Thread { get; set; }
+    private Thread? Thread { get; set; }
+
+    private readonly CancellationTokenSource _cts = new();
 
     #endregion
 
-    #region
+    #region Lifecycle
 
     protected ThreadedServiceBase()
     {
         Thread = new Thread(ThreadStart)
         {
-            Name = ThreadName
+            Name = ThreadName,
+            IsBackground = true
         };
     }
 
     public virtual void Dispose()
     {
-        Thread.Interrupt();
-        if (!Thread.Join(ThreadTimeout)) Thread.Abort();
+        _cts.Cancel();
 
-        Thread = default;
+        if (Thread is { IsAlive: true })
+        {
+            if (!Thread.Join(ThreadTimeout))
+                Console.WriteLine($"[WARN] Thread '{ThreadName}' did not stop within timeout.");
+        }
+
+        _cts.Dispose();
+        Thread = null;
     }
 
     #endregion
 
-    #region
+    #region Threading
 
     public void Start()
     {
-        Thread.Start();
+        Thread?.Start();
     }
 
     private void ThreadStart()
     {
+        Console.WriteLine($"[INFO] Thread '{ThreadName}' started.");
         try
         {
-            while (true)
+            while (!_cts.Token.IsCancellationRequested)
             {
-                FrameAction();
+                try
+                {
+                    FrameAction();
+                }
+                catch (Exception ex) when (ex is not ThreadInterruptedException and not OperationCanceledException)
+                {
+                    Console.WriteLine($"[ERROR] [{ThreadName}] {ex.Message}");
+                }
+
                 Thread.Sleep(ThreadFrameSleep);
             }
         }
-        catch (NullReferenceException)
+        catch (ThreadInterruptedException)
         {
         }
+        catch (OperationCanceledException)
+        {
+        }
+
+        Console.WriteLine($"[INFO] Thread '{ThreadName}' stopped.");
     }
 
     protected abstract void FrameAction();

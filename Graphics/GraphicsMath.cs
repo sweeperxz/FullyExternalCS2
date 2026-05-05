@@ -1,4 +1,4 @@
-using SharpDX;
+using System.Numerics;
 
 namespace CS2Cheat.Graphics;
 
@@ -6,54 +6,15 @@ public static class GraphicsMath
 {
     public static Vector3 GetVectorFromEulerAngles(double phi, double theta)
     {
-        return new Vector3
+        return Vector3.Normalize(new Vector3
         (
             (float)(Math.Cos(phi) * Math.Cos(theta)),
             (float)(Math.Cos(phi) * Math.Sin(theta)),
             (float)-Math.Sin(phi)
-        ).GetNormalized();
+        ));
     }
 
-    public static Matrix GetMatrixViewport(Size screenSize)
-    {
-        return GetMatrixViewport(new Viewport
-        {
-            X = 0,
-            Y = 0,
-            Width = screenSize.Width,
-            Height = screenSize.Height,
-            MinDepth = 0,
-            MaxDepth = 1
-        });
-    }
-
-    private static Matrix GetMatrixViewport(in Viewport viewport)
-    {
-        return new Matrix
-        {
-            M11 = viewport.Width * 0.5f,
-            M12 = 0,
-            M13 = 0,
-            M14 = 0,
-
-            M21 = 0,
-            M22 = -viewport.Height * 0.5f,
-            M23 = 0,
-            M24 = 0,
-
-            M31 = 0,
-            M32 = 0,
-            M33 = viewport.MaxDepth - viewport.MinDepth,
-            M34 = 0,
-
-            M41 = viewport.X + viewport.Width * 0.5f,
-            M42 = viewport.Y + viewport.Height * 0.5f,
-            M43 = viewport.MinDepth,
-            M44 = 1
-        };
-    }
-
-    public static Vector3 Transform(this in Matrix matrix, Vector3 value)
+    public static Vector3 Transform(this in Matrix4x4 matrix, Vector3 value)
     {
         var wInv = 1.0 / (matrix.M14 * (double)value.X + matrix.M24 * (double)value.Y +
                           matrix.M34 * (double)value.Z + matrix.M44);
@@ -70,14 +31,13 @@ public static class GraphicsMath
 
     public static float GetAngleTo(this Vector3 vector, Vector3 other)
     {
-        return GetAngleBetweenUnitVectors(vector.GetNormalized(), other.GetNormalized());
+        return GetAngleBetweenUnitVectors(Vector3.Normalize(vector), Vector3.Normalize(other));
     }
 
     private static float GetAngleBetweenUnitVectors(Vector3 leftNormalized, Vector3 rightNormalized)
     {
         return AcosClamped(Vector3.Dot(leftNormalized, rightNormalized));
     }
-
 
     public static Vector3 GetNormalized(this Vector3 value)
     {
@@ -101,9 +61,8 @@ public static class GraphicsMath
 
     private static bool IsParallelTo(this Vector3 vector, Vector3 other, float tolerance = 1E-6f)
     {
-        return Math.Abs(1.0 - Math.Abs(Vector3.Dot(vector.GetNormalized(), other.GetNormalized()))) <= tolerance;
+        return Math.Abs(1.0 - Math.Abs(Vector3.Dot(Vector3.Normalize(vector), Vector3.Normalize(other)))) <= tolerance;
     }
-
 
     private static float AcosClamped(float value, float tolerance = 1E-6f)
     {

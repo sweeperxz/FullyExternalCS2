@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using CS2Cheat.Core;
 using CS2Cheat.Core.Data;
 using Process.NET.Native.Types;
-using SharpDX;
 using static System.Diagnostics.Process;
 using Keys = Process.NET.Native.Types.Keys;
 using Rectangle = System.Drawing.Rectangle;
@@ -25,40 +25,17 @@ public static class Utility
     public enum MouseFlags : uint
     {
         Move = 0x0001,
-
-
         LeftDown = 0x0002,
-
-
         LeftUp = 0x0004,
-
-
         RightDown = 0x0008,
-
-
         RightUp = 0x0010,
-
         MiddleDown = 0x0020,
-
-
         MiddleUp = 0x0040,
-
-
         XDown = 0x0080,
-
-
         XUp = 0x0100,
-
-
         VerticalWheel = 0x0800,
-
-
         HorizontalWheel = 0x1000,
-
-
         VirtualDesk = 0x4000,
-
-
         Absolute = 0x8000
     }
 
@@ -161,20 +138,11 @@ public static class Utility
         User32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
     }
 
-    /// <summary>
-    ///     https://ben.land/post/2021/04/25/windmouse-human-mouse-movement/
-    /// </summary>
-    /// <param name="G_0">magnitude of the gravitational fornce</param>
-    /// <param name="W_0">magnitude of the wind force fluctuations</param>
-    /// <param name="M_0"> maximum step size (velocity clip threshold)</param>
-    /// <param name="D_0">distance where wind behavior changes from random to damped</param>
     public static void WindMouseMove(int start_x, int start_y, int dest_x, int dest_y, double G_0, double W_0,
         double M_0,
         double D_0)
     {
         double v_x = 0, v_y = 0, W_x = 0, W_y = 0;
-
-        var rand = new Random();
 
         while (true)
         {
@@ -186,15 +154,15 @@ public static class Utility
 
             if (dist >= D_0)
             {
-                W_x = W_x / Sqrt3 + (rand.NextDouble() * 2 - 1) * W_mag / Sqrt5;
-                W_y = W_y / Sqrt3 + (rand.NextDouble() * 2 - 1) * W_mag / Sqrt5;
+                W_x = W_x / Sqrt3 + (Random.Shared.NextDouble() * 2 - 1) * W_mag / Sqrt5;
+                W_y = W_y / Sqrt3 + (Random.Shared.NextDouble() * 2 - 1) * W_mag / Sqrt5;
             }
             else
             {
                 W_x /= Sqrt3;
                 W_y /= Sqrt3;
                 if (M_0 < 3)
-                    M_0 = 3 + rand.NextDouble() * 3;
+                    M_0 = 3 + Random.Shared.NextDouble() * 3;
                 else
                     M_0 /= Sqrt5;
             }
@@ -205,7 +173,7 @@ public static class Utility
             var v_mag = Math.Sqrt(v_x * v_x + v_y * v_y);
             if (v_mag > M_0)
             {
-                var v_clip = M_0 / 2 + rand.NextDouble() * M_0 / 2;
+                var v_clip = M_0 / 2 + Random.Shared.NextDouble() * M_0 / 2;
                 v_x = v_x / v_mag * v_clip;
                 v_y = v_y / v_mag * v_clip;
             }
@@ -403,43 +371,14 @@ public static class Utility
     }
 
 
-    public static Matrix GetMatrixViewport(Size screenSize)
+    public static Matrix4x4 GetMatrixViewport(Size screenSize)
     {
-        return GetMatrixViewport(new Viewport
-        {
-            X = 0,
-            Y = 0,
-            Width = screenSize.Width,
-            Height = screenSize.Height,
-            MinDepth = 0,
-            MaxDepth = 1
-        });
-    }
-
-    private static Matrix GetMatrixViewport(in Viewport viewport)
-    {
-        return new Matrix
-        {
-            M11 = viewport.Width * 0.5f,
-            M12 = 0,
-            M13 = 0,
-            M14 = 0,
-
-            M21 = 0,
-            M22 = -viewport.Height * 0.5f,
-            M23 = 0,
-            M24 = 0,
-
-            M31 = 0,
-            M32 = 0,
-            M33 = viewport.MaxDepth - viewport.MinDepth,
-            M34 = 0,
-
-            M41 = viewport.X + viewport.Width * 0.5f,
-            M42 = viewport.Y + viewport.Height * 0.5f,
-            M43 = viewport.MinDepth,
-            M44 = 1
-        };
+        return new Matrix4x4(
+            screenSize.Width * 0.5f, 0, 0, 0,
+            0, -screenSize.Height * 0.5f, 0, 0,
+            0, 0, 1, 0,
+            screenSize.Width * 0.5f, screenSize.Height * 0.5f, 0, 1
+        );
     }
 
     #endregion

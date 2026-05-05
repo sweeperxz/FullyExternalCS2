@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
+using System.Numerics;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
-using SharpDX;
 
 namespace CS2Cheat.Data.Entity;
 

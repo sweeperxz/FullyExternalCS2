@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using CS2Cheat.Core.Data;
 using CS2Cheat.Utils;
 using Process.NET.Native;
@@ -8,6 +8,10 @@ namespace CS2Cheat.Core;
 
 public static class User32
 {
+    public const int GWL_EXSTYLE = -20;
+    public const int WS_EX_NOACTIVATE = 0x08000000;
+    public const int WS_EX_TOOLWINDOW = 0x00000080;
+
     #region routines
 
     [DllImport("user32.dll", SetLastError = true)]
@@ -39,6 +43,15 @@ public static class User32
 
     [DllImport("user32.dll")]
     public static extern uint SendInput(uint nInputs, Utility.Input[] pInputs, int cbSize);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
 
     #endregion
 }

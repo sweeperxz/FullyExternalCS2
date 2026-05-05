@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -6,12 +6,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
-        <UseWpf>true</UseWpf>
         <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86</Platforms>
         <ApplicationIcon>assets\logo.ico</ApplicationIcon>
-        <Version>1.7</Version>
+        <Version>2.0</Version>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -24,12 +24,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="GameOverlay.Net" Version="4.3.1"/>
+        <PackageReference Include="ClickableTransparentOverlay" Version="11.1.0"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="Overlay.NET" Version="1.0.2"/>
-        <PackageReference Include="PresentationFramework" Version="4.6.0"/>
-        <PackageReference Include="SharpDX.Direct3D9" Version="4.2.0"/>
-        <PackageReference Include="SharpDX.DXGI" Version="4.2.0"/>
+        <PackageReference Include="Process.NET" Version="1.0.2"/>
     </ItemGroup>
 
 </Project>

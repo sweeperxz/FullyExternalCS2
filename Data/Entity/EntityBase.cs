@@ -1,7 +1,7 @@
 using CS2Cheat.Core.Data;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Utils;
-using SharpDX;
+using System.Numerics;
 
 namespace CS2Cheat.Data.Entity;
 
@@ -20,7 +20,7 @@ public abstract class EntityBase
     private IntPtr CurrentWeapon { get; set; }
     public string CurrentWeaponName { get; private set; } = null!;
 
-    private short WeaponIndex { get; set; }
+    public short WeaponIndex { get; private set; }
 
     public Vector3 Velocity { get; private set; }
 
@@ -55,12 +55,45 @@ public abstract class EntityBase
         Origin = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_vOldOrigin);
         ShotsFired = gameProcess.Process.Read<int>(AddressBase + Offsets.m_iShotsFired);
 
-        CurrentWeapon = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pClippingWeapon);
-        WeaponIndex = gameProcess.Process.Read<short>(CurrentWeapon + Offsets.m_AttributeManager + Offsets.m_Item +
-                                                      Offsets.m_iItemDefinitionIndex);
-        CurrentWeaponName = Enum.GetName(typeof(WeaponIndexes), WeaponIndex)!;
+        CurrentWeapon = ReadCurrentWeapon(gameProcess);
+        WeaponIndex = CurrentWeapon == IntPtr.Zero
+            ? (short)0
+            : gameProcess.Process.Read<short>(CurrentWeapon + Offsets.m_AttributeManager + Offsets.m_Item +
+                                              Offsets.m_iItemDefinitionIndex);
+        CurrentWeaponName = Enum.GetName(typeof(WeaponIndexes), WeaponIndex) ?? string.Empty;
         Velocity = gameProcess.Process.Read<Vector3>(AddressBase + Offsets.m_vecAbsVelocity);
 
         return true;
+    }
+
+    private IntPtr ReadCurrentWeapon(GameProcess gameProcess)
+    {
+        if (gameProcess.Process == null) return IntPtr.Zero;
+
+        var directWeapon = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pClippingWeapon);
+        if (IsValidWeaponIndex(gameProcess, directWeapon)) return directWeapon;
+
+        var weaponHandle = gameProcess.Process.Read<int>(AddressBase + Offsets.m_pClippingWeapon);
+        var weaponFromHandle = ReadEntityFromHandle(gameProcess, weaponHandle);
+        return IsValidWeaponIndex(gameProcess, weaponFromHandle) ? weaponFromHandle : IntPtr.Zero;
+    }
+
+    private bool IsValidWeaponIndex(GameProcess gameProcess, IntPtr weaponAddress)
+    {
+        if (gameProcess.Process == null || weaponAddress == IntPtr.Zero) return false;
+
+        var weaponIndex = gameProcess.Process.Read<short>(weaponAddress + Offsets.m_AttributeManager + Offsets.m_Item +
+                                                          Offsets.m_iItemDefinitionIndex);
+        return Enum.IsDefined(typeof(WeaponIndexes), (int)weaponIndex);
+    }
+
+    private IntPtr ReadEntityFromHandle(GameProcess gameProcess, int handle)
+    {
+        if (gameProcess.Process == null || handle <= 0) return IntPtr.Zero;
+
+        var entry = gameProcess.Process.Read<IntPtr>(EntityList + 0x8 * ((handle & 0x7FFF) >> 9) + 16);
+        return entry == IntPtr.Zero
+            ? IntPtr.Zero
+            : gameProcess.Process.Read<IntPtr>(entry + 112 * (handle & 0x1FF));
     }
 }
