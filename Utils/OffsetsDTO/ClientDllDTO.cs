@@ -4147,6 +4147,7 @@ public class Fields
     public int m_aimPunchAngle { get; set; }
     public int m_aimPunchAngleVel { get; set; }
     public int m_aimPunchCache { get; set; }
+    public int m_pAimPunchServices { get; set; }
     public int m_aimPunchTickBase { get; set; }
     public int m_aimPunchTickFraction { get; set; }
     public int m_bHasFemaleVoice { get; set; }

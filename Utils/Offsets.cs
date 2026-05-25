@@ -16,6 +16,8 @@ public abstract class Offsets
     public static int m_vecViewOffset;
     public static int m_AimPunchAngle;
     public static int m_AimPunchCache;
+    public static int m_pAimPunchServices;
+    public static int m_vecCsViewPunchAngle;
     public static int m_modelState;
     public static int m_pGameSceneNode;
     public static int m_fFlags;
@@ -96,6 +98,8 @@ public abstract class Offsets
                 sourceDataClient.clientdll.classes.C_BaseModelEntity.fields.m_vecViewOffset;
             destData.m_aimPunchAngle = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_aimPunchAngle;
             destData.m_aimPunchCache = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_aimPunchCache;
+            destData.m_pAimPunchServices = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_pAimPunchServices;
+            destData.m_vecCsViewPunchAngle = sourceDataClient.clientdll.classes.CPlayer_CameraServices.fields.m_vecCsViewPunchAngle;
             destData.m_modelState = sourceDataClient.clientdll.classes.CSkeletonInstance.fields.m_modelState;
             destData.m_pGameSceneNode = sourceDataClient.clientdll.classes.C_BaseEntity.fields.m_pGameSceneNode;
             destData.m_iIDEntIndex = sourceDataClient.clientdll.classes.C_CSPlayerPawn.fields.m_iIDEntIndex;
@@ -153,6 +157,8 @@ public abstract class Offsets
         m_vecViewOffset = data.m_vecViewOffset;
         m_AimPunchAngle = data.m_aimPunchAngle;
         m_AimPunchCache = data.m_aimPunchCache;
+        m_pAimPunchServices = data.m_pAimPunchServices;
+        m_vecCsViewPunchAngle = data.m_vecCsViewPunchAngle;
         m_modelState = data.m_modelState;
         m_pGameSceneNode = data.m_pGameSceneNode;
         m_iIDEntIndex = data.m_iIDEntIndex;
