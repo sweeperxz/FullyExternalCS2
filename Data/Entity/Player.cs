@@ -95,6 +95,19 @@ public class Player : EntityBase
         if (gameProcess.Process == null)
             throw new ArgumentNullException(nameof(gameProcess.Process), "Process cannot be null.");
 
+        var aimPunchService = gameProcess.Process.Read<IntPtr>(AddressBase + Offsets.m_pAimPunchServices);
+        if (aimPunchService != IntPtr.Zero)
+        {
+            try
+            {
+                return gameProcess.Process.Read<Vector3>(aimPunchService + Offsets.m_vecCsViewPunchAngle);
+            }
+            catch (Exception)
+            {
+                // Fall back to legacy path if the service access fails
+            }
+        }
+
         var cacheAddress = AddressBase + Offsets.m_AimPunchCache;
         AimPunchCacheCount = gameProcess.Process.Read<int>(cacheAddress);
         var cacheData = gameProcess.Process.Read<IntPtr>(cacheAddress + 0x8);
