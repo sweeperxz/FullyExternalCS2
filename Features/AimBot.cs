@@ -6,8 +6,6 @@ using CS2Cheat.Data.Entity;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
-using Process.NET.Native.Types;
-using Keys = Process.NET.Native.Types.Keys;
 using Point = System.Drawing.Point;
 
 namespace CS2Cheat.Features;
@@ -57,7 +55,10 @@ public class AimBot : ThreadedServiceBase
         try
         {
             if (GameProcess == null || !GameProcess.IsValid || GameData?.Player == null ||
-                !GameData.Player.IsAlive()) return;
+                !GameData.Player.IsAlive())
+            {
+                return;
+            }
 
             if (!Config.AimBot && !Config.AimRcs)
             {
@@ -100,8 +101,12 @@ public class AimBot : ThreadedServiceBase
             }
 
             if (aimResult)
+            {
                 if (!float.IsNaN(aimAngles.X) && !float.IsNaN(aimAngles.Y))
+                {
                     GetAimPixels(aimAngles, out aimPixels);
+                }
+            }
 
             aimPixels.X = Math.Clamp(aimPixels.X + recoilPixels.X, -100, 100);
             aimPixels.Y = Math.Clamp(aimPixels.Y + recoilPixels.Y, -100, 100);
@@ -118,7 +123,7 @@ public class AimBot : ThreadedServiceBase
 
     private Point GetRecoilControlPixels(bool aimKeyDown, bool hasAimTarget)
     {
-        if (!Config.AimRcs || GameData?.Player == null || !Keys.LButton.IsKeyDown())
+        if (!Config.AimRcs || GameData?.Player == null || !Config.AimRcsKey.IsKeyDown())
         {
             _previousPunch = Vector2.Zero;
             _previousShotsFired = 0;
@@ -135,7 +140,10 @@ public class AimBot : ThreadedServiceBase
             _previousPunch = currentPunch;
             _previousShotsFired = player.ShotsFired;
 
-            if (deltaPunch.LengthSquared() < 0.000001f) return Point.Empty;
+            if (deltaPunch.LengthSquared() < 0.000001f)
+            {
+                return Point.Empty;
+            }
 
             var recoilAngles = new Vector2(-deltaPunch.Y, deltaPunch.X) * Offsets.WeaponRecoilScale * rcsScale;
             GetAimPixels(recoilAngles, out var recoilPixels);
@@ -178,7 +186,10 @@ public class AimBot : ThreadedServiceBase
 
     private static void MoveMouse(Point pixels)
     {
-        if (pixels.X == 0 && pixels.Y == 0) return;
+        if (pixels.X == 0 && pixels.Y == 0)
+        {
+            return;
+        }
 
         Utility.MouseMove(pixels.X, pixels.Y);
         Thread.Sleep(15);
@@ -192,28 +203,48 @@ public class AimBot : ThreadedServiceBase
         var aimPosition = Vector3.Zero;
         var targetVel = Vector3.Zero;
 
-        if (GameData == null) return false;
+        if (GameData == null)
+        {
+            return false;
+        }
 
         foreach (var entity in GameData.Entities)
         {
-            if (!entity.IsAlive()) continue;
+            if (!entity.IsAlive())
+            {
+                continue;
+            }
 
             if (Config.TeamCheck && entity.Team == GameData.Player?.Team)
+            {
                 continue;
+            }
 
-            if (!entity.IsSpotted) continue;
+            if (!entity.IsSpotted)
+            {
+                continue;
+            }
 
             var boneIdx = Math.Clamp(Config.AimBoneIndex, 0, ConfigManager.BoneNames.Length - 1);
             var boneName = ConfigManager.BoneNames[boneIdx];
 
-            if (!entity.BonePos.TryGetValue(boneName, out var bonePos)) continue;
-            if (bonePos == Vector3.Zero) continue;
+            if (!entity.BonePos.TryGetValue(boneName, out var bonePos))
+            {
+                continue;
+            }
+            if (bonePos == Vector3.Zero)
+            {
+                continue;
+            }
 
             float angleSize;
             Vector2 localAngles;
             GetAimAngles(bonePos, out angleSize, out localAngles);
 
-            if (angleSize >= customFov) continue;
+            if (angleSize >= customFov)
+            {
+                continue;
+            }
 
             if (angleSize < minAngleSize)
             {
@@ -237,7 +268,9 @@ public class AimBot : ThreadedServiceBase
                 Vector2 predictedAngles;
                 GetAimAngles(predictedPos, out angleSize, out predictedAngles);
                 if (angleSize < customFov)
+                {
                     aimAngles = predictedAngles;
+                }
             }
 
             _lastTargetPos = aimPosition;
@@ -260,7 +293,10 @@ public class AimBot : ThreadedServiceBase
         aimAngles = Vector2.Zero;
         angleSize = 0f;
 
-        if (GameData == null || GameData.Player == null) return;
+        if (GameData == null || GameData.Player == null)
+        {
+            return;
+        }
 
         var aimDirection = GameData.Player.EyeDirection;
         if (Config.AimRcs && GameData.Player.AimPunchAngle.LengthSquared() >= 0.0001f)
@@ -314,7 +350,10 @@ public class AimBot : ThreadedServiceBase
     {
         Thread.Sleep(100);
 
-        if (GameData == null || GameData.Player == null) return 0.0;
+        if (GameData == null || GameData.Player == null)
+        {
+            return 0.0;
+        }
 
         var eyeDirectionStart = GameData.Player.EyeDirection;
         eyeDirectionStart.Z = 0;
@@ -323,7 +362,10 @@ public class AimBot : ThreadedServiceBase
 
         Thread.Sleep(100);
 
-        if (GameData == null || GameData.Player == null) return 0.0;
+        if (GameData == null || GameData.Player == null)
+        {
+            return 0.0;
+        }
 
         var eyeDirectionEnd = GameData.Player.EyeDirection;
         eyeDirectionEnd.Z = 0;
