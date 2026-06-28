@@ -59,12 +59,18 @@ public class OverlayRenderer : Overlay
     protected override void Render()
     {
         UpdateOverlayGeometry();
-        if (!_gameProcess.IsValid) return;
+        if (!_gameProcess.IsValid)
+        {
+            return;
+        }
         _config = ConfigManager.Load();
 
         var mk = _config.MenuToggleKey;
         var mkd = mk.IsKeyDown();
-        if (mkd && !_menuKeyWasDown) _showMenu = !_showMenu;
+        if (mkd && !_menuKeyWasDown)
+        {
+            _showMenu = !_showMenu;
+        }
         _menuKeyWasDown = mkd;
 
         _menuAlpha = _showMenu ? Math.Min(_menuAlpha + 0.08f, 1f) : Math.Max(_menuAlpha - 0.08f, 0f);
@@ -92,7 +98,10 @@ public class OverlayRenderer : Overlay
 
     void ApplyStyle()
     {
-        if (_styleApplied) return;
+        if (_styleApplied)
+        {
+            return;
+        }
         ImGui.StyleColorsDark();
         var s = ImGui.GetStyle();
         s.WindowRounding = 4;
@@ -128,12 +137,20 @@ public class OverlayRenderer : Overlay
         {
             ImGui.SetCursorPosX(8);
             bool sel = _activeTab == i;
-            if (sel) ImGui.PushStyleColor(ImGuiCol.Text, ColAccent);
+            if (sel)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, ColAccent);
+            }
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(8, 8));
             if (ImGui.Selectable(TabNames[i], sel, ImGuiSelectableFlags.None, new Vector2(134, 28)))
+            {
                 _activeTab = i;
+            }
             ImGui.PopStyleVar();
-            if (sel) ImGui.PopStyleColor();
+            if (sel)
+            {
+                ImGui.PopStyleColor();
+            }
         }
 
         ImGui.SetCursorPosY(ImGui.GetWindowHeight() - 50);
@@ -169,10 +186,16 @@ public class OverlayRenderer : Overlay
     {
         SectionHeader("Aimbot");
         var aimBot = _config.AimBot;
-        if (Toggle("Enabled", ref aimBot)) _config.AimBot = aimBot;
+        if (Toggle("Enabled", ref aimBot))
+        {
+            _config.AimBot = aimBot;
+        }
 
         var aimFovCircle = _config.AimFovCircle;
-        if (Toggle("Show FOV Circle", ref aimFovCircle)) _config.AimFovCircle = aimFovCircle;
+        if (Toggle("Show FOV Circle", ref aimFovCircle))
+        {
+            _config.AimFovCircle = aimFovCircle;
+        }
 
         ImGui.Spacing();
         var fov = _config.AimFov;
@@ -190,14 +213,16 @@ public class OverlayRenderer : Overlay
         ImGui.Spacing();
         SectionHeader("Recoil Control (RCS)");
         var aimRcs = _config.AimRcs;
-        if (Toggle("Enable RCS", ref aimRcs)) _config.AimRcs = aimRcs;
+        if (Toggle("Enable RCS", ref aimRcs))
+        {
+            _config.AimRcs = aimRcs;
+        }
         if (aimRcs)
         {
             var rcsStrength = _config.AimRcsStrength;
             if (ImGui.SliderFloat("RCS Strength (%)", ref rcsStrength, 0f, 100f, "%.0f%%"))
             { _config.AimRcsStrength = rcsStrength; ConfigManager.UpdateCache(_config); }
         }
-
     }
 
     void TabVisuals()
@@ -223,28 +248,46 @@ public class OverlayRenderer : Overlay
         }
 
         var skeletonEsp = _config.SkeletonEsp;
-        if (Toggle("Skeleton", ref skeletonEsp)) _config.SkeletonEsp = skeletonEsp;
+        if (Toggle("Skeleton", ref skeletonEsp))
+        {
+            _config.SkeletonEsp = skeletonEsp;
+        }
         var espAimCrosshair = _config.EspAimCrosshair;
-        if (Toggle("Aim Crosshair", ref espAimCrosshair)) _config.EspAimCrosshair = espAimCrosshair;
+        if (Toggle("Aim Crosshair", ref espAimCrosshair))
+        {
+            _config.EspAimCrosshair = espAimCrosshair;
+        }
 
         ImGui.Spacing();
         SectionHeader("World");
         var bombTimer = _config.BombTimer;
-        if (Toggle("Bomb Timer", ref bombTimer)) _config.BombTimer = bombTimer;
+        if (Toggle("Bomb Timer", ref bombTimer))
+        {
+            _config.BombTimer = bombTimer;
+        }
         var voteTeller = _config.VoteTeller;
-        if (Toggle("Vote Teller", ref voteTeller)) _config.VoteTeller = voteTeller;
+        if (Toggle("Vote Teller", ref voteTeller))
+        {
+            _config.VoteTeller = voteTeller;
+        }
     }
 
     void TabMisc()
     {
         SectionHeader("Combat");
         var triggerBot = _config.TriggerBot;
-        if (Toggle("TriggerBot", ref triggerBot)) _config.TriggerBot = triggerBot;
+        if (Toggle("TriggerBot", ref triggerBot))
+        {
+            _config.TriggerBot = triggerBot;
+        }
 
         ImGui.Spacing();
         SectionHeader("General");
         var teamCheck = _config.TeamCheck;
-        if (Toggle("Team Check", ref teamCheck)) _config.TeamCheck = teamCheck;
+        if (Toggle("Team Check", ref teamCheck))
+        {
+            _config.TeamCheck = teamCheck;
+        }
     }
 
     void TabSettings()
@@ -263,7 +306,9 @@ public class OverlayRenderer : Overlay
         ImGui.PushStyleColor(ImGuiCol.Button, ColAccent);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColAccentDim);
         if (ImGui.Button("Save Config", new Vector2(200, 32)))
+        {
             ConfigManager.Save(_config);
+        }
         ImGui.PopStyleColor(2);
 
         ImGui.Spacing();
@@ -312,7 +357,9 @@ public class OverlayRenderer : Overlay
         }
 
         if (ImGui.Button(btnText, new Vector2(110, 0)))
+        {
             _waitingForBind = isWaiting ? null : bindId;
+        }
 
         if (isWaiting)
         {
@@ -320,7 +367,10 @@ public class OverlayRenderer : Overlay
             var k = ScanKey();
             if (k != Keys.None)
             {
-                if (k == Keys.Escape) { _waitingForBind = null; }
+                if (k == Keys.Escape)
+                {
+                    _waitingForBind = null;
+                }
                 else
                 {
                     switch (bindId)
@@ -351,31 +401,61 @@ public class OverlayRenderer : Overlay
             Keys.D0,Keys.D1,Keys.D2,Keys.D3,Keys.D4,Keys.D5,Keys.D6,Keys.D7,Keys.D8,Keys.D9,
             Keys.Escape
         };
-        foreach (var k in keys) if (k.IsKeyDown()) return k;
+        foreach (var k in keys)
+        {
+            if (k.IsKeyDown())
+            {
+                return k;
+            }
+        }
         return Keys.None;
     }
 
     void UpdateOverlayGeometry()
     {
         var r = _gameProcess.WindowRectangleClient;
-        if (r.Width <= 0 || r.Height <= 0) return;
+        if (r.Width <= 0 || r.Height <= 0)
+        {
+            return;
+        }
         try
         {
             var ts = new System.Drawing.Size(r.Width, r.Height);
             var tp = new System.Drawing.Point(r.X, r.Y);
-            if (this.Size != ts) this.Size = ts;
-            if (this.Position != tp) this.Position = tp;
+            if (this.Size != ts)
+            {
+                this.Size = ts;
+            }
+            if (this.Position != tp)
+            {
+                this.Position = tp;
+            }
         }
         catch { }
     }
 
     void RenderVisuals(ImDrawListPtr dl)
     {
-        if (_config.EspBox) EspBox.Draw(dl, _gameData);
-        if (_config.SkeletonEsp) SkeletonEsp.Draw(dl, _gameData);
-        if (_config.EspAimCrosshair) EspAimCrosshair.Draw(dl, _gameData, _gameProcess);
-        if (_config.BombTimer) BombTimer.Draw(dl);
-        if (_config.VoteTeller) VoteTeller.Draw(dl);
+        if (_config.EspBox)
+        {
+            EspBox.Draw(dl, _gameData);
+        }
+        if (_config.SkeletonEsp)
+        {
+            SkeletonEsp.Draw(dl, _gameData);
+        }
+        if (_config.EspAimCrosshair)
+        {
+            EspAimCrosshair.Draw(dl, _gameData, _gameProcess);
+        }
+        if (_config.BombTimer)
+        {
+            BombTimer.Draw(dl);
+        }
+        if (_config.VoteTeller)
+        {
+            VoteTeller.Draw(dl);
+        }
 
         if (_config.AimFovCircle)
         {

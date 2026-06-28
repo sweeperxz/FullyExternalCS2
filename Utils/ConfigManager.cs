@@ -57,7 +57,10 @@ public class ConfigManager
     {
         lock (_cacheLock)
         {
-            if (_cachedInstance != null) return _cachedInstance;
+            if (_cachedInstance != null)
+            {
+                return _cachedInstance;
+            }
 
             _cachedInstance = LoadFromDisk();
             InitializeWatcher();
@@ -116,26 +119,59 @@ public class ConfigManager
     private static void ApplyMissingDefaults(ConfigManager config, string json)
     {
         var defaults = Default();
-        if (!json.Contains(nameof(EspName), StringComparison.OrdinalIgnoreCase)) config.EspName = defaults.EspName;
-        if (!json.Contains(nameof(EspWeapon), StringComparison.OrdinalIgnoreCase)) config.EspWeapon = defaults.EspWeapon;
-        if (!json.Contains(nameof(EspFlags), StringComparison.OrdinalIgnoreCase)) config.EspFlags = defaults.EspFlags;
-        if (!json.Contains(nameof(VoteTeller), StringComparison.OrdinalIgnoreCase)) config.VoteTeller = defaults.VoteTeller;
+        if (!json.Contains(nameof(EspName), StringComparison.OrdinalIgnoreCase))
+        {
+            config.EspName = defaults.EspName;
+        }
+        if (!json.Contains(nameof(EspWeapon), StringComparison.OrdinalIgnoreCase))
+        {
+            config.EspWeapon = defaults.EspWeapon;
+        }
+        if (!json.Contains(nameof(EspFlags), StringComparison.OrdinalIgnoreCase))
+        {
+            config.EspFlags = defaults.EspFlags;
+        }
+        if (!json.Contains(nameof(VoteTeller), StringComparison.OrdinalIgnoreCase))
+        {
+            config.VoteTeller = defaults.VoteTeller;
+        }
     }
 
     private static void SanitizeKeys(ConfigManager config)
     {
         var defaults = Default();
-        if (config.MenuToggleKey == Keys.None) config.MenuToggleKey = defaults.MenuToggleKey;
-        if (config.AimBotKey == Keys.None) config.AimBotKey = defaults.AimBotKey;
-        if (config.AimRcsKey == Keys.None) config.AimRcsKey = defaults.AimRcsKey;
-        if (config.TriggerBotKey == Keys.None) config.TriggerBotKey = defaults.TriggerBotKey;
-        if (config.AimFov <= 0) config.AimFov = defaults.AimFov;
-        if (config.AimSmoothing <= 0) config.AimSmoothing = defaults.AimSmoothing;
+        if (config.MenuToggleKey == Keys.None)
+        {
+            config.MenuToggleKey = defaults.MenuToggleKey;
+        }
+        if (config.AimBotKey == Keys.None)
+        {
+            config.AimBotKey = defaults.AimBotKey;
+        }
+        if (config.AimRcsKey == Keys.None)
+        {
+            config.AimRcsKey = defaults.AimRcsKey;
+        }
+        if (config.TriggerBotKey == Keys.None)
+        {
+            config.TriggerBotKey = defaults.TriggerBotKey;
+        }
+        if (config.AimFov <= 0)
+        {
+            config.AimFov = defaults.AimFov;
+        }
+        if (config.AimSmoothing <= 0)
+        {
+            config.AimSmoothing = defaults.AimSmoothing;
+        }
     }
 
     private static void InitializeWatcher()
     {
-        if (_watcher != null) return;
+        if (_watcher != null)
+        {
+            return;
+        }
 
         try
         {
