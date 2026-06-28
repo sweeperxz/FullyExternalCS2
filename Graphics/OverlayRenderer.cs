@@ -422,14 +422,8 @@ public class OverlayRenderer : Overlay
         {
             var ts = new System.Drawing.Size(r.Width, r.Height);
             var tp = new System.Drawing.Point(r.X, r.Y);
-            if (this.Size != ts)
-            {
-                this.Size = ts;
-            }
-            if (this.Position != tp)
-            {
-                this.Position = tp;
-            }
+            this.Size = ts;
+            this.Position = tp;
         }
         catch { }
     }
