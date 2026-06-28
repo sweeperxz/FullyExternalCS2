@@ -6,8 +6,6 @@ using CS2Cheat.Data.Entity;
 using CS2Cheat.Data.Game;
 using CS2Cheat.Graphics;
 using CS2Cheat.Utils;
-using Process.NET.Native.Types;
-using Keys = Process.NET.Native.Types.Keys;
 using Point = System.Drawing.Point;
 
 namespace CS2Cheat.Features;
@@ -118,7 +116,7 @@ public class AimBot : ThreadedServiceBase
 
     private Point GetRecoilControlPixels(bool aimKeyDown, bool hasAimTarget)
     {
-        if (!Config.AimRcs || GameData?.Player == null || !Keys.LButton.IsKeyDown())
+        if (!Config.AimRcs || GameData?.Player == null || !Config.AimRcsKey.IsKeyDown())
         {
             _previousPunch = Vector2.Zero;
             _previousShotsFired = 0;

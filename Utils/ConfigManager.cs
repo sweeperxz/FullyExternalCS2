@@ -38,6 +38,9 @@ public class ConfigManager
     public Keys AimBotKey { get; set; }
 
     [JsonConverter(typeof(KeysJsonConverter))]
+    public Keys AimRcsKey { get; set; }
+
+    [JsonConverter(typeof(KeysJsonConverter))]
     public Keys TriggerBotKey { get; set; }
 
     [JsonConverter(typeof(KeysJsonConverter))]
@@ -124,6 +127,7 @@ public class ConfigManager
         var defaults = Default();
         if (config.MenuToggleKey == Keys.None) config.MenuToggleKey = defaults.MenuToggleKey;
         if (config.AimBotKey == Keys.None) config.AimBotKey = defaults.AimBotKey;
+        if (config.AimRcsKey == Keys.None) config.AimRcsKey = defaults.AimRcsKey;
         if (config.TriggerBotKey == Keys.None) config.TriggerBotKey = defaults.TriggerBotKey;
         if (config.AimFov <= 0) config.AimFov = defaults.AimFov;
         if (config.AimSmoothing <= 0) config.AimSmoothing = defaults.AimSmoothing;
@@ -195,6 +199,7 @@ public class ConfigManager
             SkeletonEsp = false,
             TriggerBot = true,
             AimBotKey = Keys.LButton,
+            AimRcsKey = Keys.LButton,
             TriggerBotKey = Keys.LMenu,
             MenuToggleKey = Keys.Insert,
             TeamCheck = true

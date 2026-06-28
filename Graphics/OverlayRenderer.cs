@@ -34,8 +34,7 @@ public class OverlayRenderer : Overlay
     static readonly Vector4 ColItemActive = new(0.12f, 0.13f, 0.17f, 1f);
     static readonly Vector4 ColBorder = new(0.18f, 0.20f, 0.25f, 0.5f);
 
-    static readonly string[] TabNames = { "\u2022 Aimbot", "\u2022 Visuals", "\u2022 Misc", "\u2022 Config" };
-    static readonly string[] TabIcons = { "A", "V", "M", "C" };
+    static readonly string[] TabNames = { "\u2022 Aimbot", "\u2022 Visuals", "\u2022 Misc", "\u2022 Settings", "\u2022 Config" };
 
     public OverlayRenderer(GameProcess gp, GameData gd) : base(true)
     {
@@ -156,7 +155,8 @@ public class OverlayRenderer : Overlay
             case 0: TabAimbot(); break;
             case 1: TabVisuals(); break;
             case 2: TabMisc(); break;
-            case 3: TabConfig(); break;
+            case 3: TabSettings(); break;
+            case 4: TabConfig(); break;
         }
 
         ImGui.EndChild();
@@ -198,9 +198,6 @@ public class OverlayRenderer : Overlay
             { _config.AimRcsStrength = rcsStrength; ConfigManager.UpdateCache(_config); }
         }
 
-        ImGui.Spacing();
-        SectionHeader("Key Binds");
-        DrawKeyBind("Aim Key", "AimBotKey", _config.AimBotKey);
     }
 
     void TabVisuals()
@@ -243,13 +240,20 @@ public class OverlayRenderer : Overlay
         SectionHeader("Combat");
         var triggerBot = _config.TriggerBot;
         if (Toggle("TriggerBot", ref triggerBot)) _config.TriggerBot = triggerBot;
-        DrawKeyBind("Trigger Key", "TriggerBotKey", _config.TriggerBotKey);
 
         ImGui.Spacing();
         SectionHeader("General");
         var teamCheck = _config.TeamCheck;
         if (Toggle("Team Check", ref teamCheck)) _config.TeamCheck = teamCheck;
-        DrawKeyBind("Menu Key", "MenuToggleKey", _config.MenuToggleKey);
+    }
+
+    void TabSettings()
+    {
+        SectionHeader("Key Binds");
+        DrawKeyBind("AimBot", "AimBotKey", _config.AimBotKey);
+        DrawKeyBind("Recoil Control", "AimRcsKey", _config.AimRcsKey);
+        DrawKeyBind("TriggerBot", "TriggerBotKey", _config.TriggerBotKey);
+        DrawKeyBind("Menu Toggle", "MenuToggleKey", _config.MenuToggleKey);
     }
 
     void TabConfig()
@@ -322,6 +326,7 @@ public class OverlayRenderer : Overlay
                     switch (bindId)
                     {
                         case "AimBotKey": _config.AimBotKey = k; break;
+                        case "AimRcsKey": _config.AimRcsKey = k; break;
                         case "TriggerBotKey": _config.TriggerBotKey = k; break;
                         case "MenuToggleKey": _config.MenuToggleKey = k; break;
                     }
